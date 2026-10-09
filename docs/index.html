@@ -58,7 +58,7 @@
     <p>Requirements are Docker Desktop or Docker Engine and PowerShell (or a
       compatible shell). From the repository root:</p>
     <pre><code>.\week-01\run_lab.ps1</code></pre>
-    <p>The script uses the pinned image
+    <p>The script uses the specified Docker image
       <code>firdaussahran/netlab-mininet:1.0</code>, runs the topology and
       observations, and saves the transcript to
       <code>week-01\results.txt</code>. Its HTTP test serves only
@@ -108,9 +108,10 @@ pingall
       management interface for observations and link changes. Basic Ethernet
       learning suits this small LAN; programmable control can help automate
       consistent policy across larger networks.</p>
-    <p class="note">The committed results transcript records the successful
-      run and the dedicated HTTP test page. Docker may also print resource-limit
-      and bridge-nf-call warnings.</p>
+    <p class="note">The latest successful curl response from h1 contains the
+      dedicated page served by h2, titled and headed “WIC2005 Week 1 HTTP test.”
+      The transcript records this HTML response. Docker may also print
+      resource-limit and bridge-nf-call warnings.</p>
   </section>
 </main>
 </body>
