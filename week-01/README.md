@@ -1,5 +1,15 @@
 # Week 1 - Why Programmable Networks Exist
 
+## Published web page
+
+Read the visual version of this write-up at:
+
+https://cheonglihua.github.io/ID_REDACTED_wic2005-lab-portfolio/
+
+This link is permanent for the repository. It will serve the latest committed
+version whenever GitHub Pages is enabled with **GitHub Actions** and the
+**Deploy portfolio site** workflow completes successfully.
+
 ## Objective
 
 Build a small Ethernet network and observe what happens when the data plane
