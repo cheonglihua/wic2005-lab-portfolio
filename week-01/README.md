@@ -42,7 +42,7 @@ working directory:
 & "C:\path\to\ID_REDACTED_wic2005-lab-portfolio\week-01\run_lab.ps1"
 ```
 
-It starts the pinned Docker image with `--rm`, mounts the repository at `/lab`,
+It starts the specified Docker image firdaussahran/netlab-mininet:1.0 with `--rm`, mounts the repository at `/lab`,
 starts the three-host `single,3` Mininet topology using a Linux bridge and no
 controller, runs the commands below, and saves the terminal transcript to
 [`results.txt`](./results.txt). Docker removes the container when Mininet exits.
