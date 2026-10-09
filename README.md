@@ -10,6 +10,11 @@ The portfolio is also available as a [GitHub Pages site](https://cheonglihua.git
 The site includes the topology diagram, selected outputs, conclusions, and
 links back to this repository.
 
+If the site shows `404` before the first deployment, open the repository's
+**Settings → Pages**, set **Source** to **GitHub Actions**, save, and rerun
+the **Deploy portfolio site** workflow under **Actions**. GitHub does not
+allow this repository's workflow token to enable Pages automatically.
+
 ## Labs
 
 - [Week 1 - Why Programmable Networks Exist](./week-01/README.md)
