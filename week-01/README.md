@@ -28,7 +28,14 @@ docker run hello-world
 
 ## Reproduce the lab
 
-From the repository root, run:
+Open PowerShell and first change to the repository root. This matters because
+the interactive Docker command mounts the current directory into `/lab`:
+
+```powershell
+Set-Location C:\ID_REDACTED_wic2005-lab-portfolio
+```
+
+The recommended reproducible run is:
 
 ```powershell
 .\week-01\run_lab.ps1
@@ -44,6 +51,11 @@ The equivalent interactive command is:
 docker run -it --rm --privileged -v "${PWD}:/lab" -w /lab `
   firdaussahran/netlab-mininet:1.0
 ```
+
+Do not run the command from `C:\Windows\System32` or another system
+directory. The `h2` web server serves its current directory, so doing that
+would expose a system-directory listing in the lab output. The script avoids
+this mistake by always mounting this repository's directory.
 
 Then, inside the container:
 
@@ -64,10 +76,12 @@ mn --topo single,3 --mac --switch lxbr --controller none
 
 ### 2. Before traffic
 
-Before a host sends traffic, `h1 ip neigh` has no entry for `h2`, and
-`brctl showmacs s1` does not yet contain the three Mininet host MAC addresses.
-The bridge cannot have learned a source MAC address until it has seen a frame
-from that host.
+Immediately after startup, `h1 ip neigh` normally has no entry for `h2`.
+The bridge MAC table can be empty or can already contain host MAC addresses,
+depending on frames exchanged during startup and the age of entries from the
+bridge. The important point is that the bridge learns source MAC addresses
+from observed Ethernet frames; it does not receive a manually configured
+forwarding table.
 
 ### 3. ARP and bridge learning
 
@@ -91,8 +105,9 @@ addresses, so those values can differ between runs. Host MAC addresses remain
 predictable because the `--mac` option is used.
 
 `h3` was not present in the first learned host entries because it had not sent
-traffic yet. Running `pingall` causes every host to exchange traffic and all
-three host MAC addresses then appear in the bridge table.
+traffic yet in that observation. In some runs, startup traffic may already
+populate one or more entries. Running `pingall` causes every host to exchange
+traffic and all three host MAC addresses then appear in the bridge table.
 
 ### 4. Link failure and recovery
 
@@ -144,3 +159,13 @@ the programmable-network approaches covered later in the course.
 - [`run_lab.ps1`](./run_lab.ps1) - reproducible Docker/Mininet run.
 - [`results.txt`](./results.txt) - generated transcript; run the script to
   recreate it.
+
+## Interpreting terminal messages
+
+The image may print `Error setting resource limits` and warnings about
+`bridge-nf-call-*`. These are expected in Docker Desktop and do not prevent
+the lab from running. Use the commands exactly as shown in this report:
+Mininet treats mistyped input as a shell command, which can produce messages
+such as `hping: command not found` or `No such device` even though the
+topology itself is healthy. For example, the switch is named `s1`, so use
+`brctl showmacs s1`, not `brctl showmacs s`.
