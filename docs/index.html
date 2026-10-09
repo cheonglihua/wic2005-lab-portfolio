@@ -61,9 +61,8 @@
     <p>The script uses the pinned image
       <code>firdaussahran/netlab-mininet:1.0</code>, runs the topology and
       observations, and saves the transcript to
-      <code>week-01\results.txt</code>. It uses the repository path as the
-      container's working directory so the HTTP test does not serve a Windows
-      system directory.</p>
+      <code>week-01\results.txt</code>. Its HTTP test serves only
+      <code>week-01/web/</code>, not the repository directory.</p>
   </section>
 
   <section>
@@ -89,17 +88,32 @@ pingall
   </section>
 
   <section>
+    <h2>Address resolution and bridge learning</h2>
+    <p>After the h1-to-h2 ping, h1's ARP neighbor table maps
+      <code>10.0.0.2</code> to <code>00:00:00:00:00:02</code>. The bridge table
+      after that ping contains all three configured host MAC addresses on
+      ports 1, 2, and 3, including h3. The earlier table contains local bridge
+      interface MAC entries. These two snapshots do not establish exactly when
+      the bridge learned h3's address. ARP maps an IP address to a MAC address
+      on a host; the bridge separately learns source MAC addresses and ingress
+      ports from Ethernet frames.</p>
     <h2>What it shows</h2>
-    <p>ARP discovers the destination host, while the bridge learns that
-      <code>00:00:00:00:00:01</code>, <code>...:02</code>, and
-      <code>...:03</code> are on ports 1, 2, and 3. Disconnecting h3 isolates
-      it; restoring the link immediately restores connectivity. A Python HTTP
-      server on h2 also responds to curl from h1, proving that ordinary
-      application traffic crosses the learned bridge.</p>
-    <p class="note">The Docker run may print resource-limit and
-      bridge-nf-call warnings. They are expected in Docker Desktop. The
-      transcript records the student's successful results while excluding the
-      accidental system-directory listing from the final published output.</p>
+    <p>Disconnecting h3 causes checks to and from h3 to fail while h1 and h2
+      remain connected. Restoring the link returns all six ping checks to
+      success. A Python HTTP server on h2 also responds to curl from h1,
+      confirming application traffic crosses the bridge.</p>
+    <p>The bridge and host interfaces forward traffic in the data plane. There
+      is no separate SDN control plane or controller in this topology. Mininet
+      creates the network, while the Mininet CLI provides the student's
+      management interface for observations and link changes. Basic Ethernet
+      learning suits this small LAN; programmable control can help automate
+      consistent policy across larger networks.</p>
+    <p class="note">The committed results transcript is genuine output from an
+      earlier successful run. Its HTTP response shows the repository directory
+      listing because that run served the repository root. The current script
+      serves a dedicated test page from <code>week-01/web/</code>; rerun it to
+      regenerate results matching the refined HTTP setup. Docker may also print
+      resource-limit and bridge-nf-call warnings.</p>
   </section>
 </main>
 </body>

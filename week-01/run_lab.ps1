@@ -18,7 +18,7 @@ $commands = @(
     "pingall",
     "link s1 h3 up",
     "pingall",
-    "h2 python3 -m http.server 80 &",
+    "h2 python3 -m http.server 80 --directory /lab/week-01/web &",
     "sh sleep 1",
     "h1 curl -sS h2",
     "exit"

@@ -1,109 +1,109 @@
 # Week 1 - Why Programmable Networks Exist
 
-## Published web page
+## Course reference and published version
 
-Read the visual version of this write-up at:
+- [Official Week 1 lab instructions](https://firdaussahran.github.io/wic2005/weeks/week-01/#tab-lab)
+- [Published portfolio site](https://cheonglihua.github.io/ID_REDACTED_wic2005-lab-portfolio/)
 
-https://cheonglihua.github.io/ID_REDACTED_wic2005-lab-portfolio/
+## Objective and topology
 
-This link is permanent for the repository. It will serve the latest committed
-version whenever GitHub Pages is enabled with **GitHub Actions** and the
-**Deploy portfolio site** workflow completes successfully.
-
-## Objective
-
-Build a small Ethernet network and observe what happens when the data plane
-learns by itself. The topology has three hosts connected to one Linux bridge:
+This lab uses Mininet to observe Ethernet forwarding and host connectivity on a
+small network without an SDN controller or manually installed switch flows.
 
 ```text
-h1 (10.0.0.1) --\
-h2 (10.0.0.2) ---- s1 (Linux bridge)
-h3 (10.0.0.3) --/
+h1 (10.0.0.1) -- s1-eth1 --┐
+h2 (10.0.0.2) -- s1-eth2 --+-- s1 (Linux bridge)
+h3 (10.0.0.3) -- s1-eth3 --┘
 ```
 
-There is no SDN controller and no manually installed flow configuration. This
-is the baseline that later programmable-network designs change.
+`s1` is a Linux bridge created by Mininet. The `--mac` option assigns stable,
+predictable host MAC addresses (`00:00:00:00:00:01` through `...:03`).
 
-## Prerequisites
+## Requirements and setup
 
-- Docker Desktop on Windows or macOS, or Docker Engine on Linux.
-- A terminal with access to this repository.
-- Internet access the first time the course image is downloaded.
+- Docker Desktop on Windows, or Docker Engine on Linux/macOS.
+- PowerShell for the automated script. The interactive procedure can use
+  PowerShell or a POSIX shell.
+- Internet access on the first run to download
+  `firdaussahran/netlab-mininet:1.0`.
 
-Check Docker before starting:
-
-```powershell
-docker run hello-world
-```
-
-## Reproduce the lab
-
-Open PowerShell and first change to the repository root. This matters because
-the interactive Docker command mounts the current directory into `/lab`:
-
-```powershell
-Set-Location C:\ID_REDACTED_wic2005-lab-portfolio
-```
-
-The recommended reproducible run is:
+Check that Docker is running with `docker run --rm hello-world`. Clone or
+download this repository, then run the script by its path. For example, from
+PowerShell in the repository root:
 
 ```powershell
 .\week-01\run_lab.ps1
 ```
 
-The script starts the pinned image `firdaussahran/netlab-mininet:1.0`,
-creates the topology, runs the observations, and writes the complete terminal
-transcript to `week-01\results.txt`. The container is removed when the run
-finishes.
-
-The equivalent interactive command is:
+The script resolves its own location, so it can also be run from another
+working directory:
 
 ```powershell
-docker run -it --rm --privileged -v "${PWD}:/lab" -w /lab `
-  firdaussahran/netlab-mininet:1.0
+& "C:\path\to\ID_REDACTED_wic2005-lab-portfolio\week-01\run_lab.ps1"
 ```
 
-Do not run the command from `C:\Windows\System32` or another system
-directory. The `h2` web server serves its current directory, so doing that
-would expose a system-directory listing in the lab output. The script avoids
-this mistake by always mounting this repository's directory.
+It starts the pinned Docker image with `--rm`, mounts the repository at `/lab`,
+starts the three-host `single,3` Mininet topology using a Linux bridge and no
+controller, runs the commands below, and saves the terminal transcript to
+[`results.txt`](./results.txt). Docker removes the container when Mininet exits.
+The HTTP server uses only `week-01/web/`, which contains a small test page, so
+it does not serve the repository or its `.git` directory.
 
-Then, inside the container:
+### Interactive alternative
+
+From the repository root, start the image with the repository mounted at `/lab`.
+PowerShell:
+
+```powershell
+docker run -it --rm --privileged -v "${PWD}:/lab" -w /lab firdaussahran/netlab-mininet:1.0
+```
+
+Linux/macOS shell:
+
+```sh
+docker run -it --rm --privileged -v "$(pwd):/lab" -w /lab firdaussahran/netlab-mininet:1.0
+```
+
+At the container prompt, run:
 
 ```text
 mn --topo single,3 --mac --switch lxbr --controller none
 ```
 
-## Observations and results
+Then enter the Mininet commands in order. `exit` closes the Mininet CLI and
+removes the `--rm` container.
 
-### 1. Topology and addressing
+## Commands and observations
 
-`nodes`, `net`, and `dump` show three hosts and one switch:
+The transcript in `results.txt` is the preserved output from the successful
+run. It records the topology and connectivity evidence listed here. The
+automated script has since been refined to serve a dedicated test page; the
+recorded transcript's HTTP response is from the earlier run and therefore
+shows the repository directory listing. Run the script to regenerate a
+transcript for the refined HTTP test.
 
-- `h1` is `10.0.0.1` on `s1-eth1`.
-- `h2` is `10.0.0.2` on `s1-eth2`.
-- `h3` is `10.0.0.3` on `s1-eth3`.
-- `s1` is a Linux bridge, not an OpenFlow-controlled switch.
+### Topology and initial tables
 
-### 2. Before traffic
+The script runs `nodes`, `net`, and `dump` to show the nodes, links, and
+addresses. It then checks `h1 ip neigh` for a pre-existing neighbor entry and
+runs `sh brctl showmacs s1` to inspect the bridge forwarding database. In the
+recorded run, the initial table showed local bridge interface MAC entries.
 
-Immediately after startup, `h1 ip neigh` normally has no entry for `h2`.
-The bridge MAC table can be empty or can already contain host MAC addresses,
-depending on frames exchanged during startup and the age of entries from the
-bridge. The important point is that the bridge learns source MAC addresses
-from observed Ethernet frames; it does not receive a manually configured
-forwarding table.
+### ARP, MAC learning, and connectivity
 
-### 3. ARP and bridge learning
-
-After:
+`h1 ping -c 3 h2` sent three ICMP echo requests; all three replies arrived with
+0% packet loss. Afterwards, `h1 ip neigh` showed:
 
 ```text
-h1 ping -c 3 h2
+10.0.0.2 dev h1-eth0 lladdr 00:00:00:00:00:02 REACHABLE
 ```
 
-the ping succeeds with 0% packet loss. ARP resolves `10.0.0.2` to
-`00:00:00:00:00:02`, and the bridge learns:
+This is the host's ARP neighbor mapping: it associates destination IP
+`10.0.0.2` with destination MAC `00:00:00:00:00:02`. ARP resolves an IP address
+to a link-layer address on the local network. Separately, the Linux bridge
+learns source MAC addresses from Ethernet frames and associates them with
+ingress ports so it can forward later frames. The bridge table after the ping
+showed all three configured host addresses:
 
 ```text
 00:00:00:00:00:01 -> port 1
@@ -111,72 +111,73 @@ the ping succeeds with 0% packet loss. ARP resolves `10.0.0.2` to
 00:00:00:00:00:03 -> port 3
 ```
 
-The exact bridge output also includes dynamically generated local bridge MAC
-addresses, so those values can differ between runs. Host MAC addresses remain
-predictable because the `--mac` option is used.
+The transcript therefore shows `h3` in the post-ping table even though the
+specific ping was between `h1` and `h2`. The initial table showed local
+interface entries; these two snapshots alone do not establish exactly when
+the bridge learned `h3`'s MAC. Packet capture or more frequent table snapshots
+would be needed to determine that. The bridge output also includes local
+interface MAC entries with generated values that may differ between runs.
 
-`h3` was not present in the first learned host entries because it had not sent
-traffic yet in that observation. In some runs, startup traffic may already
-populate one or more entries. Running `pingall` causes every host to exchange
-traffic and all three host MAC addresses then appear in the bridge table.
+The first `pingall` succeeded for all six directed host-to-host checks (0%
+dropped, 6/6 received), confirming full connectivity in the three-host
+topology.
 
-### 4. Link failure and recovery
+### Link failure and recovery
 
-With:
+The script runs `link s1 h3 down` and repeats `pingall`. The recorded result is
+66% dropped (2/6 received): `h1` and `h2` still reach each other, while checks
+involving `h3` fail. After `link s1 h3 up`, another `pingall` succeeds with 0%
+dropped (6/6 received). In this experiment the bridge has no controller to
+reconfigure; restoring the physical/logical link restores the path.
 
-```text
-link s1 h3 down
-pingall
-```
+### HTTP application traffic
 
-traffic involving `h3` fails, while `h1` and `h2` can still communicate. The
-observed result is 66% dropped (2 of 6 host-to-host tests succeed). After:
+The script starts Python's built-in HTTP server on `h2`, rooted at
+`/lab/week-01/web/`, waits briefly, and fetches the page from `h1` with
+`curl -sS h2`. The test page is in [`web/index.html`](./web/index.html). This
+checks that ordinary TCP-based application traffic also crosses the bridge.
+The committed earlier transcript records a successful HTTP response, but its
+server was rooted in the repository and returned a directory listing. The
+current script limits the document root to the test page.
 
-```text
-link s1 h3 up
-pingall
-```
+## Reflection
 
-all six tests succeed again with 0% dropped. No controller or manual route
-change is needed: restoring the data-plane link restores connectivity.
+The Linux bridge provides basic Ethernet switching. It learns a source MAC on
+the port where a frame arrives, refreshes that association as traffic is seen,
+and forwards a frame with a known destination MAC through the associated port.
+It floods broadcast and unknown-destination frames to the other eligible
+ports. This small topology is served well by ordinary Ethernet learning.
 
-### 5. Application traffic
+ARP and bridge learning operate at different layers and maintain different
+tables. ARP lets an IP host find the destination MAC needed to send a local
+Ethernet frame. The bridge uses the source MAC in that frame to learn which
+switch port leads to the sender; it does not use the IP-to-MAC mapping as its
+forwarding entry.
 
-Finally, `h2` serves a directory listing with Python's built-in HTTP server,
-and `h1` retrieves it with `curl`. This confirms that the bridge carries
-ordinary application traffic, not only ICMP:
+In this experiment, the bridge and host interfaces form the data plane that
+forwards packets. There is no SDN controller, so there is no separate
+centralized SDN control plane programming switch flows. Mininet configures the
+topology at startup; during the experiment, the student uses the Mininet CLI
+as a basic management interface to inspect state and bring the `h3` link down
+or up. When the link fails, frames cannot cross that connection and tests to
+`h3` fail; bringing it back restores connectivity.
 
-```text
-h2 python3 -m http.server 80 &
-sh sleep 1
-h1 curl -sS h2
-```
-
-## Why this matters
-
-The bridge learns from source MAC addresses and forwards known destinations
-only to the corresponding port. Unknown or broadcast traffic is flooded so
-that the destination can reply. This is control-plane-free Ethernet learning:
-the switch data plane uses observations from frames rather than a controller
-or a human configuration session.
-
-The experiment also shows the limits of this baseline. It provides local
-Layer-2 connectivity, but it does not give a network-wide policy, automation,
-or a programmable packet-processing pipeline. Those are the motivations for
-the programmable-network approaches covered later in the course.
+Traditional Ethernet learning is simple and effective here, but it does not
+provide a central place to express network-wide policy or coordinate
+consistent changes across many switches. Programmable networking can make
+such changes easier to automate and apply consistently, while providing
+central visibility and policy control. This lab provides a small baseline for
+comparing those approaches; it does not itself demonstrate a programmable
+controller.
 
 ## Files
 
-- [`run_lab.ps1`](./run_lab.ps1) - reproducible Docker/Mininet run.
-- [`results.txt`](./results.txt) - generated transcript; run the script to
-  recreate it.
+- [`run_lab.ps1`](./run_lab.ps1) - runs the Docker and Mininet experiment and
+  regenerates the transcript.
+- [`results.txt`](./results.txt) - preserved output from the successful run.
+- [`web/index.html`](./web/index.html) - small page used by the HTTP test.
 
-## Interpreting terminal messages
-
-The image may print `Error setting resource limits` and warnings about
-`bridge-nf-call-*`. These are expected in Docker Desktop and do not prevent
-the lab from running. Use the commands exactly as shown in this report:
-Mininet treats mistyped input as a shell command, which can produce messages
-such as `hping: command not found` or `No such device` even though the
-topology itself is healthy. For example, the switch is named `s1`, so use
-`brctl showmacs s1`, not `brctl showmacs s`.
+Docker Desktop may print resource-limit and `bridge-nf-call-*` warnings in
+this environment; the recorded run continued successfully. Use the commands
+above as written. A mistyped command at the Mininet prompt can be passed to a
+host shell and produce unrelated command-not-found messages.
