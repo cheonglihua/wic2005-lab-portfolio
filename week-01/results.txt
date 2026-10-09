@@ -28,32 +28,32 @@ s1 lo:  s1-eth1:h1-eth0 s1-eth2:h2-eth0 s1-eth3:h3-eth0
 <Host h3: h3-eth0:10.0.0.3 pid=22> 
 <LinuxBridge s1: lo:127.0.0.1,s1-eth1:None,s1-eth2:None,s1-eth3:None pid=28> 
 mininet> mininet> mininet> mininet> mininet> port no	mac addr		is local?	ageing timer
-  1	6e:7b:6c:5d:23:6c	yes		   0.00
-  1	6e:7b:6c:5d:23:6c	yes		   0.00
-  2	ee:83:c4:28:18:de	yes		   0.00
-  2	ee:83:c4:28:18:de	yes		   0.00
-  3	ee:da:2c:fe:6d:ac	yes		   0.00
-  3	ee:da:2c:fe:6d:ac	yes		   0.00
+  2	02:18:cb:ef:05:6a	yes		   0.00
+  2	02:18:cb:ef:05:6a	yes		   0.00
+  1	c2:e9:00:f8:5c:42	yes		   0.00
+  1	c2:e9:00:f8:5c:42	yes		   0.00
+  3	e6:f4:c5:d6:a9:69	yes		   0.00
+  3	e6:f4:c5:d6:a9:69	yes		   0.00
 PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
-64 bytes from 10.0.0.2: icmp_seq=1 ttl=64 time=1.23 ms
-64 bytes from 10.0.0.2: icmp_seq=2 ttl=64 time=0.056 ms
-64 bytes from 10.0.0.2: icmp_seq=3 ttl=64 time=0.062 ms
+64 bytes from 10.0.0.2: icmp_seq=1 ttl=64 time=0.685 ms
+64 bytes from 10.0.0.2: icmp_seq=2 ttl=64 time=0.089 ms
+64 bytes from 10.0.0.2: icmp_seq=3 ttl=64 time=0.063 ms
 
 --- 10.0.0.2 ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2027ms
-rtt min/avg/max/mdev = 0.056/0.450/1.233/0.553 ms
+3 packets transmitted, 3 received, 0% packet loss, time 2039ms
+rtt min/avg/max/mdev = 0.063/0.279/0.685/0.287 ms
 10.0.0.2 dev h1-eth0 lladdr 00:00:00:00:00:02 REACHABLE 
-*** Ping: testing ping reachability
 mininet> mininet> mininet> port no	mac addr		is local?	ageing timer
   1	00:00:00:00:00:01	no		   0.00
   2	00:00:00:00:00:02	no		   0.00
-  3	00:00:00:00:00:03	no		   0.22
-  1	6e:7b:6c:5d:23:6c	yes		   0.00
-  1	6e:7b:6c:5d:23:6c	yes		   0.00
-  2	ee:83:c4:28:18:de	yes		   0.00
-  2	ee:83:c4:28:18:de	yes		   0.00
-  3	ee:da:2c:fe:6d:ac	yes		   0.00
-  3	ee:da:2c:fe:6d:ac	yes		   0.00
+  3	00:00:00:00:00:03	no		   0.19
+  2	02:18:cb:ef:05:6a	yes		   0.00
+  2	02:18:cb:ef:05:6a	yes		   0.00
+  1	c2:e9:00:f8:5c:42	yes		   0.00
+  1	c2:e9:00:f8:5c:42	yes		   0.00
+  3	e6:f4:c5:d6:a9:69	yes		   0.00
+  3	e6:f4:c5:d6:a9:69	yes		   0.00
+*** Ping: testing ping reachability
 h1 -> h2 h3 
 h2 -> h1 h3 
 h3 -> h1 h2 
@@ -68,7 +68,6 @@ h1 -> h2 h3
 h2 -> h1 h3 
 h3 -> h1 h2 
 *** Results: 0% dropped (6/6 received)
-[1] 93
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
@@ -80,6 +79,8 @@ h3 -> h1 h2
 <hr>
 <ul>
 <li><a href=".git/">.git/</a></li>
+<li><a href=".github/">.github/</a></li>
+<li><a href="docs/">docs/</a></li>
 <li><a href="README.md">README.md</a></li>
 <li><a href="week-01/">week-01/</a></li>
 </ul>
@@ -95,5 +96,5 @@ s1
 *** Stopping 3 hosts
 h1 h2 h3 
 *** Done
-completed in 24.043 seconds
+completed in 24.184 seconds
 mininet> mininet> mininet> mininet> mininet> mininet> mininet> mininet> mininet> 

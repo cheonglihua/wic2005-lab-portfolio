@@ -41,9 +41,10 @@ The recommended reproducible run is:
 .\week-01\run_lab.ps1
 ```
 
-The script starts `firdaussahran/netlab-mininet:1.0`, creates the topology,
-runs the observations, and writes the complete terminal transcript to
-`week-01\results.txt`. The container is removed when the run finishes.
+The script starts the pinned image `firdaussahran/netlab-mininet:1.0`,
+creates the topology, runs the observations, and writes the complete terminal
+transcript to `week-01\results.txt`. The container is removed when the run
+finishes.
 
 The equivalent interactive command is:
 

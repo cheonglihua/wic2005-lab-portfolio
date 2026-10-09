@@ -2,6 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $labRoot = Split-Path -Parent $PSScriptRoot
 $resultsPath = Join-Path $PSScriptRoot "results.txt"
+$previousLocation = Get-Location
 
 $commands = @(
     "nodes",
@@ -33,9 +34,15 @@ $dockerArgs = @(
 )
 
 Write-Host "Running Week 1 Mininet lab..."
-$commands -join "`n" | docker @dockerArgs 2>&1 | Tee-Object -FilePath $resultsPath
-if ($LASTEXITCODE -ne 0) {
-    throw "The Mininet container exited with code $LASTEXITCODE."
+try {
+    Set-Location $labRoot
+    $commands -join "`n" | docker @dockerArgs 2>&1 | Tee-Object -FilePath $resultsPath
+    if ($LASTEXITCODE -ne 0) {
+        throw "The Mininet container exited with code $LASTEXITCODE."
+    }
+}
+finally {
+    Set-Location $previousLocation
 }
 
 Write-Host "Saved transcript to $resultsPath"
