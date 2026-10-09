@@ -75,12 +75,9 @@ removes the `--rm` container.
 
 ## Commands and observations
 
-The transcript in `results.txt` is the preserved output from the successful
-run. It records the topology and connectivity evidence listed here. The
-automated script has since been refined to serve a dedicated test page; the
-recorded transcript's HTTP response is from the earlier run and therefore
-shows the repository directory listing. Run the script to regenerate a
-transcript for the refined HTTP test.
+The transcript in `results.txt` is output from the successful run of the
+automated script. It records the topology and connectivity evidence listed
+here, including the response from the dedicated HTTP test page.
 
 ### Topology and initial tables
 
@@ -136,9 +133,8 @@ The script starts Python's built-in HTTP server on `h2`, rooted at
 `/lab/week-01/web/`, waits briefly, and fetches the page from `h1` with
 `curl -sS h2`. The test page is in [`web/index.html`](./web/index.html). This
 checks that ordinary TCP-based application traffic also crosses the bridge.
-The committed earlier transcript records a successful HTTP response, but its
-server was rooted in the repository and returned a directory listing. The
-current script limits the document root to the test page.
+The transcript shows the page returned by `curl`; the server document root is
+limited to this test page rather than the repository.
 
 ## Reflection
 
