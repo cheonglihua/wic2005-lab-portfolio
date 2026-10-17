@@ -104,7 +104,7 @@ code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-sp
 .missing{color:#9b3d26}details{background:#f8fbfc;border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}summary{cursor:pointer;font-weight:650}.links{columns:2}
 </style></head><body><main>
 <header><div class="tag">WIC2005 Programmable Networks · matric suffix 4903</div><h1>Week 2: Networks as Data</h1>
-<p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="../../">Portfolio home</a> · <a href="REPOSITORY">Repository</a></p></header>
+<p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="REPOSITORY">Repository</a></p></header>
 <section><h2>Topology</h2><p>Three Linux bridges and six dual-stack hosts.</p><div class="mermaid">DIAGRAM</div></section>
 <section><h2>Host addresses</h2><table><thead><tr><th>Host</th><th>IPv4</th><th>IPv6</th></tr></thead><tbody>HOST_ROWS</tbody></table></section>
 <section><h2>Every link</h2>LINKS</section>
