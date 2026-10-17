@@ -5,6 +5,10 @@ same data also generates a published topology page. The config uses only the
 last four digits of the matric ID (`4903`): IPv4 block `10.3.0.0/16` and IPv6
 block `fd00:4903::/32`.
 
+## Published Week 2 page
+
+[Open the Week 2 network page](https://cheonglihua.github.io/ID_REDACTED_wic2005-lab-portfolio/week-02/).
+
 ## Files
 
 - `topology.yaml` — checked three-switch, six-host dual-stack design.
