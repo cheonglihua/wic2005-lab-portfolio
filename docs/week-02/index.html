@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WIC2005 Week 2 | Networks as Data</title>
+<style>
+:root{color-scheme:light;--ink:#172033;--muted:#526071;--accent:#126782;--paper:#fff;--line:#d8e1e8}
+*{box-sizing:border-box}body{margin:0;background:#f3f7f9;color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:980px;margin:auto;padding:28px 20px 60px}header,section{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px;margin:18px 0;box-shadow:0 4px 18px #17324a0d}
+h1{font-size:clamp(2rem,5vw,3.2rem);margin:.1em 0}h2{color:var(--accent);margin-top:0}.tag{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+a{color:var(--accent);font-weight:650}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line)}
+code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:#111827;color:#e7edf4;padding:16px;border-radius:9px}
+.missing{color:#9b3d26}details{background:#f8fbfc;border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}summary{cursor:pointer;font-weight:650}.links{columns:2}
+</style></head><body><main>
+<header><div class="tag">WIC2005 Programmable Networks · matric suffix 4903</div><h1>Week 2: Networks as Data</h1>
+<p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="../../">Portfolio home</a> · <a href="https://github.com/cheonglihua/ID_REDACTED_wic2005-lab-portfolio">Repository</a></p></header>
+<section><h2>Topology</h2><p>Three Linux bridges and six dual-stack hosts.</p><div class="mermaid">graph LR
+  h1 --- s1
+  h2 --- s1
+  h3 --- s2
+  h4 --- s2
+  h5 --- s3
+  h6 --- s3
+  s1 --- s2
+  s2 --- s3</div></section>
+<section><h2>Host addresses</h2><table><thead><tr><th>Host</th><th>IPv4</th><th>IPv6</th></tr></thead><tbody><tr><td>h1</td><td><code>10.3.0.1/24</code></td><td><code>fd00:4903::1/64</code></td></tr>
+<tr><td>h2</td><td><code>10.3.0.2/24</code></td><td><code>fd00:4903::2/64</code></td></tr>
+<tr><td>h3</td><td><code>10.3.0.3/24</code></td><td><code>fd00:4903::3/64</code></td></tr>
+<tr><td>h4</td><td><code>10.3.0.4/24</code></td><td><code>fd00:4903::4/64</code></td></tr>
+<tr><td>h5</td><td><code>10.3.0.5/24</code></td><td><code>fd00:4903::5/64</code></td></tr>
+<tr><td>h6</td><td><code>10.3.0.6/24</code></td><td><code>fd00:4903::6/64</code></td></tr></tbody></table></section>
+<section><h2>Every link</h2><ul class="links">
+<li><code>h1 — s1</code></li>
+<li><code>h2 — s1</code></li>
+<li><code>h3 — s2</code></li>
+<li><code>h4 — s2</code></li>
+<li><code>h5 — s3</code></li>
+<li><code>h6 — s3</code></li>
+<li><code>s1 — s2</code></li>
+<li><code>s2 — s3</code></li>
+</ul></section>
+<section><h2>Experiment evidence</h2><p>Evidence files are copied from the running Mininet experiment.</p><details><summary>check.txt — Collected</summary><pre>PROBLEM: h6 and h2 both use 10.3.0.2
+PROBLEM: h6 and h2 both use fd00:4903::2
+PROBLEM: link s3-s9 names unknown node s9
+</pre></details>
+<details><summary>pingall.txt — Collected</summary><pre>*** Ping: testing ping reachability
+h1 -&gt; h2 h3 h4 h5 h6 
+h2 -&gt; h1 h3 h4 h5 h6 
+h3 -&gt; h1 h2 h4 h5 h6 
+h4 -&gt; h1 h2 h3 h5 h6 
+h5 -&gt; h1 h2 h3 h4 h6 
+h6 -&gt; h1 h2 h3 h4 h5 
+*** Results: 0% dropped (30/30 received)</pre></details>
+<details><summary>neigh.txt — Collected</summary><pre>10.3.0.2 dev h1-eth0 lladdr 52:94:06:53:32:4a REACHABLE 
+10.3.0.6 dev h1-eth0 lladdr 12:13:d1:a5:9f:de REACHABLE 
+10.3.0.5 dev h1-eth0 lladdr de:f7:50:78:b8:b5 REACHABLE 
+10.3.0.4 dev h1-eth0 lladdr c2:51:2e:71:8f:d5 REACHABLE 
+10.3.0.3 dev h1-eth0 lladdr 2e:e5:3b:48:63:cf REACHABLE 
+fd00:4903::2 dev h1-eth0 lladdr 52:94:06:53:32:4a REACHABLE 
+</pre></details>
+<details><summary>macs.txt — Collected</summary><pre>port no	mac addr		is local?	ageing timer
+  3	06:f5:2a:b5:15:3b	no		   0.50
+  3	12:13:d1:a5:9f:de	no		   0.02
+  3	16:9d:3e:40:57:9b	no		   0.66
+  2	2a:a7:1e:a6:cf:63	yes		   0.00
+  2	2a:a7:1e:a6:cf:63	yes		   0.00
+  3	2e:e5:3b:48:63:cf	no		   0.04
+  1	3e:59:78:ee:cb:ff	no		   0.01
+  2	52:94:06:53:32:4a	no		   0.01
+  3	72:a6:bc:97:90:c6	no		   1.34
+  1	aa:6e:09:42:fa:5f	yes		   0.00
+  1	aa:6e:09:42:fa:5f	yes		   0.00
+  3	c2:35:a6:da:1e:2a	yes		   0.00
+  3	c2:35:a6:da:1e:2a	yes		   0.00
+  3	c2:51:2e:71:8f:d5	no		   0.03
+  3	de:f7:50:78:b8:b5	no		   0.02
+</pre></details>
+<details><summary>dad.txt — Collected</summary><pre>2: h2-eth0@if4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000 link-netnsid 0
+    inet6 fd00:4903::1/64 scope global dadfailed tentative 
+       valid_lft forever preferred_lft forever
+    inet6 fd00:4903::2/64 scope global 
+       valid_lft forever preferred_lft forever
+    inet6 fe80::5094:6ff:fe53:324a/64 scope link 
+       valid_lft forever preferred_lft forever
+2: h2-eth0@if4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000 link-netnsid 0
+    inet 10.3.0.2/24 brd 10.3.0.255 scope global h2-eth0
+       valid_lft forever preferred_lft forever
+    inet 10.3.0.1/24 scope global secondary h2-eth0
+       valid_lft forever preferred_lft forever
+</pre></details></section>
+<section><h2>My network</h2><p>My network has three Linux bridge switches in a line, with two dual-stack hosts attached to each switch. Every host has an address from my assigned IPv4 and IPv6 blocks. The links between switches give every host a path to every other host.</p></section>
+<section><h2>Data model and serialization</h2><p>The data model is the meaning of the network description: its switches, hosts, addresses, and links. YAML and JSON are two serializations of that same model. The JSON file keeps the structure and values but does not carry YAML comments, and its punctuation makes it less convenient to annotate.</p></section>
+<section><h2>What the evidence shows</h2><p>The IPv4 neighbour entry is learned through ARP, while the IPv6 neighbour entry is learned through Neighbour Discovery. The bridge learns source MAC addresses on its ports. Duplicate IPv4 addresses can make reachability inconsistent; IPv6 Duplicate Address Detection can mark a duplicate address unusable. The topology checker catches both address families and links to nodes that do not exist before Mininet starts.</p></section>
+<section><h2>Why Git diff helps</h2><p>git diff shows the exact changes to the structured topology between versions, so I can review and commit each meaningful network change. It also preserves a history of how the network evolved instead of relying on ambiguous copies with names such as final or final-v2.</p></section>
+</main><script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script><script>mermaid.initialize({startOnLoad:true,theme:'neutral'});</script></body></html>

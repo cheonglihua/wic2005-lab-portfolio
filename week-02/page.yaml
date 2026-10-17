@@ -1,0 +1,24 @@
+repository: https://github.com/cheonglihua/ID_REDACTED_wic2005-lab-portfolio
+answers:
+  network: >-
+    My network has three Linux bridge switches in a line, with two dual-stack
+    hosts attached to each switch. Every host has an address from my assigned
+    IPv4 and IPv6 blocks. The links between switches give every host a path to
+    every other host.
+  data_model: >-
+    The data model is the meaning of the network description: its switches,
+    hosts, addresses, and links. YAML and JSON are two serializations of that
+    same model. The JSON file keeps the structure and values but does not carry
+    YAML comments, and its punctuation makes it less convenient to annotate.
+  evidence: >-
+    The IPv4 neighbour entry is learned through ARP, while the IPv6 neighbour
+    entry is learned through Neighbour Discovery. The bridge learns source MAC
+    addresses on its ports. Duplicate IPv4 addresses can make reachability
+    inconsistent; IPv6 Duplicate Address Detection can mark a duplicate
+    address unusable. The topology checker catches both address families and
+    links to nodes that do not exist before Mininet starts.
+  version_control: >-
+    git diff shows the exact changes to the structured topology between
+    versions, so I can review and commit each meaningful network change. It
+    also preserves a history of how the network evolved instead of relying on
+    ambiguous copies with names such as final or final-v2.
