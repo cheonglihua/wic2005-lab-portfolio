@@ -18,6 +18,7 @@ allow this repository's workflow token to enable Pages automatically.
 ## Labs
 
 - [Week 1 - Why Programmable Networks Exist](./week-01/README.md)
+- [Week 2 - Networks as Data](./week-02/README.md)
 
 The Week 1 experiment runs a three-host Mininet topology on an ordinary Linux
 bridge. It demonstrates Ethernet learning without a controller or manually
