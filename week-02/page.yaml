@@ -1,10 +1,10 @@
-repository: https://github.com/cheonglihua/ID_REDACTED_wic2005-lab-portfolio
+repository: https://github.com/cheonglihua/wic2005-lab-portfolio
 answers:
   network: >-
-    My network has three Linux bridge switches in a line, with two dual-stack
-    hosts attached to each switch. Every host has an address from my assigned
-    IPv4 and IPv6 blocks. The links between switches give every host a path to
-    every other host.
+    I designed a small dual-stack campus lab network. s1 is the core bridge;
+    s2 serves the workshop hosts and s3 serves the services hosts. Three hosts
+    attach to each access switch, and h1-to-h2 traffic crosses the core. The
+    tree keeps every host connected without adding a Layer 2 loop.
   data_model: >-
     The data model is the meaning of the network description: its switches,
     hosts, addresses, and links. YAML and JSON are two serializations of that
@@ -13,10 +13,11 @@ answers:
   evidence: >-
     The IPv4 neighbour entry is learned through ARP, while the IPv6 neighbour
     entry is learned through Neighbour Discovery. The bridge learns source MAC
-    addresses on its ports. Duplicate IPv4 addresses can make reachability
-    inconsistent; IPv6 Duplicate Address Detection can mark a duplicate
-    address unusable. The topology checker catches both address families and
-    links to nodes that do not exist before Mininet starts.
+    addresses on its ports. The checker is better than relying on pingall
+    because it identifies duplicate addresses before the network is built;
+    pingall only shows that some paths may be wrong. IPv6 Duplicate Address
+    Detection marked the copied address dadfailed, while IPv4 accepted its
+    duplicate. The checker also rejects links to nodes that do not exist.
   version_control: >-
     git diff shows the exact changes to the structured topology between
     versions, so I can review and commit each meaningful network change. It

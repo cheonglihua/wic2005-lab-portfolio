@@ -6,7 +6,7 @@ needed to run the experiment again.
 
 ## Published write-up
 
-The portfolio is also available as a [GitHub Pages site](https://cheonglihua.github.io/ID_REDACTED_wic2005-lab-portfolio/).
+The portfolio is also available as a [GitHub Pages site](https://cheonglihua.github.io/wic2005-lab-portfolio/).
 The site includes the topology diagram, selected outputs, conclusions, and
 links back to this repository.
 

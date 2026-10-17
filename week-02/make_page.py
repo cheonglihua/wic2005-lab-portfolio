@@ -36,7 +36,13 @@ def links_section(topology: dict) -> str:
 
 def mermaid_diagram(topology: dict) -> str:
     """Return Mermaid flowchart text, one edge for every link in the topology."""
-    return "graph LR\n" + "\n".join(f"  {left} --- {right}" for left, right in topology.get("links", []))
+    labels = topology.get("switch_labels", {})
+    lines = ["graph LR"]
+    for switch in topology.get("switches", []):
+        label = html.escape(str(labels.get(switch, switch)), quote=True)
+        lines.append(f'  {switch}["{switch}<br/>{label}"]')
+    lines.extend(f"  {left} --- {right}" for left, right in topology.get("links", []))
+    return "\n".join(lines)
 
 
 def evidence_section() -> str:
@@ -105,7 +111,7 @@ code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-sp
 </style></head><body><main>
 <header><div class="tag">WIC2005 Programmable Networks · matric suffix 4903</div><h1>Week 2: Networks as Data</h1>
 <p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="REPOSITORY">Repository</a></p></header>
-<section><h2>Topology</h2><p>Three Linux bridges and six dual-stack hosts.</p><div class="mermaid">DIAGRAM</div></section>
+<section><h2>Topology</h2><p>A core bridge connects separate workshop and services access segments.</p><div class="mermaid">DIAGRAM</div></section>
 <section><h2>Host addresses</h2><table><thead><tr><th>Host</th><th>IPv4</th><th>IPv6</th></tr></thead><tbody>HOST_ROWS</tbody></table></section>
 <section><h2>Every link</h2>LINKS</section>
 <section><h2>Experiment evidence</h2><p>Evidence files are copied from the running Mininet experiment.</p>EVIDENCE</section>

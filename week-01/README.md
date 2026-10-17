@@ -3,7 +3,7 @@
 ## Course reference and published version
 
 - [Official Week 1 lab instructions](https://firdaussahran.github.io/wic2005/weeks/week-01/#tab-lab)
-- [Published portfolio site](https://cheonglihua.github.io/ID_REDACTED_wic2005-lab-portfolio/)
+- [Published portfolio site](https://cheonglihua.github.io/wic2005-lab-portfolio/)
 
 ## Objective and topology
 
@@ -39,7 +39,7 @@ The script resolves its own location, so it can also be run from another
 working directory:
 
 ```powershell
-& "C:\path\to\ID_REDACTED_wic2005-lab-portfolio\week-01\run_lab.ps1"
+& "C:\path\to\wic2005-lab-portfolio\week-01\run_lab.ps1"
 ```
 
 It starts the specified Docker image firdaussahran/netlab-mininet:1.0 with `--rm`, mounts the repository at `/lab`,

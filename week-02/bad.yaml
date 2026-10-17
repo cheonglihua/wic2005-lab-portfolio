@@ -3,6 +3,10 @@ switches:
   - s1
   - s2
   - s3
+switch_labels:
+  s1: Core
+  s2: Workshop access
+  s3: Services access
 hosts:
   - name: h1
     ip: 10.3.0.1/24
@@ -23,12 +27,12 @@ hosts:
     ip: 10.3.0.2/24
     ipv6: fd00:4903::2/64
 links:
-  - [h1, s1]
-  - [h2, s1]
-  - [h3, s2]
-  - [h4, s2]
-  - [h5, s3]
-  - [h6, s3]
   - [s1, s2]
-  - [s2, s3]
-  - [s3, s9]
+  - [s1, s3]
+  - [h1, s2]
+  - [h3, s2]
+  - [h5, s2]
+  - [h2, s3]
+  - [h4, s3]
+  - [h6, s3]
+  - [s1, s9]

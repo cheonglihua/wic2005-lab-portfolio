@@ -3,7 +3,11 @@ switches:
   - s1
   - s2
   - s3
-# Two hosts attach to each switch; the switches form a line.
+# s1 is the core; s2 is the workshop access switch and s3 is the services access switch.
+switch_labels:
+  s1: Core
+  s2: Workshop access
+  s3: Services access
 hosts:
   - name: h1
     ip: 10.3.0.1/24
@@ -24,11 +28,11 @@ hosts:
     ip: 10.3.0.6/24
     ipv6: fd00:4903::6/64
 links:
-  - [h1, s1]
-  - [h2, s1]
-  - [h3, s2]
-  - [h4, s2]
-  - [h5, s3]
-  - [h6, s3]
   - [s1, s2]
-  - [s2, s3]
+  - [s1, s3]
+  - [h1, s2]
+  - [h3, s2]
+  - [h5, s2]
+  - [h2, s3]
+  - [h4, s3]
+  - [h6, s3]

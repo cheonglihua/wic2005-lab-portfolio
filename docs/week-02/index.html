@@ -11,16 +11,19 @@ code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-sp
 .missing{color:#9b3d26}details{background:#f8fbfc;border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}summary{cursor:pointer;font-weight:650}.links{columns:2}
 </style></head><body><main>
 <header><div class="tag">WIC2005 Programmable Networks · matric suffix 4903</div><h1>Week 2: Networks as Data</h1>
-<p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="https://github.com/cheonglihua/ID_REDACTED_wic2005-lab-portfolio">Repository</a></p></header>
-<section><h2>Topology</h2><p>Three Linux bridges and six dual-stack hosts.</p><div class="mermaid">graph LR
-  h1 --- s1
-  h2 --- s1
-  h3 --- s2
-  h4 --- s2
-  h5 --- s3
-  h6 --- s3
+<p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="https://github.com/cheonglihua/wic2005-lab-portfolio">Repository</a></p></header>
+<section><h2>Topology</h2><p>A core bridge connects separate workshop and services access segments.</p><div class="mermaid">graph LR
+  s1[&quot;s1&lt;br/&gt;Core&quot;]
+  s2[&quot;s2&lt;br/&gt;Workshop access&quot;]
+  s3[&quot;s3&lt;br/&gt;Services access&quot;]
   s1 --- s2
-  s2 --- s3</div></section>
+  s1 --- s3
+  h1 --- s2
+  h3 --- s2
+  h5 --- s2
+  h2 --- s3
+  h4 --- s3
+  h6 --- s3</div></section>
 <section><h2>Host addresses</h2><table><thead><tr><th>Host</th><th>IPv4</th><th>IPv6</th></tr></thead><tbody><tr><td>h1</td><td><code>10.3.0.1/24</code></td><td><code>fd00:4903::1/64</code></td></tr>
 <tr><td>h2</td><td><code>10.3.0.2/24</code></td><td><code>fd00:4903::2/64</code></td></tr>
 <tr><td>h3</td><td><code>10.3.0.3/24</code></td><td><code>fd00:4903::3/64</code></td></tr>
@@ -28,66 +31,64 @@ code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-sp
 <tr><td>h5</td><td><code>10.3.0.5/24</code></td><td><code>fd00:4903::5/64</code></td></tr>
 <tr><td>h6</td><td><code>10.3.0.6/24</code></td><td><code>fd00:4903::6/64</code></td></tr></tbody></table></section>
 <section><h2>Every link</h2><ul class="links">
-<li><code>h1 — s1</code></li>
-<li><code>h2 — s1</code></li>
-<li><code>h3 — s2</code></li>
-<li><code>h4 — s2</code></li>
-<li><code>h5 — s3</code></li>
-<li><code>h6 — s3</code></li>
 <li><code>s1 — s2</code></li>
-<li><code>s2 — s3</code></li>
+<li><code>s1 — s3</code></li>
+<li><code>h1 — s2</code></li>
+<li><code>h3 — s2</code></li>
+<li><code>h5 — s2</code></li>
+<li><code>h2 — s3</code></li>
+<li><code>h4 — s3</code></li>
+<li><code>h6 — s3</code></li>
 </ul></section>
 <section><h2>Experiment evidence</h2><p>Evidence files are copied from the running Mininet experiment.</p><details><summary>check.txt — Collected</summary><pre>PROBLEM: h6 and h2 both use 10.3.0.2
 PROBLEM: h6 and h2 both use fd00:4903::2
-PROBLEM: link s3-s9 names unknown node s9
+PROBLEM: link s1-s9 names unknown node s9
 </pre></details>
 <details><summary>pingall.txt — Collected</summary><pre>*** Ping: testing ping reachability
-h1 -&gt; h2 h3 h4 h5 h6 
-h2 -&gt; h1 h3 h4 h5 h6 
-h3 -&gt; h1 h2 h4 h5 h6 
-h4 -&gt; h1 h2 h3 h5 h6 
-h5 -&gt; h1 h2 h3 h4 h6 
-h6 -&gt; h1 h2 h3 h4 h5 
-*** Results: 0% dropped (30/30 received)</pre></details>
-<details><summary>neigh.txt — Collected</summary><pre>10.3.0.2 dev h1-eth0 lladdr 52:94:06:53:32:4a REACHABLE 
-10.3.0.6 dev h1-eth0 lladdr 12:13:d1:a5:9f:de REACHABLE 
-10.3.0.5 dev h1-eth0 lladdr de:f7:50:78:b8:b5 REACHABLE 
-10.3.0.4 dev h1-eth0 lladdr c2:51:2e:71:8f:d5 REACHABLE 
-10.3.0.3 dev h1-eth0 lladdr 2e:e5:3b:48:63:cf REACHABLE 
-fd00:4903::2 dev h1-eth0 lladdr 52:94:06:53:32:4a REACHABLE 
+h1 -&gt; h2 h3 h4 h5 h6
+h2 -&gt; h1 h3 h4 h5 h6
+h3 -&gt; h1 h2 h4 h5 h6
+h4 -&gt; h1 h2 h3 h5 h6
+h5 -&gt; h1 h2 h3 h4 h6
+h6 -&gt; h1 h2 h3 h4 h5
+*** Results: 0% dropped (30/30 received)
+</pre></details>
+<details><summary>neigh.txt — Collected</summary><pre>10.3.0.2 dev h1-eth0 lladdr 86:f8:ac:c0:8a:8f REACHABLE
+10.3.0.3 dev h1-eth0 lladdr 22:df:51:b8:83:de REACHABLE
+10.3.0.6 dev h1-eth0 lladdr 16:e9:c7:2d:35:4d REACHABLE
+10.3.0.4 dev h1-eth0 lladdr ee:ff:fa:8c:6f:d6 REACHABLE
+10.3.0.5 dev h1-eth0 lladdr f6:fa:d3:70:f2:21 REACHABLE
+fd00:4903::2 dev h1-eth0 lladdr 86:f8:ac:c0:8a:8f REACHABLE
 </pre></details>
 <details><summary>macs.txt — Collected</summary><pre>port no	mac addr		is local?	ageing timer
-  3	06:f5:2a:b5:15:3b	no		   0.50
-  3	12:13:d1:a5:9f:de	no		   0.02
-  3	16:9d:3e:40:57:9b	no		   0.66
-  2	2a:a7:1e:a6:cf:63	yes		   0.00
-  2	2a:a7:1e:a6:cf:63	yes		   0.00
-  3	2e:e5:3b:48:63:cf	no		   0.04
-  1	3e:59:78:ee:cb:ff	no		   0.01
-  2	52:94:06:53:32:4a	no		   0.01
-  3	72:a6:bc:97:90:c6	no		   1.34
-  1	aa:6e:09:42:fa:5f	yes		   0.00
-  1	aa:6e:09:42:fa:5f	yes		   0.00
-  3	c2:35:a6:da:1e:2a	yes		   0.00
-  3	c2:35:a6:da:1e:2a	yes		   0.00
-  3	c2:51:2e:71:8f:d5	no		   0.03
-  3	de:f7:50:78:b8:b5	no		   0.02
+  2	16:e9:c7:2d:35:4d	no		   0.01
+  1	1a:00:05:d5:65:b5	no		   0.01
+  2	1a:13:14:38:da:bb	no		   0.77
+  1	22:df:51:b8:83:de	no		   0.02
+  1	3e:cb:3c:2b:72:a9	no		   1.54
+  1	4a:6a:d4:a6:92:ef	yes		   0.00
+  1	4a:6a:d4:a6:92:ef	yes		   0.00
+  2	86:f8:ac:c0:8a:8f	no		   0.01
+  2	8e:5d:b1:67:cd:57	yes		   0.00
+  2	8e:5d:b1:67:cd:57	yes		   0.00
+  2	ee:ff:fa:8c:6f:d6	no		   0.02
+  1	f6:fa:d3:70:f2:21	no		   0.01
 </pre></details>
-<details><summary>dad.txt — Collected</summary><pre>2: h2-eth0@if4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000 link-netnsid 0
-    inet6 fd00:4903::1/64 scope global dadfailed tentative 
+<details><summary>dad.txt — Collected</summary><pre>2: h2-eth0@if10: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000 link-netnsid 0
+    inet6 fd00:4903::1/64 scope global dadfailed tentative
        valid_lft forever preferred_lft forever
-    inet6 fd00:4903::2/64 scope global 
+    inet6 fd00:4903::2/64 scope global
        valid_lft forever preferred_lft forever
-    inet6 fe80::5094:6ff:fe53:324a/64 scope link 
+    inet6 fe80::84f8:acff:fec0:8a8f/64 scope link
        valid_lft forever preferred_lft forever
-2: h2-eth0@if4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000 link-netnsid 0
+2: h2-eth0@if10: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000 link-netnsid 0
     inet 10.3.0.2/24 brd 10.3.0.255 scope global h2-eth0
        valid_lft forever preferred_lft forever
     inet 10.3.0.1/24 scope global secondary h2-eth0
        valid_lft forever preferred_lft forever
 </pre></details></section>
-<section><h2>My network</h2><p>My network has three Linux bridge switches in a line, with two dual-stack hosts attached to each switch. Every host has an address from my assigned IPv4 and IPv6 blocks. The links between switches give every host a path to every other host.</p></section>
+<section><h2>My network</h2><p>I designed a small dual-stack campus lab network. s1 is the core bridge; s2 serves the workshop hosts and s3 serves the services hosts. Three hosts attach to each access switch, and h1-to-h2 traffic crosses the core. The tree keeps every host connected without adding a Layer 2 loop.</p></section>
 <section><h2>Data model and serialization</h2><p>The data model is the meaning of the network description: its switches, hosts, addresses, and links. YAML and JSON are two serializations of that same model. The JSON file keeps the structure and values but does not carry YAML comments, and its punctuation makes it less convenient to annotate.</p></section>
-<section><h2>What the evidence shows</h2><p>The IPv4 neighbour entry is learned through ARP, while the IPv6 neighbour entry is learned through Neighbour Discovery. The bridge learns source MAC addresses on its ports. Duplicate IPv4 addresses can make reachability inconsistent; IPv6 Duplicate Address Detection can mark a duplicate address unusable. The topology checker catches both address families and links to nodes that do not exist before Mininet starts.</p></section>
+<section><h2>What the evidence shows</h2><p>The IPv4 neighbour entry is learned through ARP, while the IPv6 neighbour entry is learned through Neighbour Discovery. The bridge learns source MAC addresses on its ports. The checker is better than relying on pingall because it identifies duplicate addresses before the network is built; pingall only shows that some paths may be wrong. IPv6 Duplicate Address Detection marked the copied address dadfailed, while IPv4 accepted its duplicate. The checker also rejects links to nodes that do not exist.</p></section>
 <section><h2>Why Git diff helps</h2><p>git diff shows the exact changes to the structured topology between versions, so I can review and commit each meaningful network change. It also preserves a history of how the network evolved instead of relying on ambiguous copies with names such as final or final-v2.</p></section>
 </main><script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script><script>mermaid.initialize({startOnLoad:true,theme:'neutral'});</script></body></html>

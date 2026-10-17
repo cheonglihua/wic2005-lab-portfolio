@@ -5,13 +5,37 @@ same data also generates a published topology page. The config uses only the
 last four digits of the matric ID (`4903`): IPv4 block `10.3.0.0/16` and IPv6
 block `fd00:4903::/32`.
 
+## My design
+
+I designed a small campus lab as a core-and-access tree. The core bridge s1
+connects the workshop access bridge s2 and services access bridge s3. Hosts
+h1, h3, and h5 attach to the workshop segment; h2, h4, and h6 attach to
+services. The h1-to-h2 path crosses s2, s1, and s3. The topology has no Layer 2
+loop, and every host has IPv4 and IPv6 addresses from my assigned blocks.
+
+```mermaid
+graph LR
+  h1[h1] --- s2["s2 · Workshop access"]
+  h3[h3] --- s2
+  h5[h5] --- s2
+  s2 --- s1["s1 · Core"]
+  s1 --- s3["s3 · Services access"]
+  h2[h2] --- s3
+  h4[h4] --- s3
+  h6[h6] --- s3
+```
+
+The published page builds its Mermaid diagram from the links and switch labels
+in `topology.yaml`, so the illustration follows the network data.
+
 ## Published Week 2 page
 
-[Open the Week 2 network page](https://cheonglihua.github.io/ID_REDACTED_wic2005-lab-portfolio/week-02/).
+[Open the Week 2 network page](https://cheonglihua.github.io/wic2005-lab-portfolio/week-02/).
 
 ## Files
 
-- `topology.yaml` — checked three-switch, six-host dual-stack design.
+- `topology.yaml` — checked, labelled core-and-access design with three
+  switches and six dual-stack hosts.
 - `topology.json` — same model in JSON serialization.
 - `build_topo.py` — validates both address families and link endpoints before
   starting Mininet.
@@ -19,7 +43,8 @@ block `fd00:4903::/32`.
   for the pre-build validation exercise.
 - `make_page.py` and `page.yaml` — generate the Week 2 page from topology,
   written answers, and collected evidence.
-- `evidence/` — outputs to collect from the live network.
+- `evidence/` — captured validation, ping, neighbour, bridge MAC, and DAD
+  outputs from the live network.
 - `run_lab.ps1` — starts the course container and interactive Mininet CLI.
 
 ## Build the network
@@ -85,9 +110,10 @@ addresses to show IPv6 Duplicate Address Detection and IPv4's lack of an
 equivalent built-in check. Regenerate `topology.yaml` from its valid version
 if you edit it during the duplicate-address experiment.
 
-The Docker engine was not running when this folder was prepared, so live
-evidence is not included yet. Run the commands above with Docker Desktop
-running before treating the lab as complete.
+The evidence files contain the outputs from a successful run of this topology.
+The recorded `pingall` result is 0% dropped (30/30); the IPv6 ping succeeds,
+and the duplicate-address output shows IPv6 DAD rejecting the duplicate while
+IPv4 accepts it.
 
 ## Generate the portfolio page
 
@@ -103,22 +129,14 @@ reflection answers are in `page.yaml`; revise them in your own words if needed.
 
 ## Git workflow
 
-The parent portfolio is already a Git repository. From the repository root,
-review and commit the Week 2 work in meaningful stages:
+The Week 2 work is committed and pushed in milestone commits. Review its
+history with:
 
 ```sh
-git add week-02/build_topo.py week-02/topology.yaml
-git commit -m "Week 2: starting topology"
-git add week-02/topology.json
-git commit -m "Add JSON topology serialization"
-git add week-02/bad.yaml week-02/evidence/check.txt
-git commit -m "Check duplicate addresses and invalid links"
-git add week-02/evidence/pingall.txt week-02/evidence/neigh.txt week-02/evidence/macs.txt week-02/evidence/dad.txt
-git commit -m "Collect Week 2 network evidence"
-git add week-02/README.md week-02/make_page.py week-02/page.yaml docs/week-02 docs/index.html README.md
-git commit -m "Generate Week 2 portfolio page"
+git log --oneline -- week-02
 ```
 
-There are no commits or remote pushes made by this setup. The existing
-GitHub Pages workflow publishes the root `docs/` directory; after you commit
-and push, the Week 2 page will be available under `/week-02/` on that site.
+When the topology or page data changes, run `python3 make_page.py`, inspect
+`git diff`, and commit the updated data and generated page. Pushing to `main`
+triggers the existing Pages workflow, which publishes the root `docs/`
+directory. The published Week 2 link is at the top of this README.
