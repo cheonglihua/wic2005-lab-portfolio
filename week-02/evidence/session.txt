@@ -1,0 +1,29 @@
+*** Error setting resource limits. Mininet's performance may be affected.
+Warning: Linux bridge may not work with net.bridge.bridge-nf-call-arptables = 1 
+Warning: Linux bridge may not work with net.bridge.bridge-nf-call-iptables = 1 
+Warning: Linux bridge may not work with net.bridge.bridge-nf-call-ip6tables = 1 
+OK: topology.yaml passed validation
+h1 h1-eth0:s1-eth1
+h2 h2-eth0:s1-eth2
+h3 h3-eth0:s2-eth1
+h4 h4-eth0:s2-eth2
+h5 h5-eth0:s3-eth1
+h6 h6-eth0:s3-eth2
+s1 lo:  s1-eth1:h1-eth0 s1-eth2:h2-eth0 s1-eth3:s2-eth3
+s2 lo:  s2-eth1:h3-eth0 s2-eth2:h4-eth0 s2-eth3:s1-eth3 s2-eth4:s3-eth3
+s3 lo:  s3-eth1:h5-eth0 s3-eth2:h6-eth0 s3-eth3:s2-eth4
+*** Ping: testing ping reachability
+h1 -> h2 h3 h4 h5 h6 
+h2 -> h1 h3 h4 h5 h6 
+h3 -> h1 h2 h4 h5 h6 
+h4 -> h1 h2 h3 h5 h6 
+h5 -> h1 h2 h3 h4 h6 
+h6 -> h1 h2 h3 h4 h5 
+*** Results: 0% dropped (30/30 received)
+PING fd00:4903::2 (fd00:4903::2) 56 data bytes
+64 bytes from fd00:4903::2: icmp_seq=1 ttl=64 time=0.193 ms
+
+--- fd00:4903::2 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.193/0.193/0.193/0.000 ms
+mininet> mininet> mininet> mininet> mininet> mininet> mininet> mininet> mininet> mininet> mininet> 
