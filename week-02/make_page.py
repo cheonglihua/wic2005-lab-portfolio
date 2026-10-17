@@ -44,13 +44,70 @@ def links_section(topology: dict) -> str:
 
 
 def mermaid_diagram(topology: dict) -> str:
-    """Return Mermaid flowchart text, one edge for every link in the topology."""
+    """Return a core/access Mermaid flowchart with every data link exactly once."""
+    switches = topology.get("switches", [])
+    hosts = {host["name"] for host in topology.get("hosts", [])}
+    switch_set = set(switches)
     labels = topology.get("switch_labels", {})
+    links = topology.get("links", [])
+    core = next(
+        (switch for switch in switches if str(labels.get(switch, "")).casefold() == "core"),
+        None,
+    )
+
+    ordered_links: list[tuple[str, str]] = []
+    if core:
+        access_switches = [
+            switch
+            for switch in switches
+            if switch != core
+            and any(set(link) == {core, switch} for link in links)
+        ]
+        used: set[int] = set()
+        for position, access in enumerate(access_switches):
+            host_links = [
+                (index, link)
+                for index, link in enumerate(links)
+                if access in link and any(node in hosts for node in link)
+            ]
+            core_links = [
+                (index, link)
+                for index, link in enumerate(links)
+                if set(link) == {core, access}
+            ]
+
+            def add_hosts() -> None:
+                for index, link in host_links:
+                    host = next(node for node in link if node in hosts)
+                    ordered_links.append((host, access))
+                    used.add(index)
+
+            if position == 0:
+                add_hosts()
+            for index, _link in core_links:
+                ordered_links.append((access, core) if position == 0 else (core, access))
+                used.add(index)
+            if position > 0:
+                add_hosts()
+        ordered_links.extend(
+            (left, right) for index, (left, right) in enumerate(links) if index not in used
+        )
+    else:
+        ordered_links = [(left, right) for left, right in links]
+
+    def node_reference(node: str, declared: set[str]) -> str:
+        if node in switch_set and node not in declared:
+            declared.add(node)
+            label = str(labels.get(node, node)).replace('"', "'")
+            return f'{node}["{node} · {label}"]'
+        if node in hosts:
+            return f"{node}[{node}]"
+        return node
+
     lines = ["graph LR"]
-    for switch in topology.get("switches", []):
-        label = html.escape(str(labels.get(switch, switch)), quote=True)
-        lines.append(f'  {switch}["{switch}<br/>{label}"]')
-    lines.extend(f"  {left} --- {right}" for left, right in topology.get("links", []))
+    declared: set[str] = set()
+    for left, right in ordered_links:
+        lines.append(f"  {node_reference(left, declared)} --- {node_reference(right, declared)}")
     return "\n".join(lines)
 
 

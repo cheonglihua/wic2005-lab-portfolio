@@ -14,17 +14,14 @@ code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-sp
 <header><div class="tag">WIC2005 Programmable Networks · matric suffix 4903</div><h1>Week 2: Networks as Data</h1>
 <p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="https://github.com/cheonglihua/wic2005-lab-portfolio">Repository</a> · <a href="https://github.com/cheonglihua/wic2005-lab-portfolio/tree/main/week-02">Week 2 source and evidence</a></p></header>
 <section><h2>Topology</h2><p>A core bridge connects workshop and services access switches in one bridged network.</p><div class="mermaid">graph LR
-  s1[&quot;s1&lt;br/&gt;Core&quot;]
-  s2[&quot;s2&lt;br/&gt;Workshop access&quot;]
-  s3[&quot;s3&lt;br/&gt;Services access&quot;]
-  s1 --- s2
-  s1 --- s3
-  h1 --- s2
-  h3 --- s2
-  h5 --- s2
-  h2 --- s3
-  h4 --- s3
-  h6 --- s3</div></section>
+  h1[h1] --- s2[&quot;s2 · Workshop access&quot;]
+  h3[h3] --- s2
+  h5[h5] --- s2
+  s2 --- s1[&quot;s1 · Core&quot;]
+  s1 --- s3[&quot;s3 · Services access&quot;]
+  h2[h2] --- s3
+  h4[h4] --- s3
+  h6[h6] --- s3</div></section>
 <section><h2>Host addresses</h2><table><thead><tr><th>Host</th><th>IPv4</th><th>IPv6</th></tr></thead><tbody><tr><td>h1</td><td><code>10.3.0.1/24</code></td><td><code>fd00:4903::1/64</code></td></tr>
 <tr><td>h2</td><td><code>10.3.0.2/24</code></td><td><code>fd00:4903::2/64</code></td></tr>
 <tr><td>h3</td><td><code>10.3.0.3/24</code></td><td><code>fd00:4903::3/64</code></td></tr>
