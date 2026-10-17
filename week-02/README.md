@@ -117,15 +117,22 @@ IPv4 accepts it.
 
 ## Generate the portfolio page
 
-With the course container available, from this directory run:
+From PowerShell at the repository root, run the generator in the course
+container while mounting the whole repository. This keeps the generated file
+at `docs/week-02/index.html` in the repository:
 
-```sh
-python3 make_page.py
+```powershell
+docker run --rm -v "${PWD}:/repo" -w /repo/week-02 `
+  firdaussahran/netlab-mininet:1.0 `
+  python3 make_page.py topology.yaml
 ```
 
-This validates `topology.yaml` and writes `../docs/week-02/index.html`. It
-shows any evidence files still missing. The repository setting and short
-reflection answers are in `page.yaml`; revise them in your own words if needed.
+You can pass `topology.json` or another YAML/JSON file instead. An explicit
+relative path is resolved from the current working directory; if you omit the
+argument, the generator uses `topology.yaml` beside `make_page.py`. It checks
+the selected topology before replacing the generated page. The repository
+setting and reflection answers are in `page.yaml`; the five captured evidence
+files are read from `week-02/evidence/`.
 
 ## Git workflow
 
@@ -136,7 +143,7 @@ history with:
 git log --oneline -- week-02
 ```
 
-When the topology or page data changes, run `python3 make_page.py`, inspect
-`git diff`, and commit the updated data and generated page. Pushing to `main`
-triggers the existing Pages workflow, which publishes the root `docs/`
+When the topology or page data changes, rerun the generator command above,
+inspect `git diff`, and commit the updated data and generated page. Pushing to
+`main` triggers the existing Pages workflow, which publishes the root `docs/`
 directory. The published Week 2 link is at the top of this README.

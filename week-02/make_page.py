@@ -3,9 +3,12 @@
 
 from __future__ import annotations
 
+import argparse
 import html
 import sys
 from pathlib import Path
+from typing import Sequence
+from urllib.parse import urlparse
 
 from build_topo import check, load
 
@@ -20,8 +23,14 @@ def load_page_data(path: Path) -> dict:
         import yaml
     except ImportError as exc:
         raise RuntimeError("PyYAML is required (it is included in the course container).") from exc
-    with path.open(encoding="utf-8") as source:
-        return yaml.safe_load(source) or {}
+    try:
+        with path.open(encoding="utf-8") as source:
+            data = yaml.safe_load(source)
+    except yaml.YAMLError as exc:
+        raise ValueError(f"{path}: malformed YAML: {exc}") from exc
+    if not isinstance(data, dict):
+        raise ValueError(f"{path}: expected a mapping containing repository and answers")
+    return data
 
 
 def links_section(topology: dict) -> str:
@@ -49,29 +58,53 @@ def evidence_section() -> str:
     blocks: list[str] = []
     for filename in EVIDENCE:
         path = LAB_DIR / "evidence" / filename
-        if path.is_file() and path.stat().st_size:
-            contents = html.escape(path.read_text(encoding="utf-8", errors="replace"))
-            state = "Collected"
-            body = f"<pre>{contents}</pre>"
-        else:
-            state = "Missing"
-            body = "<p class=\"missing\">Collect this output by following the A3/A4 steps in the lab README.</p>"
-            print(f"WARNING: evidence/{filename} is missing or empty")
+        if not path.is_file() or path.stat().st_size == 0:
+            raise ValueError(f"required evidence file is missing or empty: {path}")
+        contents = html.escape(path.read_text(encoding="utf-8", errors="replace"))
+        body = f"<pre>{contents}</pre>"
         blocks.append(
-            f"<details><summary>{html.escape(filename)} — {state}</summary>{body}</details>"
+            f"<details><summary>{html.escape(filename)} — Collected</summary>{body}</details>"
         )
     return "\n".join(blocks)
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "topology",
+        nargs="?",
+        type=Path,
+        help="YAML or JSON topology (default: topology.yaml beside this script)",
+    )
+    args = parser.parse_args(argv)
+    topology_path = args.topology or (LAB_DIR / "topology.yaml")
+    if not topology_path.is_absolute():
+        topology_path = Path.cwd() / topology_path
+    topology_path = topology_path.resolve()
+    if not topology_path.is_file():
+        print(f"PROBLEM: topology file not found: {topology_path}")
+        return 1
+
     try:
-        topology = load(LAB_DIR / "topology.yaml")
+        topology = load(topology_path)
         problems = check(topology)
         if problems:
             for problem in problems:
                 print(f"PROBLEM: {problem}")
             return 1
         page = load_page_data(LAB_DIR / "page.yaml")
+        answers = page.get("answers")
+        if not isinstance(answers, dict):
+            raise ValueError(f"{LAB_DIR / 'page.yaml'}: answers must be a mapping")
+        required_answers = ("network", "data_model", "evidence", "version_control")
+        for key in required_answers:
+            if not isinstance(answers.get(key), str) or not answers[key].strip():
+                raise ValueError(f"{LAB_DIR / 'page.yaml'}: answer '{key}' is missing or empty")
+        repository_url = page.get("repository")
+        parsed_repository = urlparse(repository_url) if isinstance(repository_url, str) else None
+        if not parsed_repository or parsed_repository.scheme != "https" or not parsed_repository.netloc:
+            raise ValueError(f"{LAB_DIR / 'page.yaml'}: repository must be an HTTPS URL")
+        evidence = evidence_section()
     except (OSError, ValueError, RuntimeError) as exc:
         print(f"PROBLEM: {exc}")
         return 1
@@ -82,7 +115,6 @@ def main() -> int:
         )
         for host in topology["hosts"]
     )
-    answers = page.get("answers", {})
     answer_blocks = "\n".join(
         f"<section><h2>{title}</h2><p>{html.escape(str(answers.get(key, '')))}</p></section>"
         for key, title in (
@@ -92,11 +124,11 @@ def main() -> int:
             ("version_control", "Why Git diff helps"),
         )
     )
-    repository = html.escape(str(page.get("repository", "")))
+    repository = html.escape(repository_url, quote=True)
+    source_url = html.escape(repository_url.rstrip("/") + "/tree/main/week-02", quote=True)
     diagram = html.escape(mermaid_diagram(topology))
     output = REPO_DIR / "docs" / "week-02" / "index.html"
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
+    document = (
         """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WIC2005 Week 2 | Networks as Data</title>
@@ -105,26 +137,31 @@ def main() -> int:
 *{box-sizing:border-box}body{margin:0;background:#f3f7f9;color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
 main{max-width:980px;margin:auto;padding:28px 20px 60px}header,section{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px;margin:18px 0;box-shadow:0 4px 18px #17324a0d}
 h1{font-size:clamp(2rem,5vw,3.2rem);margin:.1em 0}h2{color:var(--accent);margin-top:0}.tag{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-a{color:var(--accent);font-weight:650}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line)}
+a{color:var(--accent);font-weight:650}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line)}td code{overflow-wrap:anywhere}
 code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:#111827;color:#e7edf4;padding:16px;border-radius:9px}
 .missing{color:#9b3d26}details{background:#f8fbfc;border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}summary{cursor:pointer;font-weight:650}.links{columns:2}
+@media(max-width:640px){main{padding:14px 12px 36px}header,section{padding:18px;margin:12px 0}table{display:block;overflow-x:auto}.links{columns:1}}
 </style></head><body><main>
 <header><div class="tag">WIC2005 Programmable Networks · matric suffix 4903</div><h1>Week 2: Networks as Data</h1>
-<p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="REPOSITORY">Repository</a></p></header>
-<section><h2>Topology</h2><p>A core bridge connects separate workshop and services access segments.</p><div class="mermaid">DIAGRAM</div></section>
+<p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="REPOSITORY">Repository</a> · <a href="SOURCE">Week 2 source and evidence</a></p></header>
+<section><h2>Topology</h2><p>A core bridge connects workshop and services access switches in one bridged network.</p><div class="mermaid">DIAGRAM</div></section>
 <section><h2>Host addresses</h2><table><thead><tr><th>Host</th><th>IPv4</th><th>IPv6</th></tr></thead><tbody>HOST_ROWS</tbody></table></section>
 <section><h2>Every link</h2>LINKS</section>
-<section><h2>Experiment evidence</h2><p>Evidence files are copied from the running Mininet experiment.</p>EVIDENCE</section>
+<section><h2>Experiment evidence</h2><p>These are captured outputs from the running Mininet network.</p>EVIDENCE</section>
 ANSWERS
 </main><script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script><script>mermaid.initialize({startOnLoad:true,theme:'neutral'});</script></body></html>
 """.replace("DIAGRAM", diagram)
         .replace("HOST_ROWS", hosts)
         .replace("LINKS", links_section(topology))
-        .replace("EVIDENCE", evidence_section())
+        .replace("EVIDENCE", evidence)
         .replace("ANSWERS", answer_blocks)
-        .replace("REPOSITORY", repository),
-        encoding="utf-8",
+        .replace("REPOSITORY", repository)
     )
+    document = document.replace("SOURCE", source_url)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary_output = output.with_suffix(".html.tmp")
+    temporary_output.write_text(document, encoding="utf-8")
+    temporary_output.replace(output)
     print(f"Wrote {output}")
     return 0
 

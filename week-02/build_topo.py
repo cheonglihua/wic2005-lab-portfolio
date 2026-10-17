@@ -19,7 +19,10 @@ def load(path: Path) -> dict[str, Any]:
     except ImportError as exc:
         raise RuntimeError("PyYAML is required (it is included in the course container).") from exc
     with path.open(encoding="utf-8") as source:
-        data = yaml.safe_load(source)
+        try:
+            data = yaml.safe_load(source)
+        except yaml.YAMLError as exc:
+            raise ValueError(f"{path}: malformed YAML/JSON: {exc}") from exc
     if not isinstance(data, dict):
         raise ValueError("topology must be a mapping with switches, hosts, and links")
     return data

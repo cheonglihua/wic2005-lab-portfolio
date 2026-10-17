@@ -6,13 +6,14 @@
 *{box-sizing:border-box}body{margin:0;background:#f3f7f9;color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
 main{max-width:980px;margin:auto;padding:28px 20px 60px}header,section{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px;margin:18px 0;box-shadow:0 4px 18px #17324a0d}
 h1{font-size:clamp(2rem,5vw,3.2rem);margin:.1em 0}h2{color:var(--accent);margin-top:0}.tag{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-a{color:var(--accent);font-weight:650}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line)}
+a{color:var(--accent);font-weight:650}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line)}td code{overflow-wrap:anywhere}
 code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:#111827;color:#e7edf4;padding:16px;border-radius:9px}
 .missing{color:#9b3d26}details{background:#f8fbfc;border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}summary{cursor:pointer;font-weight:650}.links{columns:2}
+@media(max-width:640px){main{padding:14px 12px 36px}header,section{padding:18px;margin:12px 0}table{display:block;overflow-x:auto}.links{columns:1}}
 </style></head><body><main>
 <header><div class="tag">WIC2005 Programmable Networks · matric suffix 4903</div><h1>Week 2: Networks as Data</h1>
-<p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="https://github.com/cheonglihua/wic2005-lab-portfolio">Repository</a></p></header>
-<section><h2>Topology</h2><p>A core bridge connects separate workshop and services access segments.</p><div class="mermaid">graph LR
+<p>A checked topology description builds the Mininet network and supplies this page.</p><p><a href="https://github.com/cheonglihua/wic2005-lab-portfolio">Repository</a> · <a href="https://github.com/cheonglihua/wic2005-lab-portfolio/tree/main/week-02">Week 2 source and evidence</a></p></header>
+<section><h2>Topology</h2><p>A core bridge connects workshop and services access switches in one bridged network.</p><div class="mermaid">graph LR
   s1[&quot;s1&lt;br/&gt;Core&quot;]
   s2[&quot;s2&lt;br/&gt;Workshop access&quot;]
   s3[&quot;s3&lt;br/&gt;Services access&quot;]
@@ -40,7 +41,7 @@ code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-sp
 <li><code>h4 — s3</code></li>
 <li><code>h6 — s3</code></li>
 </ul></section>
-<section><h2>Experiment evidence</h2><p>Evidence files are copied from the running Mininet experiment.</p><details><summary>check.txt — Collected</summary><pre>PROBLEM: h6 and h2 both use 10.3.0.2
+<section><h2>Experiment evidence</h2><p>These are captured outputs from the running Mininet network.</p><details><summary>check.txt — Collected</summary><pre>PROBLEM: h6 and h2 both use 10.3.0.2
 PROBLEM: h6 and h2 both use fd00:4903::2
 PROBLEM: link s1-s9 names unknown node s9
 </pre></details>
@@ -87,8 +88,8 @@ fd00:4903::2 dev h1-eth0 lladdr 86:f8:ac:c0:8a:8f REACHABLE
     inet 10.3.0.1/24 scope global secondary h2-eth0
        valid_lft forever preferred_lft forever
 </pre></details></section>
-<section><h2>My network</h2><p>I designed a small dual-stack campus lab network. s1 is the core bridge; s2 serves the workshop hosts and s3 serves the services hosts. Three hosts attach to each access switch, and h1-to-h2 traffic crosses the core. The tree keeps every host connected without adding a Layer 2 loop.</p></section>
-<section><h2>Data model and serialization</h2><p>The data model is the meaning of the network description: its switches, hosts, addresses, and links. YAML and JSON are two serializations of that same model. The JSON file keeps the structure and values but does not carry YAML comments, and its punctuation makes it less convenient to annotate.</p></section>
-<section><h2>What the evidence shows</h2><p>The IPv4 neighbour entry is learned through ARP, while the IPv6 neighbour entry is learned through Neighbour Discovery. The bridge learns source MAC addresses on its ports. The checker is better than relying on pingall because it identifies duplicate addresses before the network is built; pingall only shows that some paths may be wrong. IPv6 Duplicate Address Detection marked the copied address dadfailed, while IPv4 accepted its duplicate. The checker also rejects links to nodes that do not exist.</p></section>
-<section><h2>Why Git diff helps</h2><p>git diff shows the exact changes to the structured topology between versions, so I can review and commit each meaningful network change. It also preserves a history of how the network evolved instead of relying on ambiguous copies with names such as final or final-v2.</p></section>
+<section><h2>My network</h2><p>My network is a core/access tree: s1 connects s2 and s3. h1, h3, and h5 attach to s2; h2, h4, and h6 attach to s3. Traffic from h1 to h2 follows h1 → s2 → s1 → s3 → h2. The tree has no Layer 2 loops. Both access groups share the same bridged network; they are not separate VLANs.</p></section>
+<section><h2>Data model and serialization</h2><p>The switches, hosts, addresses, and links form the network&#x27;s data model. topology.yaml and topology.json represent the same structure and values. Converting to JSON loses YAML comments and the original formatting, not the meaning of the network.</p></section>
+<section><h2>What the evidence shows</h2><p>pingall checked IPv4 reachability and received all 30 directed tests (6 × 5); the recorded IPv6 ping from h1 to h2 is a separate single test. In neigh.txt, 10.3.0.2 and fd00:4903::2 both resolve to h2&#x27;s MAC 86:f8:ac:c0:8a:8f: ARP learned the IPv4 mapping and IPv6 Neighbour Discovery learned the IPv6 mapping. In macs.txt that MAC is on s1 port 2, the link from s1 to s3, which leads toward h2. The switch learns source MAC addresses from frames. dad.txt shows the duplicate IPv6 address fd00:4903::1 as dadfailed tentative, while IPv4 accepts 10.3.0.1 as a secondary address. Duplicate addresses can still produce successful pings, so pingall cannot prove that addresses are unique. Pre-build validation reports both duplicate addresses and the link to missing s9. One successful IPv6 ping does not establish IPv6 all-pairs connectivity.</p></section>
+<section><h2>Why Git diff helps</h2><p>git diff displays the exact topology changes for review. Commits preserve the history of how the network evolved. That is clearer than keeping ambiguous copies in folders named topology-v2-final.</p></section>
 </main><script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script><script>mermaid.initialize({startOnLoad:true,theme:'neutral'});</script></body></html>
