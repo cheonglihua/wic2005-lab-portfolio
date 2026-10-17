@@ -153,10 +153,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         answers = page.get("answers")
         if not isinstance(answers, dict):
             raise ValueError(f"{LAB_DIR / 'page.yaml'}: answers must be a mapping")
-        required_answers = ("network", "data_model", "evidence", "version_control")
+        required_answers = ("network", "data_model", "version_control")
         for key in required_answers:
             if not isinstance(answers.get(key), str) or not answers[key].strip():
                 raise ValueError(f"{LAB_DIR / 'page.yaml'}: answer '{key}' is missing or empty")
+        evidence_answer = answers.get("evidence")
+        if not isinstance(evidence_answer, list) or not evidence_answer or any(
+            not isinstance(point, str) or not point.strip() for point in evidence_answer
+        ):
+            raise ValueError(f"{LAB_DIR / 'page.yaml'}: answer 'evidence' must be a non-empty list of points")
         repository_url = page.get("repository")
         parsed_repository = urlparse(repository_url) if isinstance(repository_url, str) else None
         if not parsed_repository or parsed_repository.scheme != "https" or not parsed_repository.netloc:
@@ -172,15 +177,22 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         for host in topology["hosts"]
     )
-    answer_blocks = "\n".join(
-        f"<section><h2>{title}</h2><p>{html.escape(str(answers.get(key, '')))}</p></section>"
-        for key, title in (
-            ("network", "My network"),
-            ("data_model", "Data model and serialization"),
-            ("evidence", "What the evidence shows"),
-            ("version_control", "Why Git diff helps"),
-        )
-    )
+    answer_blocks_list: list[str] = []
+    for key, title in (
+        ("network", "My network"),
+        ("data_model", "Data model and serialization"),
+        ("evidence", "What the evidence shows"),
+        ("version_control", "Why Git diff helps"),
+    ):
+        if key == "evidence":
+            points = "\n".join(
+                f"<li>{html.escape(point)}</li>" for point in answers["evidence"]
+            )
+            body = f'<ul class="answer-points">{points}</ul>'
+        else:
+            body = f"<p>{html.escape(answers[key])}</p>"
+        answer_blocks_list.append(f"<section><h2>{title}</h2>{body}</section>")
+    answer_blocks = "\n".join(answer_blocks_list)
     repository = html.escape(repository_url, quote=True)
     source_url = html.escape(repository_url.rstrip("/") + "/tree/main/week-02", quote=True)
     diagram = html.escape(mermaid_diagram(topology))
@@ -197,6 +209,7 @@ h1{font-size:clamp(2rem,5vw,3.2rem);margin:.1em 0}h2{color:var(--accent);margin-
 a{color:var(--accent);font-weight:650}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line)}td code{overflow-wrap:anywhere}
 code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:#111827;color:#e7edf4;padding:16px;border-radius:9px}
 .missing{color:#9b3d26}details{background:#f8fbfc;border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}summary{cursor:pointer;font-weight:650}.links{columns:2}
+.answer-points{padding-left:1.3rem}.answer-points li{margin:.5rem 0}
 @media(max-width:640px){main{padding:14px 12px 36px}header,section{padding:18px;margin:12px 0}table{display:block;overflow-x:auto}.links{columns:1}}
 </style></head><body><main>
 <header><div class="tag">WIC2005 Programmable Networks · matric suffix 4903</div><h1>Week 2: Networks as Data</h1>

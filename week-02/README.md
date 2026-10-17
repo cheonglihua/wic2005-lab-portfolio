@@ -132,7 +132,8 @@ relative path is resolved from the current working directory; if you omit the
 argument, the generator uses `topology.yaml` beside `make_page.py`. It checks
 the selected topology before replacing the generated page. The repository
 setting and reflection answers are in `page.yaml`; the five captured evidence
-files are read from `week-02/evidence/`.
+files are read from `week-02/evidence/`. The evidence reflection is a point
+list on the generated page.
 
 ## Git workflow
 

@@ -9,6 +9,7 @@ h1{font-size:clamp(2rem,5vw,3.2rem);margin:.1em 0}h2{color:var(--accent);margin-
 a{color:var(--accent);font-weight:650}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line)}td code{overflow-wrap:anywhere}
 code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow:auto;background:#111827;color:#e7edf4;padding:16px;border-radius:9px}
 .missing{color:#9b3d26}details{background:#f8fbfc;border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}summary{cursor:pointer;font-weight:650}.links{columns:2}
+.answer-points{padding-left:1.3rem}.answer-points li{margin:.5rem 0}
 @media(max-width:640px){main{padding:14px 12px 36px}header,section{padding:18px;margin:12px 0}table{display:block;overflow-x:auto}.links{columns:1}}
 </style></head><body><main>
 <header><div class="tag">WIC2005 Programmable Networks · matric suffix 4903</div><h1>Week 2: Networks as Data</h1>
@@ -87,6 +88,10 @@ fd00:4903::2 dev h1-eth0 lladdr 86:f8:ac:c0:8a:8f REACHABLE
 </pre></details></section>
 <section><h2>My network</h2><p>My network is a core/access tree: s1 connects s2 and s3. h1, h3, and h5 attach to s2; h2, h4, and h6 attach to s3. Traffic from h1 to h2 follows h1 → s2 → s1 → s3 → h2. The tree has no Layer 2 loops. Both access groups share the same bridged network; they are not separate VLANs.</p></section>
 <section><h2>Data model and serialization</h2><p>The switches, hosts, addresses, and links form the network&#x27;s data model. topology.yaml and topology.json represent the same structure and values. Converting to JSON loses YAML comments and the original formatting, not the meaning of the network.</p></section>
-<section><h2>What the evidence shows</h2><p>pingall checked IPv4 reachability and received all 30 directed tests (6 × 5); the recorded IPv6 ping from h1 to h2 is a separate single test. In neigh.txt, 10.3.0.2 and fd00:4903::2 both resolve to h2&#x27;s MAC 86:f8:ac:c0:8a:8f: ARP learned the IPv4 mapping and IPv6 Neighbour Discovery learned the IPv6 mapping. In macs.txt that MAC is on s1 port 2, the link from s1 to s3, which leads toward h2. The switch learns source MAC addresses from frames. dad.txt shows the duplicate IPv6 address fd00:4903::1 as dadfailed tentative, while IPv4 accepts 10.3.0.1 as a secondary address. Duplicate addresses can still produce successful pings, so pingall cannot prove that addresses are unique. Pre-build validation reports both duplicate addresses and the link to missing s9. One successful IPv6 ping does not establish IPv6 all-pairs connectivity.</p></section>
+<section><h2>What the evidence shows</h2><ul class="answer-points"><li>pingall tested IPv4 and received all 30 directed replies (6 hosts × 5 peers). The h1-to-h2 IPv6 ping is one separate test.</li>
+<li>neigh.txt maps h2&#x27;s 10.3.0.2 and fd00:4903::2 to the same MAC, 86:f8:ac:c0:8a:8f, learned through ARP and IPv6 Neighbour Discovery.</li>
+<li>macs.txt shows that MAC on s1 port 2, the link from s1 to s3 toward h2. The bridge learns source MAC addresses from traffic.</li>
+<li>dad.txt marks the duplicate IPv6 address fd00:4903::1 as dadfailed tentative; IPv4 accepts 10.3.0.1 as a secondary address.</li>
+<li>check.txt reports duplicate IPv4 and IPv6 addresses and the link to missing s9 before build. Duplicate addresses can still let pings succeed, so pingall cannot prove uniqueness. One IPv6 ping is not an all-pairs test.</li></ul></section>
 <section><h2>Why Git diff helps</h2><p>git diff displays the exact topology changes for review. Commits preserve the history of how the network evolved. That is clearer than keeping ambiguous copies in folders named topology-v2-final.</p></section>
 </main><script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script><script>mermaid.initialize({startOnLoad:true,theme:'neutral'});</script></body></html>

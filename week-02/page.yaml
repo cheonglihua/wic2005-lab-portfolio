@@ -10,19 +10,23 @@ answers:
     topology.yaml and topology.json represent the same structure and values.
     Converting to JSON loses YAML comments and the original formatting, not the
     meaning of the network.
-  evidence: >-
-    pingall checked IPv4 reachability and received all 30 directed tests
-    (6 × 5); the recorded IPv6 ping from h1 to h2 is a separate single test.
-    In neigh.txt, 10.3.0.2 and fd00:4903::2 both resolve to h2's MAC
-    86:f8:ac:c0:8a:8f: ARP learned the IPv4 mapping and IPv6 Neighbour
-    Discovery learned the IPv6 mapping. In macs.txt that MAC is on s1 port 2,
-    the link from s1 to s3, which leads toward h2. The switch learns source
-    MAC addresses from frames. dad.txt shows the duplicate IPv6 address
-    fd00:4903::1 as dadfailed tentative, while IPv4 accepts 10.3.0.1 as a
-    secondary address. Duplicate addresses can still produce successful
-    pings, so pingall cannot prove that addresses are unique. Pre-build
-    validation reports both duplicate addresses and the link to missing s9.
-    One successful IPv6 ping does not establish IPv6 all-pairs connectivity.
+  evidence:
+    - >-
+      pingall tested IPv4 and received all 30 directed replies (6 hosts × 5
+      peers). The h1-to-h2 IPv6 ping is one separate test.
+    - >-
+      neigh.txt maps h2's 10.3.0.2 and fd00:4903::2 to the same MAC,
+      86:f8:ac:c0:8a:8f, learned through ARP and IPv6 Neighbour Discovery.
+    - >-
+      macs.txt shows that MAC on s1 port 2, the link from s1 to s3 toward h2.
+      The bridge learns source MAC addresses from traffic.
+    - >-
+      dad.txt marks the duplicate IPv6 address fd00:4903::1 as dadfailed
+      tentative; IPv4 accepts 10.3.0.1 as a secondary address.
+    - >-
+      check.txt reports duplicate IPv4 and IPv6 addresses and the link to
+      missing s9 before build. Duplicate addresses can still let pings succeed,
+      so pingall cannot prove uniqueness. One IPv6 ping is not an all-pairs test.
   version_control: >-
     git diff displays the exact topology changes for review. Commits preserve
     the history of how the network evolved. That is clearer than keeping
