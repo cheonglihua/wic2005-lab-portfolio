@@ -1,0 +1,77 @@
+repository: https://github.com/cheonglihua/wic2005-lab-portfolio
+
+answers:
+  planes:
+    question: "Where are the data, control and management planes in your network?"
+    answer: >-
+      The Linux bridges forward Ethernet frames in the data plane and learn
+      source MAC addresses on the ports where frames arrive. There is no
+      separate SDN controller or programmable routing control plane in this
+      lab. The management work happens when build_topo.py reads the topology
+      data and creates the Mininet network, and when I inspect it through the
+      Mininet CLI.
+  learning:
+    question: "How did your switches learn which port leads to each host? Use your MAC table evidence."
+    answer: >-
+      A bridge learns from the source MAC address of each frame and records the
+      port where it arrived. In macs.txt, h2's MAC 86:f8:ac:c0:8a:8f is on s1
+      port 2, the link from s1 to s3, where h2 is attached. The neighbour table
+      shows h2's IPv4 and IPv6 addresses resolving to that same MAC.
+  kind:
+    question: "Which of the four kinds of programmability is this assignment (a network described as data, then built and documented by scripts)? Why isn't it any of the other three?"
+    answer: >-
+      This is management-plane network automation: I describe the topology as
+      data, then scripts validate it, build it, and generate its documentation.
+      I am not changing the switches' packet-forwarding algorithm, adding a
+      separate controller to program their control logic, or writing a network
+      application that provides a service to users. The bridges still use
+      ordinary Ethernet learning and forwarding.
+  two_am:
+    question: "Week 1's 2 a.m. change on 40 switches: what would be different if those switches were described like your network?"
+    answer: >-
+      I could review one version-controlled data change and have a script
+      validate and produce consistent configurations for all 40 switches,
+      instead of typing the same change into each device by hand. A real
+      rollout would still need staged deployment and checks; this Mininet lab
+      demonstrates describing and building a network, not deploying to 40
+      production switches.
+  model:
+    question: "What's the difference between your network's data model and its serialisation? Use YAML and JSON as the example."
+    answer: >-
+      The data model is the switches, hosts, addresses, labels, and links and
+      how they relate. topology.yaml and topology.json serialize the same
+      structure and values in different formats. Converting YAML to JSON loses
+      YAML comments and original formatting, but not the network meaning.
+  check:
+    question: "Why is it better to catch bad data in check() than with pingall? What did IPv6 notice about a duplicate address that IPv4 didn't?"
+    answer: >-
+      check() can reject duplicate IPv4 or IPv6 addresses and links to unknown
+      nodes before Mininet builds the network. pingall only tests IPv4
+      reachability, so a successful ping does not prove addresses are unique.
+      In dad.txt, h2's duplicate fd00:4903::1 address is marked dadfailed
+      tentative by IPv6 Duplicate Address Detection, while IPv4 accepts the
+      duplicate 10.3.0.1 as a secondary address.
+  git:
+    question: "What does your Git history give you that copying files into folders named topology-v2-final wouldn't?"
+    answer: >-
+      git diff shows the exact edits for review, and commits preserve the
+      sequence of changes with messages and authorship. I can compare or return
+      to an earlier topology without guessing which copied folder is the
+      latest version.
+
+evidence_summary:
+  - >-
+    pingall tested IPv4 and recorded 30/30 directed replies for six hosts
+    (6 × 5). The recorded h1-to-h2 IPv6 ping is a separate single test.
+  - >-
+    neigh.txt maps h2's 10.3.0.2 and fd00:4903::2 to the same MAC,
+    86:f8:ac:c0:8a:8f, through ARP and IPv6 Neighbour Discovery.
+  - >-
+    macs.txt shows that MAC learned on s1 port 2, the link toward s3 and h2;
+    the bridge learns source MAC addresses from traffic.
+  - >-
+    dad.txt records h2's duplicate fd00:4903::1 as dadfailed tentative and
+    shows IPv4 accepting 10.3.0.1 as a secondary address.
+  - >-
+    check.txt reports the duplicate IPv4 and IPv6 addresses shared by h6 and
+    h2, plus the link to nonexistent s9, before a network is built.

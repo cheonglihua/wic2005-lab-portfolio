@@ -14,7 +14,7 @@ from build_topo import check, load
 
 
 LAB_DIR = Path(__file__).resolve().parent
-REPO_DIR = LAB_DIR.parent
+REPO_DIR = LAB_DIR.parent.parent
 EVIDENCE = ("check.txt", "pingall.txt", "neigh.txt", "macs.txt", "dad.txt")
 
 
@@ -153,15 +153,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         answers = page.get("answers")
         if not isinstance(answers, dict):
             raise ValueError(f"{LAB_DIR / 'page.yaml'}: answers must be a mapping")
-        required_answers = ("network", "data_model", "version_control")
+        required_answers = (
+            "planes",
+            "learning",
+            "kind",
+            "two_am",
+            "model",
+            "check",
+            "git",
+        )
         for key in required_answers:
-            if not isinstance(answers.get(key), str) or not answers[key].strip():
+            item = answers.get(key)
+            if not isinstance(item, dict):
+                raise ValueError(f"{LAB_DIR / 'page.yaml'}: answer '{key}' must contain question and answer")
+            if not isinstance(item.get("question"), str) or not item["question"].strip():
+                raise ValueError(f"{LAB_DIR / 'page.yaml'}: question '{key}' is missing or empty")
+            if not isinstance(item.get("answer"), str) or not item["answer"].strip():
                 raise ValueError(f"{LAB_DIR / 'page.yaml'}: answer '{key}' is missing or empty")
-        evidence_answer = answers.get("evidence")
-        if not isinstance(evidence_answer, list) or not evidence_answer or any(
-            not isinstance(point, str) or not point.strip() for point in evidence_answer
+        evidence_points = page.get("evidence_summary")
+        if not isinstance(evidence_points, list) or not evidence_points or any(
+            not isinstance(point, str) or not point.strip() for point in evidence_points
         ):
-            raise ValueError(f"{LAB_DIR / 'page.yaml'}: answer 'evidence' must be a non-empty list of points")
+            raise ValueError(f"{LAB_DIR / 'page.yaml'}: evidence_summary must be a non-empty list of points")
         repository_url = page.get("repository")
         parsed_repository = urlparse(repository_url) if isinstance(repository_url, str) else None
         if not parsed_repository or parsed_repository.scheme != "https" or not parsed_repository.netloc:
@@ -178,23 +191,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         for host in topology["hosts"]
     )
     answer_blocks_list: list[str] = []
-    for key, title in (
-        ("network", "My network"),
-        ("data_model", "Data model and serialization"),
-        ("evidence", "What the evidence shows"),
-        ("version_control", "Why Git diff helps"),
-    ):
-        if key == "evidence":
-            points = "\n".join(
-                f"<li>{html.escape(point)}</li>" for point in answers["evidence"]
-            )
-            body = f'<ul class="answer-points">{points}</ul>'
-        else:
-            body = f"<p>{html.escape(answers[key])}</p>"
-        answer_blocks_list.append(f"<section><h2>{title}</h2>{body}</section>")
+    for key in ("planes", "learning", "kind", "two_am", "model", "check", "git"):
+        question = html.escape(answers[key]["question"])
+        answer = html.escape(answers[key]["answer"]).replace("\n", "<br>")
+        answer_blocks_list.append(
+            f'<section class="qa"><h2>{question}</h2><p>{answer}</p></section>'
+        )
     answer_blocks = "\n".join(answer_blocks_list)
+    evidence_points = "\n".join(
+        f"<li>{html.escape(point)}</li>" for point in page["evidence_summary"]
+    )
     repository = html.escape(repository_url, quote=True)
-    source_url = html.escape(repository_url.rstrip("/") + "/tree/main/week-02", quote=True)
+    source_url = html.escape(repository_url.rstrip("/") + "/tree/main/week-02/netlab", quote=True)
     diagram = html.escape(mermaid_diagram(topology))
     output = REPO_DIR / "docs" / "week-02" / "index.html"
     document = (
@@ -218,12 +226,14 @@ code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-sp
 <section><h2>Host addresses</h2><table><thead><tr><th>Host</th><th>IPv4</th><th>IPv6</th></tr></thead><tbody>HOST_ROWS</tbody></table></section>
 <section><h2>Every link</h2>LINKS</section>
 <section><h2>Experiment evidence</h2><p>These are captured outputs from the running Mininet network.</p>EVIDENCE</section>
+<section><h2>Evidence highlights</h2><ul class="answer-points">SUMMARY_POINTS</ul></section>
 ANSWERS
 </main><script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script><script>mermaid.initialize({startOnLoad:true,theme:'neutral'});</script></body></html>
 """.replace("DIAGRAM", diagram)
         .replace("HOST_ROWS", hosts)
         .replace("LINKS", links_section(topology))
         .replace("EVIDENCE", evidence)
+        .replace("SUMMARY_POINTS", evidence_points)
         .replace("ANSWERS", answer_blocks)
         .replace("REPOSITORY", repository)
     )

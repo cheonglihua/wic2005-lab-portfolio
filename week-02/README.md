@@ -5,6 +5,8 @@ same data also generates a published topology page. The config uses only the
 last four digits of the matric ID (`4903`): IPv4 block `10.3.0.0/16` and IPv6
 block `fd00:4903::/32`.
 
+The semester lab files are kept in `netlab/`, as the lab instructions specify.
+
 ## My design
 
 I designed a small campus lab as a core-and-access tree. The core bridge s1
@@ -26,7 +28,7 @@ graph LR
 ```
 
 The published page builds its Mermaid diagram from the links and switch labels
-in `topology.yaml`, so the illustration follows the network data.
+in `netlab/topology.yaml`, so the illustration follows the network data.
 
 ## Published Week 2 page
 
@@ -34,22 +36,22 @@ in `topology.yaml`, so the illustration follows the network data.
 
 ## Files
 
-- `topology.yaml` — checked, labelled core-and-access design with three
+- `netlab/topology.yaml` — checked, labelled core-and-access design with three
   switches and six dual-stack hosts.
-- `topology.json` — same model in JSON serialization.
-- `build_topo.py` — validates both address families and link endpoints before
-  starting Mininet.
-- `bad.yaml` — duplicate IPv4/IPv6 addresses and a link to missing switch s9,
+- `netlab/topology.json` — same model in JSON serialization.
+- `netlab/build_topo.py` — validates both address families and link endpoints
+  before starting Mininet.
+- `netlab/bad.yaml` — duplicate IPv4/IPv6 addresses and a link to missing switch s9,
   for the pre-build validation exercise.
-- `make_page.py` and `page.yaml` — generate the Week 2 page from topology,
-  written answers, and collected evidence.
-- `evidence/` — captured validation, ping, neighbour, bridge MAC, and DAD
+- `netlab/make_page.py` and `netlab/page.yaml` — generate the Week 2 page from
+  topology, written answers, and collected evidence.
+- `netlab/evidence/` — captured validation, ping, neighbour, bridge MAC, and DAD
   outputs from the live network.
-- `run_lab.ps1` — starts the course container and interactive Mininet CLI.
+- `netlab/run_lab.ps1` — starts the course container and interactive Mininet CLI.
 
 ## Build the network
 
-Start Docker Desktop, open PowerShell in this folder, and run:
+Start Docker Desktop, open PowerShell in `week-02/netlab`, and run:
 
 ```powershell
 .\run_lab.ps1
@@ -72,8 +74,8 @@ the container.
 
 ## Check invalid data before building
 
-From this folder on the laptop, use the course container to run the check and
-save its real output locally:
+From `week-02/netlab` on the laptop, use the course container to run the check
+and save its real output locally:
 
 ```sh
 docker run --rm --privileged -v "${PWD}:/lab" -w /lab \
@@ -89,7 +91,8 @@ never starts a network. Restore the valid file by building from
 
 ## Collect live evidence
 
-Build with `python3 build_topo.py topology.yaml`, then at `mininet>` run:
+Build with `python3 build_topo.py topology.yaml` from `week-02/netlab`, then at
+`mininet>` run:
 
 ```text
 pingall
@@ -105,7 +108,7 @@ exit
 ```
 
 Copy the `pingall` summary printed in the terminal into
-`evidence/pingall.txt`. The final commands deliberately give h2 copies of h1's
+`netlab/evidence/pingall.txt`. The final commands deliberately give h2 copies of h1's
 addresses to show IPv6 Duplicate Address Detection and IPv4's lack of an
 equivalent built-in check. Regenerate `topology.yaml` from its valid version
 if you edit it during the duplicate-address experiment.
@@ -122,7 +125,7 @@ container while mounting the whole repository. This keeps the generated file
 at `docs/week-02/index.html` in the repository:
 
 ```powershell
-docker run --rm -v "${PWD}:/repo" -w /repo/week-02 `
+docker run --rm -v "${PWD}:/repo" -w /repo/week-02/netlab `
   firdaussahran/netlab-mininet:1.0 `
   python3 make_page.py topology.yaml
 ```
@@ -131,9 +134,9 @@ You can pass `topology.json` or another YAML/JSON file instead. An explicit
 relative path is resolved from the current working directory; if you omit the
 argument, the generator uses `topology.yaml` beside `make_page.py`. It checks
 the selected topology before replacing the generated page. The repository
-setting and reflection answers are in `page.yaml`; the five captured evidence
-files are read from `week-02/evidence/`. The evidence reflection is a point
-list on the generated page.
+setting and reflection answers are in `netlab/page.yaml`; the five captured
+evidence files are read from `week-02/netlab/evidence/`. The evidence reflection
+is a point list on the generated page.
 
 ## Git workflow
 
