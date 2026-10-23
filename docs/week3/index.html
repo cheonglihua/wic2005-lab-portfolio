@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Network 4903: routed, from data</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1f2937; }
+  h1 { font-size: 1.6rem; margin-bottom: .2rem; } h2 { margin-top: 2.2rem; border-bottom: 1px solid #e5e7eb; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; margin-bottom: 1rem; } th, td { border-bottom: 1px solid #e5e7eb; padding: .35rem .5rem; text-align: left; }
+  pre { background: #111827; color: #f3f4f6; padding: .8rem; border-radius: .4rem; overflow-x: auto; font-size: .82rem; }
+  pre.mermaid { background: none; color: inherit; } pre.missing { background: #fef2f2; color: #991b1b; }
+  .meta, .file { color: #6b7280; font-size: .85rem; } code { font-size: .88em; }
+</style>
+</head>
+<body>
+<p class="meta"><a href="../">← Week 2: my network, built from data</a></p>
+<h1>My routed network, from data</h1>
+<p class="meta">Student ID ending 4903 · generated from <code>week-03/netlab/network.yaml</code> by <code>make_page3.py</code> on 2026-10-24</p>
+<p id="summary">3 routers, 3 LANs and 3 router links, with 5 static routes, on <code>10.3.0.0/16</code>.
+Every route was checked for loops and missing routes before it reached a router.</p>
+<p>Repository: <a id="repository" href="https://github.com/cheonglihua/wic2005-lab-portfolio">https://github.com/cheonglihua/wic2005-lab-portfolio</a></p>
+
+<h2>The network</h2>
+<h3>LANs</h3>
+<section id="lans"><table><thead><tr><th>LAN</th><th>Network</th><th>Router (.1)</th><th>Host (.10)</th></tr></thead><tbody><tr><td>lan-h1</td><td><code>10.3.1.0/24</code></td><td>r1</td><td>h1 <code>10.3.1.10</code></td></tr><tr><td>lan-h2</td><td><code>10.3.32.0/24</code></td><td>r2</td><td>h2 <code>10.3.32.10</code></td></tr><tr><td>lan-h3</td><td><code>10.3.33.0/24</code></td><td>r2</td><td>h3 <code>10.3.33.10</code></td></tr></tbody></table></section>
+<h3>Router links</h3>
+<section id="links"><table><thead><tr><th>Link</th><th>Network</th></tr></thead><tbody><tr><td>r1 — r2</td><td><code>10.3.12.0/30</code></td></tr><tr><td>r1 — r3</td><td><code>10.3.13.0/30</code></td></tr><tr><td>r3 — r2</td><td><code>10.3.23.0/30</code></td></tr></tbody></table></section>
+<h3>Diagram</h3>
+<pre class="mermaid" id="diagram">graph LR
+  h1[&quot;h1&lt;br&gt;10.3.1.10&quot;] --- r1((r1))
+  h2[&quot;h2&lt;br&gt;10.3.32.10&quot;] --- r2((r2))
+  h3[&quot;h3&lt;br&gt;10.3.33.10&quot;] --- r2((r2))
+  r1((r1)) ---|10.3.12.0/30| r2((r2))
+  r1((r1)) ---|10.3.13.0/30| r3((r3))
+  r3((r3)) ---|10.3.23.0/30| r2((r2))</pre>
+
+<h2>Routing tables</h2>
+<section id="routing-tables"><h3>r1</h3><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.12.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.13.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.1.0/24</code></td><td>directly connected</td></tr><tr><td><code>10.3.32.0/24</code></td><td>10.3.12.2</td></tr><tr><td><code>10.3.32.0/20</code></td><td>10.3.13.2</td></tr></tbody></table>
+<h3>r2</h3><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.12.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.23.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.1.0/24</code></td><td>10.3.12.1</td></tr><tr><td><code>10.3.32.0/24</code></td><td>directly connected</td></tr><tr><td><code>10.3.33.0/24</code></td><td>directly connected</td></tr></tbody></table>
+<h3>r3</h3><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.13.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.23.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.1.0/24</code></td><td>10.3.13.1</td></tr><tr><td><code>10.3.32.0/20</code></td><td>10.3.23.2</td></tr></tbody></table></section>
+
+<h2>Evidence from the running network</h2>
+<section id="evidence"><h3>Every router&#x27;s routing table: ip route</h3>
+<p class="file">evidence3/routes.txt</p>
+<pre id="evidence-routes">10.3.1.0/24 dev r1-eth0 proto kernel scope link src 10.3.1.1
+10.3.12.0/30 dev r1-eth1 proto kernel scope link src 10.3.12.1
+10.3.13.0/30 dev r1-eth2 proto kernel scope link src 10.3.13.1
+10.3.32.0/24 via 10.3.12.2 dev r1-eth1
+10.3.32.0/20 via 10.3.13.2 dev r1-eth2
+10.3.1.0/24 via 10.3.12.1 dev r2-eth0
+10.3.12.0/30 dev r2-eth0 proto kernel scope link src 10.3.12.2
+10.3.23.0/30 dev r2-eth1 proto kernel scope link src 10.3.23.2
+10.3.32.0/24 dev r2-eth2 proto kernel scope link src 10.3.32.1
+10.3.33.0/24 dev r2-eth3 proto kernel scope link src 10.3.33.1
+10.3.1.0/24 via 10.3.13.1 dev r3-eth0
+10.3.13.0/30 dev r3-eth0 proto kernel scope link src 10.3.13.2
+10.3.23.0/30 dev r3-eth1 proto kernel scope link src 10.3.23.1
+10.3.32.0/20 via 10.3.23.2 dev r3-eth1</pre>
+<h3>From one host to every other: traceroute</h3>
+<p class="file">evidence3/traces.txt</p>
+<pre id="evidence-traces">traceroute to 10.3.32.10 (10.3.32.10), 5 hops max, 60 byte packets
+ 1  10.3.1.1  1.393 ms  0.015 ms  0.007 ms
+ 2  10.3.12.2  0.317 ms  0.015 ms  0.008 ms
+ 3  10.3.32.10  0.086 ms  0.009 ms  0.008 ms
+traceroute to 10.3.33.10 (10.3.33.10), 5 hops max, 60 byte packets
+ 1  10.3.1.1  2.261 ms  2.015 ms  1.991 ms
+ 2  10.3.13.2  1.982 ms  0.473 ms  0.408 ms
+ 3  10.3.12.2  0.375 ms  0.333 ms  0.317 ms
+ 4  10.3.33.10  0.304 ms  0.161 ms  0.131 ms
+traceroute to 10.3.1.10 (10.3.1.10), 5 hops max, 60 byte packets
+ 1  10.3.32.1  0.500 ms  0.017 ms  0.004 ms
+ 2  10.3.12.1  0.066 ms  0.008 ms  0.007 ms
+ 3  10.3.1.10  0.052 ms  0.025 ms  0.010 ms</pre>
+<h3>Your summary route at work: ip route get</h3>
+<p class="file">evidence3/summary.txt</p>
+<pre id="evidence-summary">10.3.32.10 via 10.3.12.2 dev r1-eth1 src 10.3.12.1 uid 0
+    cache
+10.3.33.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
+    cache</pre>
+<h3>A link goes down: what static routes do</h3>
+<p class="file">evidence3/failure.txt</p>
+<pre id="evidence-failure">PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+
+--- 10.3.32.10 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1000ms
+
+traceroute to 10.3.32.10 (10.3.32.10), 4 hops max, 60 byte packets
+ 1  10.3.1.1  0.341 ms  0.288 ms  0.210 ms
+ 2  10.3.13.2  0.195 ms  0.163 ms  0.149 ms
+ 3  * * *
+ 4  * * *
+10.3.32.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
+    cache
+PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+
+--- 10.3.32.10 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1021ms
+
+RTNETLINK answers: Network is unreachable
+After bringing r1-r2 back up:
+10.3.12.0/30 dev r2-eth0 proto kernel scope link src 10.3.12.2
+10.3.23.0/30 dev r2-eth1 proto kernel scope link src 10.3.23.2
+10.3.32.0/24 dev r2-eth2 proto kernel scope link src 10.3.32.1
+10.3.33.0/24 dev r2-eth3 proto kernel scope link src 10.3.33.1
+PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+
+--- 10.3.32.10 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1028ms
+
+After manually restoring r2 static route:
+PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.751 ms
+64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.073 ms
+
+--- 10.3.32.10 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1002ms
+rtt min/avg/max/mdev = 0.073/0.412/0.751/0.339 ms</pre>
+<h3>check_paths() stopping a loop and a missing route</h3>
+<p class="file">evidence3/check.txt</p>
+<pre id="evidence-check">Missing-route case:
+PROBLEM: h2 to h1: r2 has no route to 10.3.1.10
+PROBLEM: h3 to h1: r2 has no route to 10.3.1.10
+
+Loop case:
+PROBLEM: h2 to h1: loop r2 -&gt; r3 -&gt; r2
+PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2</pre></section>
+
+<h2>What I learned</h2>
+<section id="answers"><section id="answer-design"><h3>Describe your design: why these routers, LANs and links, and how you chose the addresses.</h3><p>My design uses three routers in a triangle, with h1 on r1 and h2 and h3 on separate LANs behind r2. The direct r1â€“r2 link gives h1 a short path to h2, while the path through r3 provides a second physical route between the routers. I used the lab&#x27;s address plan with NN=03: LANs use 10.3.1.0/24, 10.3.32.0/24, and 10.3.33.0/24, and each router link has its own /30.</p></section>
+<section id="answer-summary"><h3>Which route summarises several LANs? Which networks does it cover, why is it correct, and what else would it attract if you added a network inside its range?</h3><p>The 10.3.32.0/20 route summarizes the 10.3.32.0/24 and 10.3.33.0/24 LANs because both are inside 10.3.32.0 through 10.3.47.255. It lets r1 send traffic for the remote LAN block through r3, while its more specific 10.3.32.0/24 route sends h2 traffic directly toward r2. The summary would also attract any future network inside that /20, including unused ranges such as 10.3.40.0/24, unless a more specific route or another design change handled it.</p></section>
+<section id="answer-failure"><h3>When you took a link down, what happened, and why couldn&#x27;t your routes recover even though another path existed? What would have recovered?</h3><p>When I took r1â€“r2 down, h1&#x27;s ping to h2 lost all packets. The route lookup on r1 then selected the broader 10.3.32.0/20 route through r3, so an alternate forward path existed. But r2 reported &quot;Network is unreachable&quot; for h1: its route back used the failed r1â€“r2 link and disappeared. Bringing the link up did not restore that static route, and the ping still failed. Re-adding r2&#x27;s route manually restored the ping. A routing protocol such as OSPF could detect the failure and recalculate the routes automatically.</p></section>
+<section id="answer-control_plane"><h3>In your network, what was the control plane? Who worked out the routes, and what does that mean for a network of 40 routers?</h3><p>In this lab, I worked out the routes and wrote them as static entries in network.yaml. The Linux kernel&#x27;s routing table then makes the forwarding decision for each packet using longest-prefix match; there is no routing protocol calculating routes for this topology. For 40 routers, manually maintaining every route would be error-prone, so a routing protocol or a validated configuration generator would be more practical and could respond to topology changes.</p></section></section>
+
+<script type="application/json" id="network-data">{
+  "student_id_last4": "4903",
+  "routers": [
+    "r1",
+    "r2",
+    "r3"
+  ],
+  "lans": [
+    {
+      "name": "lan-h1",
+      "network": "10.3.1.0/24",
+      "router": "r1",
+      "host": "h1"
+    },
+    {
+      "name": "lan-h2",
+      "network": "10.3.32.0/24",
+      "router": "r2",
+      "host": "h2"
+    },
+    {
+      "name": "lan-h3",
+      "network": "10.3.33.0/24",
+      "router": "r2",
+      "host": "h3"
+    }
+  ],
+  "links": [
+    [
+      "r1",
+      "r2",
+      "10.3.12.0/30"
+    ],
+    [
+      "r1",
+      "r3",
+      "10.3.13.0/30"
+    ],
+    [
+      "r3",
+      "r2",
+      "10.3.23.0/30"
+    ]
+  ],
+  "routes": {
+    "r1": [
+      {
+        "to": "10.3.32.0/24",
+        "via": "10.3.12.2"
+      },
+      {
+        "to": "10.3.32.0/20",
+        "via": "10.3.13.2"
+      }
+    ],
+    "r3": [
+      {
+        "to": "10.3.32.0/20",
+        "via": "10.3.23.2"
+      },
+      {
+        "to": "10.3.1.0/24",
+        "via": "10.3.13.1"
+      }
+    ],
+    "r2": [
+      {
+        "to": "10.3.1.0/24",
+        "via": "10.3.12.1"
+      }
+    ]
+  }
+}</script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true });
+</script>
+</body>
+</html>

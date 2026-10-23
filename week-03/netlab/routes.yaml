@@ -1,0 +1,16 @@
+# The Week 3 routes from the assignment, using NN=03 from student ID 4903.
+r1:
+  - to: 10.3.32.0/24
+    via: 10.3.12.2
+  - to: 10.3.32.0/20
+    via: 10.3.13.2
+
+r3:
+  - to: 10.3.32.0/20
+    via: 10.3.23.2
+  - to: 10.3.1.0/24
+    via: 10.3.13.1
+
+r2:
+  - to: 10.3.1.0/24
+    via: 10.3.12.1

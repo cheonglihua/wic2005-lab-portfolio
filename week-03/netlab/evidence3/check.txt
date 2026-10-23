@@ -1,0 +1,7 @@
+Missing-route case:
+PROBLEM: h2 to h1: r2 has no route to 10.3.1.10
+PROBLEM: h3 to h1: r2 has no route to 10.3.1.10
+
+Loop case:
+PROBLEM: h2 to h1: loop r2 -> r3 -> r2
+PROBLEM: h3 to h1: loop r2 -> r3 -> r2

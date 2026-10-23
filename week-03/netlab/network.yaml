@@ -1,0 +1,38 @@
+# Week 3 routed design. NN = 03 (last two digits of student ID 4903).
+student_id_last4: "4903"
+
+routers: [r1, r2, r3]
+
+lans:
+  - name: lan-h1
+    network: 10.3.1.0/24
+    router: r1
+    host: h1
+  - name: lan-h2
+    network: 10.3.32.0/24
+    router: r2
+    host: h2
+  - name: lan-h3
+    network: 10.3.33.0/24
+    router: r2
+    host: h3
+
+links:
+  - [r1, r2, 10.3.12.0/30]
+  - [r1, r3, 10.3.13.0/30]
+  - [r3, r2, 10.3.23.0/30]
+
+routes:
+  r1:
+    - to: 10.3.32.0/24
+      via: 10.3.12.2
+    - to: 10.3.32.0/20
+      via: 10.3.13.2
+  r3:
+    - to: 10.3.32.0/20
+      via: 10.3.23.2
+    - to: 10.3.1.0/24
+      via: 10.3.13.1
+  r2:
+    - to: 10.3.1.0/24
+      via: 10.3.12.1

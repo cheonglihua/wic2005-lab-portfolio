@@ -1,0 +1,41 @@
+repository: https://github.com/cheonglihua/wic2005-lab-portfolio
+
+answers:
+  design:
+    question: "Describe your design: why these routers, LANs and links, and how you chose the addresses."
+    answer: >-
+      My design uses three routers in a triangle, with h1 on r1 and h2 and h3
+      on separate LANs behind r2. The direct r1–r2 link gives h1 a short path
+      to h2, while the path through r3 provides a second physical route between
+      the routers. I used the lab's address plan with NN=03: LANs use 10.3.1.0/24,
+      10.3.32.0/24, and 10.3.33.0/24, and each router link has its own /30.
+  summary:
+    question: "Which route summarises several LANs? Which networks does it cover, why is it correct, and what else would it attract if you added a network inside its range?"
+    answer: >-
+      The 10.3.32.0/20 route summarizes the 10.3.32.0/24 and 10.3.33.0/24
+      LANs because both are inside 10.3.32.0 through 10.3.47.255. It lets r1
+      send traffic for the remote LAN block through r3, while its more specific
+      10.3.32.0/24 route sends h2 traffic directly toward r2. The summary would
+      also attract any future network inside that /20, including unused ranges
+      such as 10.3.40.0/24, unless a more specific route or another design change
+      handled it.
+  failure:
+    question: "When you took a link down, what happened, and why couldn't your routes recover even though another path existed? What would have recovered?"
+    answer: >-
+      When I took r1–r2 down, h1's ping to h2 lost all packets. The route lookup
+      on r1 then selected the broader 10.3.32.0/20 route through r3, so an
+      alternate forward path existed. But r2 reported "Network is unreachable"
+      for h1: its route back used the failed r1–r2 link and disappeared. Bringing
+      the link up did not restore that static route, and the ping still failed.
+      Re-adding r2's route manually restored the ping. A routing protocol such
+      as OSPF could detect the failure and recalculate the routes automatically.
+  control_plane:
+    question: "In your network, what was the control plane? Who worked out the routes, and what does that mean for a network of 40 routers?"
+    answer: >-
+      In this lab, I worked out the routes and wrote them as static entries in
+      network.yaml. The Linux kernel's routing table then makes the forwarding
+      decision for each packet using longest-prefix match; there is no routing
+      protocol calculating routes for this topology. For 40 routers, manually
+      maintaining every route would be error-prone, so a routing protocol or a
+      validated configuration generator would be more practical and could
+      respond to topology changes.
