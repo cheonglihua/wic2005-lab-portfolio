@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-r"""Week 3 topology: three Linux routers and three hosts, on your own addresses.
+r"""Week 3 topology: four Linux routers and four hosts, on your own addresses.
 
     h1 ---- r1 ------------ r2 ---- h2
-              \            /  \
-               `---- r3 --'    `--- h3
+              \            /  \     h3
+               `---- r3 --'    `---- r4 ---- h4
 
 NN = the last 2 digits of your student ID (no leading zero), NNNN = the last 4.
 
@@ -14,6 +14,8 @@ r1-r3 link         10.NN.13.0/30     fd00:NNNN:13::/64   r1 .1 / ::1,   r3 .2 / 
 r3-r2 link         10.NN.23.0/30     fd00:NNNN:23::/64   r3 .1 / ::1,   r2 .2 / ::2
 h2's LAN           10.NN.32.0/24     fd00:NNNN:32::/64   r2 .1 / ::1,   h2 .10 / ::10
 h3's LAN           10.NN.33.0/24     fd00:NNNN:33::/64   r2 .1 / ::1,   h3 .10 / ::10
+h4's LAN           10.NN.34.0/24     fd00:NNNN:34::/64   r4 .1 / ::1,   h4 .10 / ::10
+r2-r4 link         10.NN.24.0/30     fd00:NNNN:24::/64   r2 .1 / ::1,   r4 .2 / ::2
 
 Hosts are ready to go (each has default gateways). The routers are not: forwarding
 is switched off and they only know their directly connected networks.
@@ -39,10 +41,12 @@ NETWORKS = [
     ("r1-r2 link", 12, 30, [("r1", 1), ("r2", 2)]),
     ("r1-r3 link", 13, 30, [("r1", 1), ("r3", 2)]),
     ("r3-r2 link", 23, 30, [("r3", 1), ("r2", 2)]),
+    ("r2-r4 link", 24, 30, [("r2", 1), ("r4", 2)]),
     ("h2's LAN", 32, 24, [("r2", 1), ("h2", 10)]),
     ("h3's LAN", 33, 24, [("r2", 1), ("h3", 10)]),
+    ("h4's LAN", 34, 24, [("r4", 1), ("h4", 10)]),
 ]
-GATEWAYS = {"h1": 1, "h2": 32, "h3": 33}  # each host's LAN; its router is .1 / ::1
+GATEWAYS = {"h1": 1, "h2": 32, "h3": 33, "h4": 34}  # each host's LAN; its router is .1 / ::1
 
 
 class Router(Node):
@@ -61,9 +65,9 @@ def build(nn, nnnn):
     v6 = lambda net, host: f"fd00:{nnnn}:{net}::{host}"
 
     net = Mininet(controller=None)
-    for name in ("r1", "r2", "r3"):
+    for name in ("r1", "r2", "r3", "r4"):
         net.addHost(name, cls=Router, ip=None)
-    for name in ("h1", "h2", "h3"):
+    for name in ("h1", "h2", "h3", "h4"):
         net.addHost(name, ip=None)
 
     v6_plan = []  # IPv6 addresses go on after the network starts: Mininet only sets IPv4
@@ -82,7 +86,7 @@ def build(nn, nnnn):
 
 # ---------- Step 10: routes as data ----------------------------------------------------------
 
-ROUTERS = ("r1", "r2", "r3")
+ROUTERS = ("r1", "r2", "r3", "r4")
 
 
 def addresses(nn):
@@ -209,7 +213,7 @@ def print_plan(nn, nnnn):
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(description="Week 3: three Linux routers on your own addresses.")
+    ap = argparse.ArgumentParser(description="Week 3: four Linux routers on your own addresses.")
     ap.add_argument("--id", required=True, metavar="NNNN", help="the last 4 digits of your student ID")
     ap.add_argument("--routes", metavar="FILE", help="Step 10: configure the routers from this routes file")
     args = ap.parse_args()

@@ -235,6 +235,8 @@ if __name__ == "__main__":
             print("PROBLEM:", p)
         sys.exit("Fix the description and try again: nothing was built.")
 
+    if Mininet is None:
+        sys.exit("Mininet is required to build the network; run this inside the course container. Nothing was built.")
     setLogLevel("info")
     net = build(spec)
     print("\nHosts:", ", ".join(f"{h} {a} (via {r})" for h, (a, r) in hosts(spec).items()), "\n")
