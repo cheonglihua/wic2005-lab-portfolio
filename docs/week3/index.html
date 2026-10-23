@@ -229,64 +229,64 @@ rtt min/avg/max/mdev = 0.081/0.081/0.081/0.000 ms</pre></details>
 == r1 lookup: h3, 10.3.33.10 ==
 10.3.33.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
     cache</pre></details>
-<details class="evidence-card" id="evidence-card-failure"><summary><span class="evidence-title">A link goes down: what static routes do</span><span class="file">evidence3/failure.txt</span></summary><pre id="evidence-failure">Failure experiment: four-router Mininet run using network.yaml
-== Baseline connectivity: h1 to h2 before failure ==
+<details class="evidence-card" id="evidence-card-failure"><summary><span class="evidence-title">A link goes down: what static routes do</span><span class="file">evidence3/failure.txt</span></summary><pre id="evidence-failure">== Baseline h1 to h2 ==
 PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
-64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=1.24 ms
-64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.155 ms
+64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.063 ms
+64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.072 ms
 
 --- 10.3.32.10 ping statistics ---
-2 packets transmitted, 2 received, 0% packet loss, time 1002ms
-rtt min/avg/max/mdev = 0.155/0.696/1.238/0.541 ms
-== Exact link-down command: link r1 r2 down ==
-== h1 traceroute while r1-r2 is down: h1 traceroute -n -I -m 5 -w 1 -q 1 10.3.32.10 ==
+2 packets transmitted, 2 received, 0% packet loss, time 1026ms
+rtt min/avg/max/mdev = 0.063/0.067/0.072/0.004 ms
+== Link-down command: link r1 r2 down ==
+== r1 lookup for h2 after link down ==
+10.3.32.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
+    cache
+== r2 lookup for h1 after link down ==
+RTNETLINK answers: Network is unreachable
+== h1 to h2 ping after link down ==
+PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+
+--- 10.3.32.10 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1022ms
+
+== Traceroute h1 to h2 while link is down ==
+Command: h1 /usr/sbin/traceroute -n -I -m 5 -w 1 -q 1 10.3.32.10
 traceroute to 10.3.32.10 (10.3.32.10), 5 hops max, 60 byte packets
- 1  10.3.1.1  0.663 ms
- 2  10.3.13.2  0.374 ms
+ 1  10.3.1.1  0.480 ms
+ 2  10.3.13.2  0.062 ms
  3  *
  4  *
  5  *
-== r1 route lookup for h2 while link is down ==
-10.3.32.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
-    cache
-== r2 route lookup for h1 while link is down ==
-RTNETLINK answers: Network is unreachable
-== Ping during failure: h1 to h2 ==
-PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
-
---- 10.3.32.10 ping statistics ---
-2 packets transmitted, 0 received, 100% packet loss, time 1019ms
-
-Observation: r1 has an alternate forward route via r3, but r2 has no return route to h1. The traceroute reaches r3, then probes time out because h2 replies cannot return to h1.
-Static routing does not exchange reachability or recalculate alternate routes. Restoring the physical link restores its connected network but does not re-add the lost static route; a routing protocol such as OSPF could learn and recalculate paths.
-== Exact link-restoration command: link r1 r2 up ==
-== r2 route table immediately after link restoration ==
+== Link restoration command: link r1 r2 up ==
+== r2 routes after link restoration ==
 10.3.12.0/30 dev r2-eth2 proto kernel scope link src 10.3.12.2
 10.3.23.0/30 dev r2-eth3 proto kernel scope link src 10.3.23.2
 10.3.24.0/30 dev r2-eth4 proto kernel scope link src 10.3.24.1
 10.3.32.0/24 dev r2-eth0 proto kernel scope link src 10.3.32.1
 10.3.33.0/24 dev r2-eth1 proto kernel scope link src 10.3.33.1
 10.3.34.0/24 via 10.3.24.2 dev r2-eth4
-== h1 to h2 after link restoration, before manual route repair ==
+== h1 to h2 after restoration, before repair ==
 PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
 
 --- 10.3.32.10 ping statistics ---
-2 packets transmitted, 0 received, 100% packet loss, time 1004ms
+2 packets transmitted, 0 received, 100% packet loss, time 1008ms
 
-== r2 lookup for h1 before manual route repair ==
-RTNETLINK answers: Network is unreachable
-== Manual repair command: r2 ip route add 10.3.1.0/24 via 10.3.12.1 ==
-== r2 lookup for h1 after manual route repair ==
+== Manual route repair: r2 route to h1 ==
+== r2 lookup after repair ==
 10.3.1.10 via 10.3.12.1 dev r2-eth2 src 10.3.12.2 uid 0
     cache
-== h1 to h2 after manual route repair ==
+== h1 to h2 after manual repair ==
 PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
-64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.099 ms
-64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.126 ms
+64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.090 ms
+64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.125 ms
 
 --- 10.3.32.10 ping statistics ---
-2 packets transmitted, 2 received, 0% packet loss, time 1015ms
-rtt min/avg/max/mdev = 0.099/0.112/0.126/0.013 ms</pre></details>
+2 packets transmitted, 2 received, 0% packet loss, time 1001ms
+rtt min/avg/max/mdev = 0.090/0.107/0.125/0.017 ms
+
+== Interpretation ==
+With r1-r2 down, r1 forwards toward h2 through r3, but r2 reports no route back to h1. The traceroute reaches r3 and then times out, and the ping fails.
+Static routes do not recalculate when links change. Bringing r1-r2 back restores the connected link but does not restore the static route on r2 to 10.3.1.0/24; connectivity returns only after that route is manually replaced.</pre></details>
 <details class="evidence-card" id="evidence-card-check"><summary><span class="evidence-title">check_paths() stopping a loop and a missing route</span><span class="file">evidence3/check.txt</span></summary><pre id="evidence-check">== FORWARDING LOOP: loop.yaml ==
 PROBLEM: h2 to h1: loop r2 -&gt; r3 -&gt; r2
 PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2
