@@ -26,7 +26,7 @@
   .page-section { margin:3.2rem 0; padding:clamp(1.25rem,3vw,2rem); border:1px solid #d3e1da; border-radius:22px; background:linear-gradient(145deg,#ffffff,#eaf5ef); box-shadow:var(--shadow); scroll-margin-top:5rem; } #routes { background:linear-gradient(145deg,#e5ebf8,#f4f5fb); border-color:#d6deef; } #evidence { background:linear-gradient(145deg,#dcefeb,#f0f8f5); border-color:#cfe2dc; } #reflection { background:linear-gradient(145deg,#f3ead9,#fcf8ed); border-color:#eadfc8; } .section-heading { display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:1.2rem; padding-bottom:1rem; border-bottom:1px solid #ccded5; } #routes .section-heading { border-color:#d5dcee; } #evidence .section-heading { border-color:#cfe2dc; } #reflection .section-heading { border-color:#e8dcc3; } .section-heading h2 { margin:0; font-size:clamp(1.8rem,4vw,2.45rem); letter-spacing:-.04em; } .section-heading p:not(.section-kicker) { margin:.35rem 0 0; color:var(--muted); } .section-kicker { display:inline-block; padding:.22rem .5rem; border-radius:999px; background:#dcefe5; } #routes .section-kicker { background:#e0e5f3; color:#4b5b91; } #evidence .section-kicker { background:#d2eae3; } #reflection .section-kicker { background:#efe1c4; color:#806322; } .section-index { flex:none; padding:.35rem .6rem; border:1px solid #d1e0d8; border-radius:8px; background:#f8fcf9; color:#53756b; font:700 .78rem ui-monospace,monospace; }
   .network-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(320px,.9fr); gap:1rem; align-items:start; } .panel,.route-card,.answer-card,.evidence-card { border:1px solid var(--line); border-radius:17px; background:var(--paper); box-shadow:0 10px 30px #163c3b08; } .panel { padding:1.15rem; } .panel h3 { margin:.2rem 0 .9rem; font-size:1rem; } .diagram-panel { overflow:hidden; padding:1.25rem; background:linear-gradient(145deg,#e6f3ee,#f7faf5); } .diagram-panel .mermaid { min-height:230px; display:grid; place-items:center; } .diagram-note { margin:.25rem 0 0; color:var(--muted); font-size:.82rem; }
   .topology-data { display:grid; gap:1rem; } .table-wrap { overflow-x:auto; } table { width:100%; border-collapse:collapse; font-size:.9rem; } th,td { padding:.72rem .65rem; border-bottom:1px solid #eaf0ed; text-align:left; vertical-align:top; } th { color:var(--muted); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; } tbody tr:last-child td { border-bottom:0; } td code, code { color:#135c60; font:600 .9em ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }
-  .route-intro { display:flex; flex-wrap:wrap; gap:.6rem; margin:0 0 1rem; } .pill { display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .65rem; border-radius:999px; background:#e3f2eb; color:#236551; font-size:.78rem; font-weight:750; } .pill-summary { background:#f3eddb; color:#7a5c21; } .route-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; } .route-card { overflow:hidden; } .route-card header { display:flex; align-items:center; gap:.65rem; padding:1rem 1rem .65rem; } .route-card header h3 { margin:0; font-size:1.2rem; } .router-mark { padding:.22rem .4rem; border-radius:6px; background:#e7f2ed; color:#387563; font-size:.62rem; font-weight:800; letter-spacing:.1em; } .route-card .table-wrap { padding:0 .75rem .65rem; } .route-card th,.route-card td { padding:.62rem .35rem; } .hop { display:inline-block; padding:.24rem .45rem; border-radius:6px; font-size:.78rem; } .connected { background:#e8f2ed; color:#356951; } .static { background:#edf0f9; color:#4b5b91; font-family:ui-monospace,monospace; }
+  .route-intro { display:flex; flex-wrap:wrap; gap:.6rem; margin:0 0 1rem; } .pill { display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .65rem; border-radius:999px; background:#e3f2eb; color:#236551; font-size:.78rem; font-weight:750; } .pill-summary { background:#f3eddb; color:#7a5c21; } .route-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; } .route-card { overflow:hidden; } .route-card header { display:flex; align-items:center; gap:.65rem; padding:1rem 1rem .65rem; } .route-card header h3 { margin:0; font-size:1.2rem; } .router-mark { padding:.22rem .4rem; border-radius:6px; background:#e7f2ed; color:#387563; font-size:.62rem; font-weight:800; letter-spacing:.1em; } .route-card .table-wrap { padding:0 .75rem .65rem; } .route-card th,.route-card td { padding:.62rem .35rem; } .hop { display:inline-block; padding:.24rem .45rem; border-radius:6px; font-size:.78rem; } .connected { background:#e8f2ed; color:#356951; } .static { background:#edf0f9; color:#4b5b91; font-family:ui-monospace,monospace; }
   .summary-callout { display:flex; gap:.9rem; align-items:flex-start; margin-top:1rem; padding:1rem 1.1rem; border:1px solid #e9dfc5; border-radius:13px; background:#fbf7ec; color:#5b4d2b; } .summary-callout strong { display:block; color:#624d1d; } .summary-callout p { margin:.15rem 0 0; font-size:.9rem; }
   .evidence-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; } .evidence-card { overflow:hidden; } .evidence-card summary { display:flex; flex-direction:column; gap:.15rem; padding:1rem 1.1rem; cursor:pointer; list-style:none; } .evidence-card summary::-webkit-details-marker { display:none; } .evidence-card summary:after { content:"+"; position:absolute; right:1.1rem; top:1rem; color:var(--teal); font-size:1.15rem; font-weight:700; } .evidence-card summary { position:relative; padding-right:2.6rem; } .evidence-card[open] summary:after { content:"−"; } .evidence-title { color:var(--ink); font-weight:750; } .file { color:var(--muted); font: .75rem ui-monospace,monospace; } pre { max-height:380px; overflow:auto; margin:0; padding:1rem 1.1rem; border-top:1px solid #e6eeea; background:#102a35; color:#dcece5; font: .78rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; } pre.missing { background:#fff1ec; color:#8b4027; }
   .answer-grid { display:grid; gap:.8rem; } .answer-card { padding:1.15rem 1.3rem; } .answer-key { color:var(--teal); font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; } .answer-card h3 { margin:.35rem 0 .65rem; font-size:1.08rem; line-height:1.4; } .answer-card p { margin:.55rem 0 0; color:#425960; }
@@ -49,7 +49,7 @@
     <div class="hero-copy">
       <p class="eyebrow">Week 03 · Static routing · Mininet lab</p>
       <h1>A small network.<br>A clear route.</h1>
-      <p>Three routers, three LANs and a redundant path make longest-prefix matching and static-route failure visible in a working network.</p>
+      <p>4 routers connect 4 host LANs over 4 router links. Static routes expose a redundant path and make longest-prefix matching and link-failure behavior visible.</p>
       <div class="hero-actions">
         <a class="button button-primary" href="#topology">Explore the network <span aria-hidden="true">↓</span></a>
         <a class="button button-ghost" id="repository" href="https://github.com/cheonglihua/wic2005-lab-portfolio">View repository <span aria-hidden="true">↗</span></a>
@@ -57,130 +57,248 @@
     </div>
     <aside class="hero-aside" aria-label="Address block and page information">
       <span class="aside-label">IPv4 address block</span><strong class="block-value">10.3.0.0/16</strong>
-      <div class="hero-meta"><span>ID suffix · 4903</span><span>Updated · 2026-10-24</span></div>
+      <div class="hero-meta"><span>ID suffix · 4903</span><span>Updated · 2026-10-23</span></div>
     </aside>
   </section>
 
   <section class="stats" aria-label="Network summary">
-    <div class="stat"><strong>3</strong><span>Linux routers</span></div>
-    <div class="stat"><strong>3</strong><span>Host LANs</span></div>
-    <div class="stat"><strong>3</strong><span>Router links</span></div>
-    <div class="stat"><strong>5</strong><span>Static routes</span></div>
+    <div class="stat"><strong>4</strong><span>Linux routers</span></div>
+    <div class="stat"><strong>4</strong><span>Host LANs</span></div>
+    <div class="stat"><strong>4</strong><span>Router links</span></div>
+    <div class="stat"><strong>8</strong><span>Static routes</span></div>
   </section>
 
   <section class="page-section" id="topology">
-    <div class="section-heading"><div><p class="section-kicker">01 · Network design</p><h2>Topology</h2><p>Two paths connect r1 and r2; h2 and h3 share r2 but use separate LANs.</p></div><span class="section-index">10.3.0.0/16</span></div>
+    <div class="section-heading"><div><p class="section-kicker">01 · Network design</p><h2>Topology</h2><p>Two paths connect r1 and r2; h2 and h3 use separate LANs on r2, while h4 is on r4.</p></div><span class="section-index">10.3.0.0/16</span></div>
     <div class="network-grid">
       <article class="panel diagram-panel"><h3>Logical layout</h3><div class="mermaid" id="diagram">graph LR
   h1[&quot;h1&lt;br&gt;10.3.1.10&quot;] --- r1((r1))
   h2[&quot;h2&lt;br&gt;10.3.32.10&quot;] --- r2((r2))
   h3[&quot;h3&lt;br&gt;10.3.33.10&quot;] --- r2((r2))
+  h4[&quot;h4&lt;br&gt;10.3.34.10&quot;] --- r4((r4))
   r1((r1)) ---|10.3.12.0/30| r2((r2))
   r1((r1)) ---|10.3.13.0/30| r3((r3))
-  r3((r3)) ---|10.3.23.0/30| r2((r2))</div><p class="diagram-note">Router-to-router links use /30 networks. Host LANs use /24 networks.</p></article>
+  r3((r3)) ---|10.3.23.0/30| r2((r2))
+  r2((r2)) ---|10.3.24.0/30| r4((r4))</div><p class="diagram-note">Router-to-router links use /30 networks. Host LANs use /24 networks.</p></article>
       <div class="topology-data">
-        <article class="panel"><h3>Host LANs</h3><div id="lans"><table><thead><tr><th>LAN</th><th>Network</th><th>Router (.1)</th><th>Host (.10)</th></tr></thead><tbody><tr><td>lan-h1</td><td><code>10.3.1.0/24</code></td><td>r1</td><td>h1 <code>10.3.1.10</code></td></tr><tr><td>lan-h2</td><td><code>10.3.32.0/24</code></td><td>r2</td><td>h2 <code>10.3.32.10</code></td></tr><tr><td>lan-h3</td><td><code>10.3.33.0/24</code></td><td>r2</td><td>h3 <code>10.3.33.10</code></td></tr></tbody></table></div></article>
-        <article class="panel"><h3>Router links</h3><div id="links"><table><thead><tr><th>Link</th><th>Network</th></tr></thead><tbody><tr><td>r1 — r2</td><td><code>10.3.12.0/30</code></td></tr><tr><td>r1 — r3</td><td><code>10.3.13.0/30</code></td></tr><tr><td>r3 — r2</td><td><code>10.3.23.0/30</code></td></tr></tbody></table></div></article>
+        <article class="panel"><h3>Host LANs</h3><div id="lans"><table><thead><tr><th>LAN</th><th>Network</th><th>Router (.1)</th><th>Host (.10)</th></tr></thead><tbody><tr><td>lan-h1</td><td><code>10.3.1.0/24</code></td><td>r1</td><td>h1 <code>10.3.1.10</code></td></tr><tr><td>lan-h2</td><td><code>10.3.32.0/24</code></td><td>r2</td><td>h2 <code>10.3.32.10</code></td></tr><tr><td>lan-h3</td><td><code>10.3.33.0/24</code></td><td>r2</td><td>h3 <code>10.3.33.10</code></td></tr><tr><td>lan-h4</td><td><code>10.3.34.0/24</code></td><td>r4</td><td>h4 <code>10.3.34.10</code></td></tr></tbody></table></div></article>
+        <article class="panel"><h3>Router links</h3><div id="links"><table><thead><tr><th>Link</th><th>Network</th></tr></thead><tbody><tr><td>r1 — r2</td><td><code>10.3.12.0/30</code></td></tr><tr><td>r1 — r3</td><td><code>10.3.13.0/30</code></td></tr><tr><td>r3 — r2</td><td><code>10.3.23.0/30</code></td></tr><tr><td>r2 — r4</td><td><code>10.3.24.0/30</code></td></tr></tbody></table></div></article>
       </div>
     </div>
   </section>
 
   <section class="page-section" id="routes">
-    <div class="section-heading"><div><p class="section-kicker">02 · Forwarding</p><h2>Routing tables</h2><p>Connected networks and configured static routes, sorted by longest prefix first.</p></div><span class="section-index">5 entries</span></div>
+    <div class="section-heading"><div><p class="section-kicker">02 · Forwarding</p><h2>Routing tables</h2><p>Connected networks and configured static routes, sorted by longest prefix first.</p></div><span class="section-index">8 static · 20 total</span></div>
     <div class="route-intro"><span class="pill">Directly connected</span><span class="pill pill-summary">Static next hop</span></div>
     <div class="route-grid" id="routing-tables"><article class="route-card"><header><span class="router-mark">ROUTER</span><h3>r1</h3></header><div class="table-wrap"><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.12.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.13.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.1.0/24</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.32.0/24</code></td><td><span class="hop static">10.3.12.2</span></td></tr><tr><td><code>10.3.32.0/20</code></td><td><span class="hop static">10.3.13.2</span></td></tr></tbody></table></div></article>
-<article class="route-card"><header><span class="router-mark">ROUTER</span><h3>r2</h3></header><div class="table-wrap"><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.12.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.23.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.1.0/24</code></td><td><span class="hop static">10.3.12.1</span></td></tr><tr><td><code>10.3.32.0/24</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.33.0/24</code></td><td><span class="hop connected">directly connected</span></td></tr></tbody></table></div></article>
-<article class="route-card"><header><span class="router-mark">ROUTER</span><h3>r3</h3></header><div class="table-wrap"><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.13.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.23.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.1.0/24</code></td><td><span class="hop static">10.3.13.1</span></td></tr><tr><td><code>10.3.32.0/20</code></td><td><span class="hop static">10.3.23.2</span></td></tr></tbody></table></div></article></div>
-    <aside class="summary-callout"><span aria-hidden="true">↳</span><div><strong>Longest-prefix match in action</strong><p>r1 uses <code>10.3.32.0/24 via 10.3.12.2</code> for h2. Other destinations in the <code>10.3.32.0/20</code> summary, including h3, go through r3.</p></div></aside>
+<article class="route-card"><header><span class="router-mark">ROUTER</span><h3>r2</h3></header><div class="table-wrap"><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.12.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.23.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.24.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.1.0/24</code></td><td><span class="hop static">10.3.12.1</span></td></tr><tr><td><code>10.3.32.0/24</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.33.0/24</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.34.0/24</code></td><td><span class="hop static">10.3.24.2</span></td></tr></tbody></table></div></article>
+<article class="route-card"><header><span class="router-mark">ROUTER</span><h3>r3</h3></header><div class="table-wrap"><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.13.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.23.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.1.0/24</code></td><td><span class="hop static">10.3.13.1</span></td></tr><tr><td><code>10.3.32.0/20</code></td><td><span class="hop static">10.3.23.2</span></td></tr></tbody></table></div></article>
+<article class="route-card"><header><span class="router-mark">ROUTER</span><h3>r4</h3></header><div class="table-wrap"><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.24.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.1.0/24</code></td><td><span class="hop static">10.3.24.1</span></td></tr><tr><td><code>10.3.34.0/24</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.32.0/20</code></td><td><span class="hop static">10.3.24.1</span></td></tr></tbody></table></div></article></div>
+    <aside class="summary-callout"><span aria-hidden="true">↳</span><div><strong>Longest-prefix match in action</strong><p>r1 uses <code>10.3.32.0/24 via 10.3.12.2</code> for h2. Its <code>10.3.32.0/20</code> summary sends h3 and h4 through r3. On r3, h2, h3 and h4 all use the same summary next hop, r2.</p></div></aside>
   </section>
 
   <section class="page-section" id="evidence">
-    <div class="section-heading"><div><p class="section-kicker">03 · Live Mininet output</p><h2>Evidence</h2><p>Expand an item to inspect the captured command output.</p></div><span class="section-index">5 records</span></div>
-    <div class="evidence-grid"><details class="evidence-card" id="evidence-card-routes"><summary><span class="evidence-title">Every router&#x27;s routing table: ip route</span><span class="file">evidence3/routes.txt</span></summary><pre id="evidence-routes">10.3.1.0/24 dev r1-eth0 proto kernel scope link src 10.3.1.1
+    <div class="section-heading"><div><p class="section-kicker">03 · Live Mininet output</p><h2>Evidence</h2><p>Expand an item to inspect the captured command output.</p></div><span class="section-index">7 records</span></div>
+    <div class="evidence-grid"><details class="evidence-card" id="evidence-card-routes"><summary><span class="evidence-title">Every router&#x27;s routing table: ip route</span><span class="file">evidence3/routes.txt</span></summary><pre id="evidence-routes">== r1 ==
+10.3.1.0/24 dev r1-eth0 proto kernel scope link src 10.3.1.1
 10.3.12.0/30 dev r1-eth1 proto kernel scope link src 10.3.12.1
 10.3.13.0/30 dev r1-eth2 proto kernel scope link src 10.3.13.1
 10.3.32.0/24 via 10.3.12.2 dev r1-eth1
 10.3.32.0/20 via 10.3.13.2 dev r1-eth2
-10.3.1.0/24 via 10.3.12.1 dev r2-eth0
-10.3.12.0/30 dev r2-eth0 proto kernel scope link src 10.3.12.2
-10.3.23.0/30 dev r2-eth1 proto kernel scope link src 10.3.23.2
-10.3.32.0/24 dev r2-eth2 proto kernel scope link src 10.3.32.1
-10.3.33.0/24 dev r2-eth3 proto kernel scope link src 10.3.33.1
+== r2 ==
+10.3.1.0/24 via 10.3.12.1 dev r2-eth2
+10.3.12.0/30 dev r2-eth2 proto kernel scope link src 10.3.12.2
+10.3.23.0/30 dev r2-eth3 proto kernel scope link src 10.3.23.2
+10.3.24.0/30 dev r2-eth4 proto kernel scope link src 10.3.24.1
+10.3.32.0/24 dev r2-eth0 proto kernel scope link src 10.3.32.1
+10.3.33.0/24 dev r2-eth1 proto kernel scope link src 10.3.33.1
+10.3.34.0/24 via 10.3.24.2 dev r2-eth4
+== r3 ==
 10.3.1.0/24 via 10.3.13.1 dev r3-eth0
 10.3.13.0/30 dev r3-eth0 proto kernel scope link src 10.3.13.2
 10.3.23.0/30 dev r3-eth1 proto kernel scope link src 10.3.23.1
-10.3.32.0/20 via 10.3.23.2 dev r3-eth1</pre></details>
-<details class="evidence-card" id="evidence-card-traces"><summary><span class="evidence-title">From one host to every other: traceroute</span><span class="file">evidence3/traces.txt</span></summary><pre id="evidence-traces">traceroute to 10.3.32.10 (10.3.32.10), 5 hops max, 60 byte packets
- 1  10.3.1.1  1.393 ms  0.015 ms  0.007 ms
- 2  10.3.12.2  0.317 ms  0.015 ms  0.008 ms
- 3  10.3.32.10  0.086 ms  0.009 ms  0.008 ms
-traceroute to 10.3.33.10 (10.3.33.10), 5 hops max, 60 byte packets
- 1  10.3.1.1  2.261 ms  2.015 ms  1.991 ms
- 2  10.3.13.2  1.982 ms  0.473 ms  0.408 ms
- 3  10.3.12.2  0.375 ms  0.333 ms  0.317 ms
- 4  10.3.33.10  0.304 ms  0.161 ms  0.131 ms
-traceroute to 10.3.1.10 (10.3.1.10), 5 hops max, 60 byte packets
- 1  10.3.32.1  0.500 ms  0.017 ms  0.004 ms
- 2  10.3.12.1  0.066 ms  0.008 ms  0.007 ms
- 3  10.3.1.10  0.052 ms  0.025 ms  0.010 ms</pre></details>
-<details class="evidence-card" id="evidence-card-summary"><summary><span class="evidence-title">Your summary route at work: ip route get</span><span class="file">evidence3/summary.txt</span></summary><pre id="evidence-summary">10.3.32.10 via 10.3.12.2 dev r1-eth1 src 10.3.12.1 uid 0
-    cache
-10.3.33.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
-    cache</pre></details>
-<details class="evidence-card" id="evidence-card-failure"><summary><span class="evidence-title">A link goes down: what static routes do</span><span class="file">evidence3/failure.txt</span></summary><pre id="evidence-failure">PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+10.3.32.0/20 via 10.3.23.2 dev r3-eth1
+== r4 ==
+10.3.1.0/24 via 10.3.24.1 dev r4-eth1
+10.3.24.0/30 dev r4-eth1 proto kernel scope link src 10.3.24.2
+10.3.32.0/20 via 10.3.24.1 dev r4-eth1
+10.3.34.0/24 dev r4-eth0 proto kernel scope link src 10.3.34.1</pre></details>
+<details class="evidence-card" id="evidence-card-traces"><summary><span class="evidence-title">Traceroutes from h1 to each remote LAN</span><span class="file">evidence3/traces.txt</span></summary><pre id="evidence-traces">== h1 to h2 ==
+traceroute to 10.3.32.10 (10.3.32.10), 6 hops max, 60 byte packets
+ 1  10.3.1.1  1.683 ms
+ 2  10.3.12.2  0.559 ms
+ 3  10.3.32.10  0.156 ms
+== h1 to h3 ==
+traceroute to 10.3.33.10 (10.3.33.10), 6 hops max, 60 byte packets
+ 1  10.3.1.1  0.060 ms
+ 2  10.3.13.2  0.688 ms
+ 3  10.3.12.2  0.042 ms
+ 4  10.3.33.10  0.089 ms
+== h1 to h4 ==
+traceroute to 10.3.34.10 (10.3.34.10), 6 hops max, 60 byte packets
+ 1  10.3.1.1  0.049 ms
+ 2  10.3.13.2  0.012 ms
+ 3  10.3.12.2  0.009 ms
+ 4  10.3.24.2  0.699 ms
+ 5  10.3.34.10  0.329 ms</pre></details>
+<details class="evidence-card" id="evidence-card-connectivity"><summary><span class="evidence-title">All 12 directed host-to-host pings</span><span class="file">evidence3/connectivity.txt</span></summary><pre id="evidence-connectivity">== All 12 directed host-pair pings ==
+PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.109 ms
 
 --- 10.3.32.10 ping statistics ---
-2 packets transmitted, 0 received, 100% packet loss, time 1000ms
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.109/0.109/0.109/0.000 ms
+PING 10.3.33.10 (10.3.33.10) 56(84) bytes of data.
+64 bytes from 10.3.33.10: icmp_seq=1 ttl=62 time=0.056 ms
 
-traceroute to 10.3.32.10 (10.3.32.10), 4 hops max, 60 byte packets
- 1  10.3.1.1  0.341 ms  0.288 ms  0.210 ms
- 2  10.3.13.2  0.195 ms  0.163 ms  0.149 ms
- 3  * * *
- 4  * * *
+--- 10.3.33.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.056/0.056/0.056/0.000 ms
+PING 10.3.34.10 (10.3.34.10) 56(84) bytes of data.
+64 bytes from 10.3.34.10: icmp_seq=1 ttl=61 time=0.390 ms
+
+--- 10.3.34.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.390/0.390/0.390/0.000 ms
+PING 10.3.1.10 (10.3.1.10) 56(84) bytes of data.
+64 bytes from 10.3.1.10: icmp_seq=1 ttl=62 time=0.057 ms
+
+--- 10.3.1.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.057/0.057/0.057/0.000 ms
+PING 10.3.33.10 (10.3.33.10) 56(84) bytes of data.
+64 bytes from 10.3.33.10: icmp_seq=1 ttl=63 time=0.155 ms
+
+--- 10.3.33.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.155/0.155/0.155/0.000 ms
+PING 10.3.34.10 (10.3.34.10) 56(84) bytes of data.
+64 bytes from 10.3.34.10: icmp_seq=1 ttl=62 time=1.19 ms
+
+--- 10.3.34.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 1.189/1.189/1.189/0.000 ms
+PING 10.3.1.10 (10.3.1.10) 56(84) bytes of data.
+64 bytes from 10.3.1.10: icmp_seq=1 ttl=61 time=0.099 ms
+
+--- 10.3.1.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.099/0.099/0.099/0.000 ms
+PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+64 bytes from 10.3.32.10: icmp_seq=1 ttl=63 time=0.043 ms
+
+--- 10.3.32.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.043/0.043/0.043/0.000 ms
+PING 10.3.34.10 (10.3.34.10) 56(84) bytes of data.
+64 bytes from 10.3.34.10: icmp_seq=1 ttl=62 time=1.14 ms
+
+--- 10.3.34.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 1.139/1.139/1.139/0.000 ms
+PING 10.3.1.10 (10.3.1.10) 56(84) bytes of data.
+64 bytes from 10.3.1.10: icmp_seq=1 ttl=60 time=0.091 ms
+
+--- 10.3.1.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.091/0.091/0.091/0.000 ms
+PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.056 ms
+
+--- 10.3.32.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.056/0.056/0.056/0.000 ms
+PING 10.3.33.10 (10.3.33.10) 56(84) bytes of data.
+64 bytes from 10.3.33.10: icmp_seq=1 ttl=62 time=0.081 ms
+
+--- 10.3.33.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.081/0.081/0.081/0.000 ms</pre></details>
+<details class="evidence-card" id="evidence-card-summary"><summary><span class="evidence-title">r3 summary-route lookups</span><span class="file">evidence3/summary.txt</span></summary><pre id="evidence-summary">== r3 summary lookup: h2, 10.3.32.10 ==
+10.3.32.10 via 10.3.23.2 dev r3-eth1 src 10.3.23.1 uid 0
+    cache
+== r3 summary lookup: h3, 10.3.33.10 ==
+10.3.33.10 via 10.3.23.2 dev r3-eth1 src 10.3.23.1 uid 0
+    cache
+== r3 summary lookup: h4, 10.3.34.10 ==
+10.3.34.10 via 10.3.23.2 dev r3-eth1 src 10.3.23.1 uid 0
+    cache</pre></details>
+<details class="evidence-card" id="evidence-card-lpm"><summary><span class="evidence-title">r1 longest-prefix-match lookups</span><span class="file">evidence3/lpm.txt</span></summary><pre id="evidence-lpm">== r1 lookup: h2, 10.3.32.10 ==
+10.3.32.10 via 10.3.12.2 dev r1-eth1 src 10.3.12.1 uid 0
+    cache
+== r1 lookup: h3, 10.3.33.10 ==
+10.3.33.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
+    cache</pre></details>
+<details class="evidence-card" id="evidence-card-failure"><summary><span class="evidence-title">A link goes down: what static routes do</span><span class="file">evidence3/failure.txt</span></summary><pre id="evidence-failure">== Baseline h1 to h2 ==
+PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.085 ms
+64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.066 ms
+
+--- 10.3.32.10 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1002ms
+rtt min/avg/max/mdev = 0.066/0.075/0.085/0.009 ms
+== Link-down command: link r1 r2 down ==
+== r1 lookup for h2 after link down ==
 10.3.32.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
     cache
+== r2 lookup for h1 after link down ==
+RTNETLINK answers: Network is unreachable
+== h1 to h2 after link down ==
+PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+
+--- 10.3.32.10 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1012ms
+
+== Link restoration command: link r1 r2 up ==
+== r2 table after link restoration ==
+10.3.12.0/30 dev r2-eth2 proto kernel scope link src 10.3.12.2
+10.3.23.0/30 dev r2-eth3 proto kernel scope link src 10.3.23.2
+10.3.24.0/30 dev r2-eth4 proto kernel scope link src 10.3.24.1
+10.3.32.0/24 dev r2-eth0 proto kernel scope link src 10.3.32.1
+10.3.33.0/24 dev r2-eth1 proto kernel scope link src 10.3.33.1
+10.3.34.0/24 via 10.3.24.2 dev r2-eth4
+== h1 to h2 after link restoration, before route repair ==
 PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
 
 --- 10.3.32.10 ping statistics ---
 2 packets transmitted, 0 received, 100% packet loss, time 1021ms
 
-RTNETLINK answers: Network is unreachable
-After bringing r1-r2 back up:
-10.3.12.0/30 dev r2-eth0 proto kernel scope link src 10.3.12.2
-10.3.23.0/30 dev r2-eth1 proto kernel scope link src 10.3.23.2
-10.3.32.0/24 dev r2-eth2 proto kernel scope link src 10.3.32.1
-10.3.33.0/24 dev r2-eth3 proto kernel scope link src 10.3.33.1
+== Manual route repair: r2 ip route add 10.3.1.0/24 via 10.3.12.1 ==
+== r2 lookup for h1 after manual repair ==
+10.3.1.10 via 10.3.12.1 dev r2-eth2 src 10.3.12.2 uid 0
+    cache
+== h1 to h2 after manual route repair ==
 PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.145 ms
+64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.095 ms
 
 --- 10.3.32.10 ping statistics ---
-2 packets transmitted, 0 received, 100% packet loss, time 1028ms
+2 packets transmitted, 2 received, 0% packet loss, time 1004ms
+rtt min/avg/max/mdev = 0.095/0.120/0.145/0.025 ms</pre></details>
+<details class="evidence-card" id="evidence-card-check"><summary><span class="evidence-title">check_paths() stopping a loop and a missing route</span><span class="file">evidence3/check.txt</span></summary><pre id="evidence-check">== FORWARDING LOOP: loop.yaml ==
+PROBLEM: h2 to h1: loop r2 -&gt; r3 -&gt; r2
+PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2
+PROBLEM: h4 to h1: loop r4 -&gt; r2 -&gt; r3 -&gt; r2
+Fix the description and try again: nothing was built.
+Exit code: 1
 
-After manually restoring r2 static route:
-PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
-64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.751 ms
-64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.073 ms
-
---- 10.3.32.10 ping statistics ---
-2 packets transmitted, 2 received, 0% packet loss, time 1002ms
-rtt min/avg/max/mdev = 0.073/0.412/0.751/0.339 ms</pre></details>
-<details class="evidence-card" id="evidence-card-check"><summary><span class="evidence-title">check_paths() stopping a loop and a missing route</span><span class="file">evidence3/check.txt</span></summary><pre id="evidence-check">Missing-route case:
+== MISSING ROUTE: missing.yaml ==
 PROBLEM: h2 to h1: r2 has no route to 10.3.1.10
 PROBLEM: h3 to h1: r2 has no route to 10.3.1.10
-
-Loop case:
-PROBLEM: h2 to h1: loop r2 -&gt; r3 -&gt; r2
-PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2</pre></details></div>
+PROBLEM: h4 to h1: r2 has no route to 10.3.1.10
+Fix the description and try again: nothing was built.
+Exit code: 1</pre></details></div>
   </section>
 
   <section class="page-section" id="reflection">
     <div class="section-heading"><div><p class="section-kicker">04 · Lab notes</p><h2>What I learned</h2><p>Design choices, route summaries, failure behavior and control-plane work.</p></div><span class="section-index">Reflection</span></div>
-    <div class="answer-grid" id="answers"><article class="answer-card" id="answer-design"><span class="answer-key">design</span><h3>Describe your design: why these routers, LANs and links, and how you chose the addresses.</h3><p>My design uses three routers in a triangle, with h1 on r1 and h2 and h3 on separate LANs behind r2. The direct r1â€“r2 link gives h1 a short path to h2, while the path through r3 provides a second physical route between the routers. I used the lab&#x27;s address plan with NN=03: LANs use 10.3.1.0/24, 10.3.32.0/24, and 10.3.33.0/24, and each router link has its own /30.</p></article>
-<article class="answer-card" id="answer-summary"><span class="answer-key">summary</span><h3>Which route summarises several LANs? Which networks does it cover, why is it correct, and what else would it attract if you added a network inside its range?</h3><p>The 10.3.32.0/20 route summarizes the 10.3.32.0/24 and 10.3.33.0/24 LANs because both are inside 10.3.32.0 through 10.3.47.255. It lets r1 send traffic for the remote LAN block through r3, while its more specific 10.3.32.0/24 route sends h2 traffic directly toward r2. The summary would also attract any future network inside that /20, including unused ranges such as 10.3.40.0/24, unless a more specific route or another design change handled it.</p></article>
-<article class="answer-card" id="answer-failure"><span class="answer-key">failure</span><h3>When you took a link down, what happened, and why couldn&#x27;t your routes recover even though another path existed? What would have recovered?</h3><p>When I took r1â€“r2 down, h1&#x27;s ping to h2 lost all packets. The route lookup on r1 then selected the broader 10.3.32.0/20 route through r3, so an alternate forward path existed. But r2 reported &quot;Network is unreachable&quot; for h1: its route back used the failed r1â€“r2 link and disappeared. Bringing the link up did not restore that static route, and the ping still failed. Re-adding r2&#x27;s route manually restored the ping. A routing protocol such as OSPF could detect the failure and recalculate the routes automatically.</p></article>
-<article class="answer-card" id="answer-control_plane"><span class="answer-key">control plane</span><h3>In your network, what was the control plane? Who worked out the routes, and what does that mean for a network of 40 routers?</h3><p>In this lab, I worked out the routes and wrote them as static entries in network.yaml. The Linux kernel&#x27;s routing table then makes the forwarding decision for each packet using longest-prefix match; there is no routing protocol calculating routes for this topology. For 40 routers, manually maintaining every route would be error-prone, so a routing protocol or a validated configuration generator would be more practical and could respond to topology changes.</p></article></div>
+    <div class="answer-grid" id="answers"><article class="answer-card" id="answer-design"><span class="answer-key">design</span><h3>Describe your design: why these routers, LANs and links, and how you chose the addresses.</h3><p>I kept the r1–r2–r3 triangle so h1 can reach r2 over a direct link or through r3, then extended the network with r4 and h4 over r2–r4. This gives four routers and four host LANs while retaining the redundant path used to study route selection and failure. The 10.3.0.0/16 block uses /24 LANs and /30 router links; the /30 links leave two usable addresses, one for each endpoint.</p></article>
+<article class="answer-card" id="answer-summary"><span class="answer-key">summary</span><h3>Which route summarises several LANs? Which networks does it cover, why is it correct, and what else would it attract if you added a network inside its range?</h3><p>The 10.3.32.0/20 summary covers h2 (10.3.32.0/24), h3 (10.3.33.0/24), and h4 (10.3.34.0/24); h1&#x27;s 10.3.1.0/24 is outside it. It also covers unused /24 space from 10.3.35.0 through 10.3.47.0, so a future network there would be attracted to this next hop unless a more specific route overrides it. For h2, r1 chooses its /24 route over the overlapping /20 summary because longest-prefix matching selects the more specific prefix.</p></article>
+<article class="answer-card" id="answer-failure"><span class="answer-key">failure</span><h3>When you took a link down, what happened, and why couldn&#x27;t your routes recover even though another path existed? What would have recovered?</h3><p>With r1–r2 down, r1&#x27;s lookup for h2 moved to the /20 via r3, but r2 had no route back to h1 and returned &quot;Network is unreachable&quot;. The h1-to-h2 ping therefore lost both packets even though the forward path existed. After I brought the link up, the connected /30 returned but r2&#x27;s static route to h1 did not; the ping still failed. Re-adding 10.3.1.0/24 via 10.3.12.1 on r2 restored both the return path and ping. OSPF could advertise the alternate path and recalculate after a failure.</p></article>
+<article class="answer-card" id="answer-control_plane"><span class="answer-key">control plane</span><h3>In your network, what was the control plane? Who worked out the routes, and what does that mean for a network of 40 routers?</h3><p>I acted as the control plane by designing the static routes in YAML and checking that every host pair had a valid path. Linux&#x27;s kernel then used its routing table and longest-prefix match to forward each packet; no routing protocol recalculated paths. Keeping routes consistent across 40 routers by hand would be difficult and error-prone. A protocol such as OSPF or validated configuration automation could distribute and update routes as the topology changes.</p></article></div>
   </section>
 
-  <footer><span>WIC2005 · Week 3 · generated from <code>week-03/netlab/network.yaml</code></span><a href="https://github.com/cheonglihua/wic2005-lab-portfolio">Source repository ↗</a></footer>
+  <footer><span>WIC2005 · Week 3 · generated from <code>network.yaml</code></span><a href="https://github.com/cheonglihua/wic2005-lab-portfolio">Source repository ↗</a></footer>
 </main>
 
 <script type="application/json" id="network-data">{
@@ -188,7 +306,8 @@ PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2</pre></details></div>
   "routers": [
     "r1",
     "r2",
-    "r3"
+    "r3",
+    "r4"
   ],
   "lans": [
     {
@@ -208,6 +327,12 @@ PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2</pre></details></div>
       "network": "10.3.33.0/24",
       "router": "r2",
       "host": "h3"
+    },
+    {
+      "name": "lan-h4",
+      "network": "10.3.34.0/24",
+      "router": "r4",
+      "host": "h4"
     }
   ],
   "links": [
@@ -225,6 +350,11 @@ PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2</pre></details></div>
       "r3",
       "r2",
       "10.3.23.0/30"
+    ],
+    [
+      "r2",
+      "r4",
+      "10.3.24.0/30"
     ]
   ],
   "routes": {
@@ -238,20 +368,34 @@ PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2</pre></details></div>
         "via": "10.3.13.2"
       }
     ],
-    "r3": [
-      {
-        "to": "10.3.32.0/20",
-        "via": "10.3.23.2"
-      },
-      {
-        "to": "10.3.1.0/24",
-        "via": "10.3.13.1"
-      }
-    ],
     "r2": [
       {
         "to": "10.3.1.0/24",
         "via": "10.3.12.1"
+      },
+      {
+        "to": "10.3.34.0/24",
+        "via": "10.3.24.2"
+      }
+    ],
+    "r3": [
+      {
+        "to": "10.3.1.0/24",
+        "via": "10.3.13.1"
+      },
+      {
+        "to": "10.3.32.0/20",
+        "via": "10.3.23.2"
+      }
+    ],
+    "r4": [
+      {
+        "to": "10.3.1.0/24",
+        "via": "10.3.24.1"
+      },
+      {
+        "to": "10.3.32.0/20",
+        "via": "10.3.24.1"
       }
     ]
   }

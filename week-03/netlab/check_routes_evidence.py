@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
-"""Show check_paths() rejecting a missing route and a forwarding loop."""
-from copy import deepcopy
+"""Capture actual CLI rejection output for loop.yaml and missing.yaml."""
 from pathlib import Path
+import subprocess
+import sys
 
-from build_routed import check_paths, load
 
+HERE = Path(__file__).resolve().parent
+BUILDER = HERE / "build_routed.py"
+OUTPUT = HERE / "evidence3" / "check.txt"
 
-SPEC = load(Path(__file__).with_name("network.yaml"))
+records = []
+for label, fixture in (("FORWARDING LOOP", "loop.yaml"), ("MISSING ROUTE", "missing.yaml")):
+    result = subprocess.run(
+        [sys.executable, str(BUILDER), str(HERE / fixture)],
+        cwd=HERE,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        check=False,
+    )
+    records.append(f"== {label}: {fixture} ==\n{result.stdout.rstrip()}\nExit code: {result.returncode}")
+    if result.returncode == 0 or "PROBLEM:" not in result.stdout or "nothing was built" not in result.stdout:
+        raise SystemExit(f"{fixture} did not produce the expected pre-build rejection")
 
-missing = deepcopy(SPEC)
-missing["routes"]["r2"] = []
-print("Missing-route case:")
-for problem in check_paths(missing):
-    print("PROBLEM:", problem)
-
-loop = deepcopy(SPEC)
-# For h2 -> h1, send r2 to r3 and r3 back to r2.
-loop["routes"]["r2"] = [{"to": "10.3.1.0/24", "via": "10.3.23.1"}]
-loop["routes"]["r3"] = [
-    route for route in loop["routes"]["r3"] if route["to"] != "10.3.1.0/24"
-]
-loop["routes"]["r3"].append({"to": "10.3.1.0/24", "via": "10.3.23.2"})
-print("\nLoop case:")
-for problem in check_paths(loop):
-    print("PROBLEM:", problem)
+OUTPUT.write_text("\n\n".join(records) + "\n", encoding="utf-8")
+print(f"Captured actual validator output in {OUTPUT}")

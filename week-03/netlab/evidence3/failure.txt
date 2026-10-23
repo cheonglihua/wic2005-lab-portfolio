@@ -1,36 +1,46 @@
+== Baseline h1 to h2 ==
+PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.085 ms
+64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.066 ms
+
+--- 10.3.32.10 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1002ms
+rtt min/avg/max/mdev = 0.066/0.075/0.085/0.009 ms
+== Link-down command: link r1 r2 down ==
+== r1 lookup for h2 after link down ==
+10.3.32.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
+    cache
+== r2 lookup for h1 after link down ==
+RTNETLINK answers: Network is unreachable
+== h1 to h2 after link down ==
 PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
 
 --- 10.3.32.10 ping statistics ---
-2 packets transmitted, 0 received, 100% packet loss, time 1000ms
+2 packets transmitted, 0 received, 100% packet loss, time 1012ms
 
-traceroute to 10.3.32.10 (10.3.32.10), 4 hops max, 60 byte packets
- 1  10.3.1.1  0.341 ms  0.288 ms  0.210 ms
- 2  10.3.13.2  0.195 ms  0.163 ms  0.149 ms
- 3  * * *
- 4  * * *
-10.3.32.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
-    cache
+== Link restoration command: link r1 r2 up ==
+== r2 table after link restoration ==
+10.3.12.0/30 dev r2-eth2 proto kernel scope link src 10.3.12.2
+10.3.23.0/30 dev r2-eth3 proto kernel scope link src 10.3.23.2
+10.3.24.0/30 dev r2-eth4 proto kernel scope link src 10.3.24.1
+10.3.32.0/24 dev r2-eth0 proto kernel scope link src 10.3.32.1
+10.3.33.0/24 dev r2-eth1 proto kernel scope link src 10.3.33.1
+10.3.34.0/24 via 10.3.24.2 dev r2-eth4
+== h1 to h2 after link restoration, before route repair ==
 PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
 
 --- 10.3.32.10 ping statistics ---
 2 packets transmitted, 0 received, 100% packet loss, time 1021ms
 
-RTNETLINK answers: Network is unreachable
-After bringing r1-r2 back up:
-10.3.12.0/30 dev r2-eth0 proto kernel scope link src 10.3.12.2
-10.3.23.0/30 dev r2-eth1 proto kernel scope link src 10.3.23.2
-10.3.32.0/24 dev r2-eth2 proto kernel scope link src 10.3.32.1
-10.3.33.0/24 dev r2-eth3 proto kernel scope link src 10.3.33.1
+== Manual route repair: r2 ip route add 10.3.1.0/24 via 10.3.12.1 ==
+== r2 lookup for h1 after manual repair ==
+10.3.1.10 via 10.3.12.1 dev r2-eth2 src 10.3.12.2 uid 0
+    cache
+== h1 to h2 after manual route repair ==
 PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.145 ms
+64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.095 ms
 
 --- 10.3.32.10 ping statistics ---
-2 packets transmitted, 0 received, 100% packet loss, time 1028ms
-
-After manually restoring r2 static route:
-PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
-64 bytes from 10.3.32.10: icmp_seq=1 ttl=62 time=0.751 ms
-64 bytes from 10.3.32.10: icmp_seq=2 ttl=62 time=0.073 ms
-
---- 10.3.32.10 ping statistics ---
-2 packets transmitted, 2 received, 0% packet loss, time 1002ms
-rtt min/avg/max/mdev = 0.073/0.412/0.751/0.339 ms
+2 packets transmitted, 2 received, 0% packet loss, time 1004ms
+rtt min/avg/max/mdev = 0.095/0.120/0.145/0.025 ms

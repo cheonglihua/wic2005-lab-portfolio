@@ -1,50 +1,19 @@
 # Week 3 evidence
 
-Save real outputs from the course Mininet container here. Do not replace them
-with predicted output. Start Mininet from the repository root using the
-`routers.py` command in `../../README.md`.
+These captures were collected from `build_routed.py network.yaml` running in
+the course Mininet Docker image. They use the `10.3.x.x` addresses in the final
+four-router topology.
 
-At the `mininet>` prompt, capture the three route tables and representative
-forwarding decisions:
+- `routes.txt`: `ip route` from r1, r2, r3 and r4.
+- `lpm.txt`: r1 sends h2 through the /24 on r1–r2 and h3 through the /20 via r3.
+- `summary.txt`: r3 sends lookups for h2, h3 and h4 to `10.3.23.2`.
+- `traces.txt`: real ICMP traceroutes from h1 to h2, h3 and h4.
+- `connectivity.txt`: one successful ping for each of the 12 directed host pairs.
+- `failure.txt`: baseline, r1–r2 outage, alternate forward lookup, missing return
+  route, link restoration and successful manual route recovery.
+- `check.txt`: actual CLI output rejecting the loop and missing-route fixtures
+  before Mininet builds anything.
 
-```text
-r1 ip route > /lab/evidence3/routes.txt
-r2 ip route >> /lab/evidence3/routes.txt
-r3 ip route >> /lab/evidence3/routes.txt
-r1 ip route get 10.3.32.10 > /lab/evidence3/summary.txt
-r1 ip route get 10.3.33.10 >> /lab/evidence3/summary.txt
-h1 traceroute -n -m 5 -w 1 10.3.32.10 > /lab/evidence3/traces.txt
-h1 traceroute -n -m 5 -w 1 10.3.33.10 >> /lab/evidence3/traces.txt
-h2 traceroute -n -m 5 -w 1 10.3.1.10 >> /lab/evidence3/traces.txt
-link r1 r2 down
-h1 ping -c 2 -W 1 10.3.32.10 > /lab/evidence3/failure.txt
-h1 traceroute -n -m 5 -w 1 10.3.32.10 >> /lab/evidence3/failure.txt
-r1 ip route get 10.3.32.10 >> /lab/evidence3/failure.txt
-r2 ip route get 10.3.1.10 >> /lab/evidence3/failure.txt 2>&1
-link r1 r2 up
-sh echo 'After bringing r1-r2 back up:' >> /lab/evidence3/failure.txt
-r2 ip route >> /lab/evidence3/failure.txt
-h1 ping -c 2 -W 1 10.3.32.10 >> /lab/evidence3/failure.txt
-r2 ip route add 10.3.1.0/24 via 10.3.12.1
-h1 ping -c 2 -W 1 10.3.32.10 >> /lab/evidence3/failure.txt
-exit
-```
-
-The output records the failed ping after the link comes back up and its success
-after manually restoring r2's static route. If `traceroute` is not installed
-in the image, record that and use the available `tracepath` command. The
-Mininet bind mount writes these files directly into this folder.
-
-To capture `check_paths()` rejecting a loop and a missing route, run this
-from the repository root in PowerShell. It uses the container's Python and
-Mininet dependencies but does not start a network:
-
-```powershell
-docker run --rm -v "${PWD}:/repo" -w /repo `
-  firdaussahran/netlab-mininet:1.0 `
-  python3 week-03/netlab/check_routes_evidence.py `
-  > week-03/netlab/evidence3/check.txt
-```
-
-This runs the validator against two modified copies of the data and records
-its diagnostics; it does not change `network.yaml` or build Mininet.
+To reproduce captures, follow the exact Docker and `mininet>` command sequence
+in [`../../README.md`](../../README.md). `check_routes_evidence.py` regenerates
+`check.txt` by invoking the actual `build_routed.py` CLI against each fixture.

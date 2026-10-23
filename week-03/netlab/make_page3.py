@@ -27,8 +27,10 @@ NETLAB = Path(__file__).resolve().parent
 REPO = NETLAB.parent.parent
 EVIDENCE = [
     ("routes", "evidence3/routes.txt", "Every router's routing table: ip route"),
-    ("traces", "evidence3/traces.txt", "From one host to every other: traceroute"),
-    ("summary", "evidence3/summary.txt", "Your summary route at work: ip route get"),
+    ("traces", "evidence3/traces.txt", "Traceroutes from h1 to each remote LAN"),
+    ("connectivity", "evidence3/connectivity.txt", "All 12 directed host-to-host pings"),
+    ("summary", "evidence3/summary.txt", "r3 summary-route lookups"),
+    ("lpm", "evidence3/lpm.txt", "r1 longest-prefix-match lookups"),
     ("failure", "evidence3/failure.txt", "A link goes down: what static routes do"),
     ("check", "evidence3/check.txt", "check_paths() stopping a loop and a missing route"),
 ]
@@ -159,7 +161,7 @@ PAGE = """<!doctype html>
   .page-section {{ margin:3.2rem 0; padding:clamp(1.25rem,3vw,2rem); border:1px solid #d3e1da; border-radius:22px; background:linear-gradient(145deg,#ffffff,#eaf5ef); box-shadow:var(--shadow); scroll-margin-top:5rem; }} #routes {{ background:linear-gradient(145deg,#e5ebf8,#f4f5fb); border-color:#d6deef; }} #evidence {{ background:linear-gradient(145deg,#dcefeb,#f0f8f5); border-color:#cfe2dc; }} #reflection {{ background:linear-gradient(145deg,#f3ead9,#fcf8ed); border-color:#eadfc8; }} .section-heading {{ display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:1.2rem; padding-bottom:1rem; border-bottom:1px solid #ccded5; }} #routes .section-heading {{ border-color:#d5dcee; }} #evidence .section-heading {{ border-color:#cfe2dc; }} #reflection .section-heading {{ border-color:#e8dcc3; }} .section-heading h2 {{ margin:0; font-size:clamp(1.8rem,4vw,2.45rem); letter-spacing:-.04em; }} .section-heading p:not(.section-kicker) {{ margin:.35rem 0 0; color:var(--muted); }} .section-kicker {{ display:inline-block; padding:.22rem .5rem; border-radius:999px; background:#dcefe5; }} #routes .section-kicker {{ background:#e0e5f3; color:#4b5b91; }} #evidence .section-kicker {{ background:#d2eae3; }} #reflection .section-kicker {{ background:#efe1c4; color:#806322; }} .section-index {{ flex:none; padding:.35rem .6rem; border:1px solid #d1e0d8; border-radius:8px; background:#f8fcf9; color:#53756b; font:700 .78rem ui-monospace,monospace; }}
   .network-grid {{ display:grid; grid-template-columns:minmax(0,1.2fr) minmax(320px,.9fr); gap:1rem; align-items:start; }} .panel,.route-card,.answer-card,.evidence-card {{ border:1px solid var(--line); border-radius:17px; background:var(--paper); box-shadow:0 10px 30px #163c3b08; }} .panel {{ padding:1.15rem; }} .panel h3 {{ margin:.2rem 0 .9rem; font-size:1rem; }} .diagram-panel {{ overflow:hidden; padding:1.25rem; background:linear-gradient(145deg,#e6f3ee,#f7faf5); }} .diagram-panel .mermaid {{ min-height:230px; display:grid; place-items:center; }} .diagram-note {{ margin:.25rem 0 0; color:var(--muted); font-size:.82rem; }}
   .topology-data {{ display:grid; gap:1rem; }} .table-wrap {{ overflow-x:auto; }} table {{ width:100%; border-collapse:collapse; font-size:.9rem; }} th,td {{ padding:.72rem .65rem; border-bottom:1px solid #eaf0ed; text-align:left; vertical-align:top; }} th {{ color:var(--muted); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; }} tbody tr:last-child td {{ border-bottom:0; }} td code, code {{ color:#135c60; font:600 .9em ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }}
-  .route-intro {{ display:flex; flex-wrap:wrap; gap:.6rem; margin:0 0 1rem; }} .pill {{ display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .65rem; border-radius:999px; background:#e3f2eb; color:#236551; font-size:.78rem; font-weight:750; }} .pill-summary {{ background:#f3eddb; color:#7a5c21; }} .route-grid {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }} .route-card {{ overflow:hidden; }} .route-card header {{ display:flex; align-items:center; gap:.65rem; padding:1rem 1rem .65rem; }} .route-card header h3 {{ margin:0; font-size:1.2rem; }} .router-mark {{ padding:.22rem .4rem; border-radius:6px; background:#e7f2ed; color:#387563; font-size:.62rem; font-weight:800; letter-spacing:.1em; }} .route-card .table-wrap {{ padding:0 .75rem .65rem; }} .route-card th,.route-card td {{ padding:.62rem .35rem; }} .hop {{ display:inline-block; padding:.24rem .45rem; border-radius:6px; font-size:.78rem; }} .connected {{ background:#e8f2ed; color:#356951; }} .static {{ background:#edf0f9; color:#4b5b91; font-family:ui-monospace,monospace; }}
+  .route-intro {{ display:flex; flex-wrap:wrap; gap:.6rem; margin:0 0 1rem; }} .pill {{ display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .65rem; border-radius:999px; background:#e3f2eb; color:#236551; font-size:.78rem; font-weight:750; }} .pill-summary {{ background:#f3eddb; color:#7a5c21; }} .route-grid {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }} .route-card {{ overflow:hidden; }} .route-card header {{ display:flex; align-items:center; gap:.65rem; padding:1rem 1rem .65rem; }} .route-card header h3 {{ margin:0; font-size:1.2rem; }} .router-mark {{ padding:.22rem .4rem; border-radius:6px; background:#e7f2ed; color:#387563; font-size:.62rem; font-weight:800; letter-spacing:.1em; }} .route-card .table-wrap {{ padding:0 .75rem .65rem; }} .route-card th,.route-card td {{ padding:.62rem .35rem; }} .hop {{ display:inline-block; padding:.24rem .45rem; border-radius:6px; font-size:.78rem; }} .connected {{ background:#e8f2ed; color:#356951; }} .static {{ background:#edf0f9; color:#4b5b91; font-family:ui-monospace,monospace; }}
   .summary-callout {{ display:flex; gap:.9rem; align-items:flex-start; margin-top:1rem; padding:1rem 1.1rem; border:1px solid #e9dfc5; border-radius:13px; background:#fbf7ec; color:#5b4d2b; }} .summary-callout strong {{ display:block; color:#624d1d; }} .summary-callout p {{ margin:.15rem 0 0; font-size:.9rem; }}
   .evidence-grid {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; }} .evidence-card {{ overflow:hidden; }} .evidence-card summary {{ display:flex; flex-direction:column; gap:.15rem; padding:1rem 1.1rem; cursor:pointer; list-style:none; }} .evidence-card summary::-webkit-details-marker {{ display:none; }} .evidence-card summary:after {{ content:"+"; position:absolute; right:1.1rem; top:1rem; color:var(--teal); font-size:1.15rem; font-weight:700; }} .evidence-card summary {{ position:relative; padding-right:2.6rem; }} .evidence-card[open] summary:after {{ content:"−"; }} .evidence-title {{ color:var(--ink); font-weight:750; }} .file {{ color:var(--muted); font: .75rem ui-monospace,monospace; }} pre {{ max-height:380px; overflow:auto; margin:0; padding:1rem 1.1rem; border-top:1px solid #e6eeea; background:#102a35; color:#dcece5; font: .78rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; }} pre.missing {{ background:#fff1ec; color:#8b4027; }}
   .answer-grid {{ display:grid; gap:.8rem; }} .answer-card {{ padding:1.15rem 1.3rem; }} .answer-key {{ color:var(--teal); font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }} .answer-card h3 {{ margin:.35rem 0 .65rem; font-size:1.08rem; line-height:1.4; }} .answer-card p {{ margin:.55rem 0 0; color:#425960; }}
@@ -182,7 +184,7 @@ PAGE = """<!doctype html>
     <div class="hero-copy">
       <p class="eyebrow">Week 03 · Static routing · Mininet lab</p>
       <h1>A small network.<br>A clear route.</h1>
-      <p>Three routers, three LANs and a redundant path make longest-prefix matching and static-route failure visible in a working network.</p>
+      <p>{topology_copy}</p>
       <div class="hero-actions">
         <a class="button button-primary" href="#topology">Explore the network <span aria-hidden="true">↓</span></a>
         <a class="button button-ghost" id="repository" href="{repo}">View repository <span aria-hidden="true">↗</span></a>
@@ -202,7 +204,7 @@ PAGE = """<!doctype html>
   </section>
 
   <section class="page-section" id="topology">
-    <div class="section-heading"><div><p class="section-kicker">01 · Network design</p><h2>Topology</h2><p>Two paths connect r1 and r2; h2 and h3 share r2 but use separate LANs.</p></div><span class="section-index">{v4_block}</span></div>
+    <div class="section-heading"><div><p class="section-kicker">01 · Network design</p><h2>Topology</h2><p>Two paths connect r1 and r2; h2 and h3 use separate LANs on r2, while h4 is on r4.</p></div><span class="section-index">{v4_block}</span></div>
     <div class="network-grid">
       <article class="panel diagram-panel"><h3>Logical layout</h3><div class="mermaid" id="diagram">{diagram}</div><p class="diagram-note">Router-to-router links use /30 networks. Host LANs use /24 networks.</p></article>
       <div class="topology-data">
@@ -213,14 +215,14 @@ PAGE = """<!doctype html>
   </section>
 
   <section class="page-section" id="routes">
-    <div class="section-heading"><div><p class="section-kicker">02 · Forwarding</p><h2>Routing tables</h2><p>Connected networks and configured static routes, sorted by longest prefix first.</p></div><span class="section-index">{n_routes} entries</span></div>
+    <div class="section-heading"><div><p class="section-kicker">02 · Forwarding</p><h2>Routing tables</h2><p>Connected networks and configured static routes, sorted by longest prefix first.</p></div><span class="section-index">{n_routes} static · {n_table_entries} total</span></div>
     <div class="route-intro"><span class="pill">Directly connected</span><span class="pill pill-summary">Static next hop</span></div>
     <div class="route-grid" id="routing-tables">{tables}</div>
-    <aside class="summary-callout"><span aria-hidden="true">↳</span><div><strong>Longest-prefix match in action</strong><p>r1 uses <code>10.3.32.0/24 via 10.3.12.2</code> for h2. Other destinations in the <code>10.3.32.0/20</code> summary, including h3, go through r3.</p></div></aside>
+    <aside class="summary-callout"><span aria-hidden="true">↳</span><div><strong>Longest-prefix match in action</strong><p>r1 uses <code>{r1_h2_route}</code> for h2. Its <code>10.{nn}.32.0/20</code> summary sends h3 and h4 through r3. On r3, h2, h3 and h4 all use the same summary next hop, r2.</p></div></aside>
   </section>
 
   <section class="page-section" id="evidence">
-    <div class="section-heading"><div><p class="section-kicker">03 · Live Mininet output</p><h2>Evidence</h2><p>Expand an item to inspect the captured command output.</p></div><span class="section-index">5 records</span></div>
+    <div class="section-heading"><div><p class="section-kicker">03 · Live Mininet output</p><h2>Evidence</h2><p>Expand an item to inspect the captured command output.</p></div><span class="section-index">{n_evidence} records</span></div>
     <div class="evidence-grid">{evidence}</div>
   </section>
 
@@ -270,6 +272,11 @@ def main():
                 n_lans=len(spec["lans"]),
                 n_links=len(spec["links"]),
                 n_routes=sum(len(v or []) for v in (spec.get("routes") or {}).values()),
+                n_table_entries=sum(len(plan(spec)[router]) for router in spec["routers"]) + sum(len(v or []) for v in (spec.get("routes") or {}).values()),
+                n_evidence=len(EVIDENCE),
+                topology_copy=f"{len(spec['routers'])} routers connect {len(spec['lans'])} host LANs over {len(spec['links'])} router links. Static routes expose a redundant path and make longest-prefix matching and link-failure behavior visible.",
+                r1_h2_route="10.{}.32.0/24 via 10.{}.12.2".format(int(last4[2:]), int(last4[2:])),
+                nn=int(last4[2:]),
                 v4_block=f"10.{int(last4[2:])}.0.0/16",
                 repo=esc(page.get("repository", "")),
                 lans=lans_section(spec),
