@@ -93,12 +93,73 @@ def routing_tables_section(spec):
     return "\n".join(sections)
 
 
-def mermaid_diagram(spec):
-    lines = ["graph LR"]
-    for host, (address, router) in hosts(spec).items():
-        lines.append(f'  {host}["{host}<br>{address}"] --- {router}(({router}))')
-    for a, b, network in spec["links"]:
-        lines.append(f"  {a}(({a})) ---|{network}| {b}(({b}))")
+def topology_svg(spec):
+    """Draw the Week 3 topology with straight links that stop at node borders."""
+    host_data = hosts(spec)
+    lan_networks = {lan["host"]: lan["network"] for lan in spec["lans"]}
+    link_networks = {frozenset((a, b)): network for a, b, network in spec["links"]}
+
+    def host_node(host, x, y, width=140, height=78):
+        address, _router = host_data[host]
+        network = lan_networks[host]
+        center = x + width / 2
+        return (
+            f'<g class="topology-host"><rect x="{x}" y="{y}" width="{width}" height="{height}" rx="12" />'
+            f'<text class="topology-host-name" x="{center}" y="{y + 25}">{esc(host)}</text>'
+            f'<text class="topology-host-meta" x="{center}" y="{y + 44}">{esc(address)}</text>'
+            f'<text class="topology-host-meta" x="{center}" y="{y + 62}">{esc(network)}</text></g>'
+        )
+
+    def router_node(router, x, y):
+        return (
+            f'<g class="topology-router"><rect x="{x}" y="{y}" width="130" height="64" rx="13" />'
+            f'<text x="{x + 65}" y="{y + 28}">{esc(router)}</text>'
+            f'<text class="topology-router-meta" x="{x + 65}" y="{y + 46}">router</text></g>'
+        )
+
+    # Fixed positions keep the redundant r1-r2-r3 path readable and preserve
+    # the four-LAN layout while all connection and address labels come from YAML.
+    nodes = {
+        "r1": (210, 210),
+        "r2": (470, 210),
+        "r3": (330, 370),
+        "r4": (720, 210),
+    }
+    hosts_at = {
+        "h1": (20, 203, 140, 78),
+        "h2": (465, 48, 140, 78),
+        "h3": (650, 310, 140, 78),
+        "h4": (890, 203, 140, 78),
+    }
+
+    def link(a, b, x1, y1, x2, y2, lx, ly, kind="router-link"):
+        network = link_networks[frozenset((a, b))]
+        return (
+            f'<line class="{kind}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" />'
+            f'<text class="topology-link-label" x="{lx}" y="{ly}">{esc(network)}</text>'
+        )
+
+    lines = [
+        '<svg class="topology-svg" viewBox="0 0 1050 470" role="img" aria-labelledby="topology-title topology-description">',
+        '<title id="topology-title">Four-router, four-LAN network topology</title>',
+        '<desc id="topology-description">Routers r1, r2, and r3 form a redundant triangle; r2 connects to r4. Each host connects to its LAN router.</desc>',
+        '<g aria-hidden="true">',
+        link("r1", "r2", 340, 242, 470, 242, 405, 222),
+        link("r1", "r3", 315, 274, 370, 370, 310, 326),
+        link("r3", "r2", 450, 370, 490, 274, 465, 326),
+        link("r2", "r4", 600, 242, 720, 242, 660, 222),
+        '<line class="lan-link" x1="160" y1="242" x2="210" y2="242" />',
+        '<line class="lan-link" x1="535" y1="126" x2="535" y2="210" />',
+        '<line class="lan-link" x1="590" y1="274" x2="650" y2="349" />',
+        '<line class="lan-link" x1="850" y1="242" x2="890" y2="242" />',
+        '</g>',
+        host_node("h1", *hosts_at["h1"]),
+        host_node("h2", *hosts_at["h2"]),
+        host_node("h3", *hosts_at["h3"]),
+        host_node("h4", *hosts_at["h4"]),
+        *(router_node(router, *nodes[router]) for router in ("r1", "r2", "r3", "r4")),
+        '</svg>',
+    ]
     return "\n".join(lines)
 
 
@@ -159,7 +220,7 @@ PAGE = """<!doctype html>
   .hero-aside {{ align-self:end; position:relative; z-index:1; padding:1.15rem; border:1px solid #ffffff28; border-radius:16px; background:#ffffff0c; backdrop-filter:blur(8px); }} .aside-label {{ color:#a9c6bd; font-size:.76rem; text-transform:uppercase; letter-spacing:.1em; }} .block-value {{ display:block; margin:.2rem 0 .8rem; color:#fff; font:700 clamp(1.35rem,3vw,1.8rem)/1.2 ui-monospace,monospace; }} .hero-meta {{ display:flex; justify-content:space-between; gap:1rem; padding-top:.75rem; border-top:1px solid #ffffff25; color:#c6d9d3; font-size:.82rem; }}
   .stats {{ display:grid; grid-template-columns:repeat(4,1fr); gap:.85rem; margin:1.1rem 0 3.5rem; }} .stat {{ padding:1rem 1.15rem; border:1px solid #d3e1da; border-radius:14px; background:#d9ece4; box-shadow:0 8px 25px #163c3b08; }} .stat:nth-child(2) {{ background:#dcecf0; }} .stat:nth-child(3) {{ background:#e8e5f2; }} .stat:nth-child(4) {{ background:#f4ead4; }} .stat strong {{ display:block; color:var(--teal-dark); font-size:1.65rem; line-height:1.15; }} .stat span {{ color:#4f6870; font-size:.84rem; }}
   .page-section {{ margin:3.2rem 0; padding:clamp(1.25rem,3vw,2rem); border:1px solid #d3e1da; border-radius:22px; background:linear-gradient(145deg,#ffffff,#eaf5ef); box-shadow:var(--shadow); scroll-margin-top:5rem; }} #routes {{ background:linear-gradient(145deg,#e5ebf8,#f4f5fb); border-color:#d6deef; }} #evidence {{ background:linear-gradient(145deg,#dcefeb,#f0f8f5); border-color:#cfe2dc; }} #reflection {{ background:linear-gradient(145deg,#f3ead9,#fcf8ed); border-color:#eadfc8; }} .section-heading {{ display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:1.2rem; padding-bottom:1rem; border-bottom:1px solid #ccded5; }} #routes .section-heading {{ border-color:#d5dcee; }} #evidence .section-heading {{ border-color:#cfe2dc; }} #reflection .section-heading {{ border-color:#e8dcc3; }} .section-heading h2 {{ margin:0; font-size:clamp(1.8rem,4vw,2.45rem); letter-spacing:-.04em; }} .section-heading p:not(.section-kicker) {{ margin:.35rem 0 0; color:var(--muted); }} .section-kicker {{ display:inline-block; padding:.22rem .5rem; border-radius:999px; background:#dcefe5; }} #routes .section-kicker {{ background:#e0e5f3; color:#4b5b91; }} #evidence .section-kicker {{ background:#d2eae3; }} #reflection .section-kicker {{ background:#efe1c4; color:#806322; }} .section-index {{ flex:none; padding:.35rem .6rem; border:1px solid #d1e0d8; border-radius:8px; background:#f8fcf9; color:#53756b; font:700 .78rem ui-monospace,monospace; }}
-  .network-grid {{ display:grid; grid-template-columns:minmax(0,1.2fr) minmax(320px,.9fr); gap:1rem; align-items:start; }} .panel,.route-card,.answer-card,.evidence-card {{ border:1px solid var(--line); border-radius:17px; background:var(--paper); box-shadow:0 10px 30px #163c3b08; }} .panel {{ padding:1.15rem; }} .panel h3 {{ margin:.2rem 0 .9rem; font-size:1rem; }} .diagram-panel {{ overflow:hidden; padding:1.25rem; background:linear-gradient(145deg,#e6f3ee,#f7faf5); }} .diagram-panel .mermaid {{ min-height:230px; display:grid; place-items:center; }} .diagram-note {{ margin:.25rem 0 0; color:var(--muted); font-size:.82rem; }}
+  .network-grid {{ display:grid; grid-template-columns:minmax(0,1.2fr) minmax(320px,.9fr); gap:1rem; align-items:start; }} .panel,.route-card,.answer-card,.evidence-card {{ border:1px solid var(--line); border-radius:17px; background:var(--paper); box-shadow:0 10px 30px #163c3b08; }} .panel {{ padding:1.15rem; }} .panel h3 {{ margin:.2rem 0 .9rem; font-size:1rem; }} .diagram-panel {{ overflow-x:auto; padding:1.25rem; background:linear-gradient(145deg,#e6f3ee,#f7faf5); }} .topology-svg {{ display:block; width:100%; min-width:640px; height:auto; }} .topology-svg .router-link {{ stroke:#2c7773; stroke-width:3; stroke-linecap:butt; }} .topology-svg .lan-link {{ stroke:#678b81; stroke-width:2.5; stroke-linecap:butt; }} .topology-svg .topology-link-label {{ fill:#315f5b; stroke:#f3f8f4; stroke-width:5px; paint-order:stroke; stroke-linejoin:round; text-anchor:middle; font:700 12px ui-monospace,SFMono-Regular,Consolas,monospace; }} .topology-svg .topology-host rect {{ fill:#fff; stroke:#9dbbb0; stroke-width:2; }} .topology-svg .topology-host-name {{ fill:#163c3b; text-anchor:middle; font:800 14px system-ui,sans-serif; }} .topology-svg .topology-host-meta {{ fill:#536d69; text-anchor:middle; font:11px ui-monospace,SFMono-Regular,Consolas,monospace; }} .topology-svg .topology-router rect {{ fill:#e0f0e9; stroke:#28766e; stroke-width:2.5; }} .topology-svg .topology-router text {{ fill:#174e4a; text-anchor:middle; font:800 19px system-ui,sans-serif; }} .topology-svg .topology-router .topology-router-meta {{ fill:#567a72; font:10px system-ui,sans-serif; letter-spacing:.08em; text-transform:uppercase; }} .diagram-note {{ margin:.25rem 0 0; color:var(--muted); font-size:.82rem; }}
   .topology-data {{ display:grid; gap:1rem; }} .table-wrap {{ overflow-x:auto; }} table {{ width:100%; border-collapse:collapse; font-size:.9rem; }} th,td {{ padding:.72rem .65rem; border-bottom:1px solid #eaf0ed; text-align:left; vertical-align:top; }} th {{ color:var(--muted); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; }} tbody tr:last-child td {{ border-bottom:0; }} td code, code {{ color:#135c60; font:600 .9em ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }}
   .route-intro {{ display:flex; flex-wrap:wrap; gap:.6rem; margin:0 0 1rem; }} .pill {{ display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .65rem; border-radius:999px; background:#e3f2eb; color:#236551; font-size:.78rem; font-weight:750; }} .pill-summary {{ background:#f3eddb; color:#7a5c21; }} .route-grid {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }} .route-card {{ overflow:hidden; }} .route-card header {{ display:flex; align-items:center; gap:.65rem; padding:1rem 1rem .65rem; }} .route-card header h3 {{ margin:0; font-size:1.2rem; }} .router-mark {{ padding:.22rem .4rem; border-radius:6px; background:#e7f2ed; color:#387563; font-size:.62rem; font-weight:800; letter-spacing:.1em; }} .route-card .table-wrap {{ padding:0 .75rem .65rem; }} .route-card th,.route-card td {{ padding:.62rem .35rem; }} .hop {{ display:inline-block; padding:.24rem .45rem; border-radius:6px; font-size:.78rem; }} .connected {{ background:#e8f2ed; color:#356951; }} .static {{ background:#edf0f9; color:#4b5b91; font-family:ui-monospace,monospace; }}
   .summary-callout {{ display:flex; gap:.9rem; align-items:flex-start; margin-top:1rem; padding:1rem 1.1rem; border:1px solid #e9dfc5; border-radius:13px; background:#fbf7ec; color:#5b4d2b; }} .summary-callout strong {{ display:block; color:#624d1d; }} .summary-callout p {{ margin:.15rem 0 0; font-size:.9rem; }}
@@ -206,7 +267,7 @@ PAGE = """<!doctype html>
   <section class="page-section" id="topology">
     <div class="section-heading"><div><p class="section-kicker">01 · Network design</p><h2>Topology</h2><p>Two paths connect r1 and r2; h2 and h3 use separate LANs on r2, while h4 is on r4.</p></div><span class="section-index">{v4_block}</span></div>
     <div class="network-grid">
-      <article class="panel diagram-panel"><h3>Logical layout</h3><div class="mermaid" id="diagram">{diagram}</div><p class="diagram-note">Router-to-router links use /30 networks. Host LANs use /24 networks.</p></article>
+      <article class="panel diagram-panel"><h3>Logical layout</h3><div id="diagram">{diagram}</div><p class="diagram-note">Straight lines stop at each device; labels identify the /30 router links and /24 host LANs.</p></article>
       <div class="topology-data">
         <article class="panel"><h3>Host LANs</h3><div id="lans">{lans}</div></article>
         <article class="panel"><h3>Router links</h3><div id="links">{links}</div></article>
@@ -235,10 +296,6 @@ PAGE = """<!doctype html>
 </main>
 
 <script type="application/json" id="network-data">{data}</script>
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({{ startOnLoad: true, theme: "neutral", securityLevel: "strict" }});
-</script>
 </body>
 </html>
 """
@@ -281,7 +338,7 @@ def main():
                 repo=esc(page.get("repository", "")),
                 lans=lans_section(spec),
                 links=links_section(spec),
-                diagram=esc(mermaid_diagram(spec)),
+                diagram=topology_svg(spec),
                 tables=routing_tables_section(spec),
                 evidence="\n".join(evidence_section(*e) for e in EVIDENCE),
                 answers=answers_section(page),
