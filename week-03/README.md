@@ -133,6 +133,8 @@ sh echo '== Baseline h1 to h2 ==' > /lab/evidence3/failure.txt
 h1 ping -c 2 -W 1 10.3.32.10 >> /lab/evidence3/failure.txt
 sh echo '== Link-down command: link r1 r2 down ==' >> /lab/evidence3/failure.txt
 link r1 r2 down
+sh echo '== h1 traceroute while r1-r2 is down ==' >> /lab/evidence3/failure.txt
+h1 traceroute -n -I -m 5 -w 1 -q 1 10.3.32.10 >> /lab/evidence3/failure.txt 2>&1
 sh echo '== r1 lookup for h2 after link down ==' >> /lab/evidence3/failure.txt
 r1 ip route get 10.3.32.10 >> /lab/evidence3/failure.txt
 sh echo '== r2 lookup for h1 after link down ==' >> /lab/evidence3/failure.txt
