@@ -3,47 +3,100 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Network 4903: routed, from data</title>
+<meta name="theme-color" content="#102a35">
+<meta name="description" content="Week 3 routed Mininet lab: topology, static routes, live traces and failure evidence.">
+<title>Week 3 · Routed Network Lab</title>
 <style>
-  body { font-family: system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1f2937; }
-  h1 { font-size: 1.6rem; margin-bottom: .2rem; } h2 { margin-top: 2.2rem; border-bottom: 1px solid #e5e7eb; }
-  table { border-collapse: collapse; width: 100%; font-size: .92rem; margin-bottom: 1rem; } th, td { border-bottom: 1px solid #e5e7eb; padding: .35rem .5rem; text-align: left; }
-  pre { background: #111827; color: #f3f4f6; padding: .8rem; border-radius: .4rem; overflow-x: auto; font-size: .82rem; }
-  pre.mermaid { background: none; color: inherit; } pre.missing { background: #fef2f2; color: #991b1b; }
-  .meta, .file { color: #6b7280; font-size: .85rem; } code { font-size: .88em; }
+  :root { color-scheme: light; --ink:#142b33; --muted:#617780; --teal:#087e83; --teal-dark:#075c64; --lime:#c6f36a; --paper:#fff; --canvas:#f1f6f4; --line:#dce7e2; --navy:#102a35; --shadow:0 18px 48px #163c3b12; }
+  * { box-sizing:border-box; } html { scroll-behavior:smooth; scroll-padding-top:5.5rem; }
+  body { margin:0; background:var(--canvas); color:var(--ink); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  a { color:var(--teal-dark); } a:focus-visible, summary:focus-visible { outline:3px solid #dc8d27; outline-offset:3px; border-radius:4px; }
+  .skip-link { position:absolute; left:-9999px; top:1rem; z-index:20; background:#fff; padding:.7rem 1rem; } .skip-link:focus { left:1rem; }
+  .topbar { position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; gap:1.5rem; padding:.75rem max(1.25rem,calc((100% - 1160px)/2)); background:#102a35f5; color:#eff8f3; backdrop-filter:blur(14px); }
+  .brand { color:#eff8f3; text-decoration:none; font-weight:750; letter-spacing:.02em; white-space:nowrap; } .brand-mark { display:inline-grid; place-items:center; width:2rem; height:2rem; margin-right:.55rem; border-radius:9px; background:var(--lime); color:var(--navy); font-size:.78rem; }
+  .nav { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.25rem; } .nav a { color:#c4d9d4; padding:.45rem .65rem; font-size:.88rem; text-decoration:none; border-radius:8px; } .nav a:hover { color:#fff; background:#ffffff18; }
+  main { max-width:1160px; margin:auto; padding:2rem 1.25rem 4rem; }
+  .hero { position:relative; overflow:hidden; display:grid; grid-template-columns:minmax(0,1.5fr) minmax(250px,.7fr); gap:2rem; padding:clamp(2rem,5vw,4.25rem); border-radius:26px; color:#f2faf5; background:radial-gradient(circle at 91% 10%,#247e78 0,transparent 34%),linear-gradient(125deg,#102a35 5%,#15444b 70%,#0e625f); box-shadow:var(--shadow); }
+  .hero:after { content:""; position:absolute; width:330px; height:330px; right:-140px; bottom:-220px; border:1px solid #ffffff24; border-radius:50%; box-shadow:0 0 0 35px #ffffff09,0 0 0 70px #ffffff06; pointer-events:none; }
+  .eyebrow,.section-kicker { margin:0 0 .6rem; color:var(--teal); font-size:.75rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; } .hero .eyebrow { color:var(--lime); }
+  h1 { max-width:700px; margin:.1rem 0 1rem; font-size:clamp(2.5rem,6vw,4.6rem); line-height:1.02; letter-spacing:-.055em; } .hero-copy>p:not(.eyebrow) { max-width:650px; color:#d3e5df; font-size:1.08rem; }
+  .hero-actions { display:flex; flex-wrap:wrap; gap:.7rem; margin-top:1.5rem; } .button { display:inline-flex; align-items:center; gap:.55rem; padding:.7rem 1rem; border-radius:10px; font-weight:750; text-decoration:none; } .button-primary { background:var(--lime); color:var(--navy); } .button-ghost { border:1px solid #ffffff50; color:#f2faf5; }
+  .hero-aside { align-self:end; position:relative; z-index:1; padding:1.15rem; border:1px solid #ffffff28; border-radius:16px; background:#ffffff0c; backdrop-filter:blur(8px); } .aside-label { color:#a9c6bd; font-size:.76rem; text-transform:uppercase; letter-spacing:.1em; } .block-value { display:block; margin:.2rem 0 .8rem; color:#fff; font:700 clamp(1.35rem,3vw,1.8rem)/1.2 ui-monospace,monospace; } .hero-meta { display:flex; justify-content:space-between; gap:1rem; padding-top:.75rem; border-top:1px solid #ffffff25; color:#c6d9d3; font-size:.82rem; }
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:.85rem; margin:1.1rem 0 3.5rem; } .stat { padding:1rem 1.15rem; border:1px solid var(--line); border-radius:14px; background:var(--paper); box-shadow:0 8px 25px #163c3b08; } .stat strong { display:block; color:var(--teal-dark); font-size:1.65rem; line-height:1.15; } .stat span { color:var(--muted); font-size:.84rem; }
+  .page-section { margin:3.8rem 0; scroll-margin-top:5rem; } .section-heading { display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:1.2rem; } .section-heading h2 { margin:0; font-size:clamp(1.8rem,4vw,2.45rem); letter-spacing:-.04em; } .section-heading p:not(.section-kicker) { margin:.35rem 0 0; color:var(--muted); } .section-index { flex:none; color:#9ab0a8; font:700 .9rem ui-monospace,monospace; }
+  .network-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(320px,.9fr); gap:1rem; align-items:start; } .panel,.route-card,.answer-card,.evidence-card { border:1px solid var(--line); border-radius:17px; background:var(--paper); box-shadow:0 10px 30px #163c3b08; } .panel { padding:1.15rem; } .panel h3 { margin:.2rem 0 .9rem; font-size:1rem; } .diagram-panel { overflow:hidden; padding:1.25rem; background:linear-gradient(145deg,#e6f3ee,#f7faf5); } .diagram-panel .mermaid { min-height:230px; display:grid; place-items:center; } .diagram-note { margin:.25rem 0 0; color:var(--muted); font-size:.82rem; }
+  .topology-data { display:grid; gap:1rem; } .table-wrap { overflow-x:auto; } table { width:100%; border-collapse:collapse; font-size:.9rem; } th,td { padding:.72rem .65rem; border-bottom:1px solid #eaf0ed; text-align:left; vertical-align:top; } th { color:var(--muted); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; } tbody tr:last-child td { border-bottom:0; } td code, code { color:#135c60; font:600 .9em ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }
+  .route-intro { display:flex; flex-wrap:wrap; gap:.6rem; margin:0 0 1rem; } .pill { display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .65rem; border-radius:999px; background:#e3f2eb; color:#236551; font-size:.78rem; font-weight:750; } .pill-summary { background:#f3eddb; color:#7a5c21; } .route-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; } .route-card { overflow:hidden; } .route-card header { display:flex; align-items:center; gap:.65rem; padding:1rem 1rem .65rem; } .route-card header h3 { margin:0; font-size:1.2rem; } .router-mark { padding:.22rem .4rem; border-radius:6px; background:#e7f2ed; color:#387563; font-size:.62rem; font-weight:800; letter-spacing:.1em; } .route-card .table-wrap { padding:0 .75rem .65rem; } .route-card th,.route-card td { padding:.62rem .35rem; } .hop { display:inline-block; padding:.24rem .45rem; border-radius:6px; font-size:.78rem; } .connected { background:#e8f2ed; color:#356951; } .static { background:#edf0f9; color:#4b5b91; font-family:ui-monospace,monospace; }
+  .summary-callout { display:flex; gap:.9rem; align-items:flex-start; margin-top:1rem; padding:1rem 1.1rem; border:1px solid #e9dfc5; border-radius:13px; background:#fbf7ec; color:#5b4d2b; } .summary-callout strong { display:block; color:#624d1d; } .summary-callout p { margin:.15rem 0 0; font-size:.9rem; }
+  .evidence-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; } .evidence-card { overflow:hidden; } .evidence-card summary { display:flex; flex-direction:column; gap:.15rem; padding:1rem 1.1rem; cursor:pointer; list-style:none; } .evidence-card summary::-webkit-details-marker { display:none; } .evidence-card summary:after { content:"+"; position:absolute; right:1.1rem; top:1rem; color:var(--teal); font-size:1.15rem; font-weight:700; } .evidence-card summary { position:relative; padding-right:2.6rem; } .evidence-card[open] summary:after { content:"−"; } .evidence-title { color:var(--ink); font-weight:750; } .file { color:var(--muted); font: .75rem ui-monospace,monospace; } pre { max-height:380px; overflow:auto; margin:0; padding:1rem 1.1rem; border-top:1px solid #e6eeea; background:#102a35; color:#dcece5; font: .78rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; } pre.missing { background:#fff1ec; color:#8b4027; }
+  .answer-grid { display:grid; gap:.8rem; } .answer-card { padding:1.15rem 1.3rem; } .answer-key { color:var(--teal); font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; } .answer-card h3 { margin:.35rem 0 .65rem; font-size:1.08rem; line-height:1.4; } .answer-card p { margin:.55rem 0 0; color:#425960; }
+  footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.75rem; margin-top:4rem; padding:1.2rem 0; border-top:1px solid var(--line); color:var(--muted); font-size:.84rem; } footer a { text-decoration:none; font-weight:700; }
+  @media(max-width:850px) { .network-grid { grid-template-columns:1fr; } .route-grid { grid-template-columns:1fr 1fr; } .hero { grid-template-columns:1fr; } .hero-aside { max-width:460px; } }
+  @media(max-width:620px) { .topbar { align-items:flex-start; flex-direction:column; gap:.35rem; padding:.7rem 1rem; } .nav { justify-content:flex-start; width:100%; overflow-x:auto; flex-wrap:nowrap; } .nav a { white-space:nowrap; } main { padding:1rem .8rem 3rem; } .hero { gap:1rem; padding:1.6rem 1.3rem; border-radius:19px; } .stats { grid-template-columns:1fr 1fr; margin-bottom:2.7rem; } .stat { padding:.8rem; } .section-heading { align-items:flex-start; } .route-grid,.evidence-grid { grid-template-columns:1fr; } .page-section { margin:2.8rem 0; } }
+  @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } * { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
 </style>
 </head>
 <body>
-<p class="meta"><a href="../">← Week 2: my network, built from data</a></p>
-<h1>My routed network, from data</h1>
-<p class="meta">Student ID ending 4903 · generated from <code>week-03/netlab/network.yaml</code> by <code>make_page3.py</code> on 2026-10-24</p>
-<p id="summary">3 routers, 3 LANs and 3 router links, with 5 static routes, on <code>10.3.0.0/16</code>.
-Every route was checked for loops and missing routes before it reached a router.</p>
-<p>Repository: <a id="repository" href="https://github.com/cheonglihua/wic2005-lab-portfolio">https://github.com/cheonglihua/wic2005-lab-portfolio</a></p>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../"><span class="brand-mark">W3</span>WIC2005 · Lab portfolio</a>
+  <nav class="nav" aria-label="Page sections">
+    <a href="#topology">Topology</a><a href="#routes">Routing</a><a href="#evidence">Evidence</a><a href="#reflection">Reflection</a>
+  </nav>
+</header>
+<main id="main">
+  <section class="hero" id="overview">
+    <div class="hero-copy">
+      <p class="eyebrow">Week 03 · Static routing · Mininet lab</p>
+      <h1>A small network.<br>A clear route.</h1>
+      <p>Three routers, three LANs and a redundant path make longest-prefix matching and static-route failure visible in a working network.</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="#topology">Explore the network <span aria-hidden="true">↓</span></a>
+        <a class="button button-ghost" id="repository" href="https://github.com/cheonglihua/wic2005-lab-portfolio">View repository <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <aside class="hero-aside" aria-label="Address block and page information">
+      <span class="aside-label">IPv4 address block</span><strong class="block-value">10.3.0.0/16</strong>
+      <div class="hero-meta"><span>ID suffix · 4903</span><span>Updated · 2026-10-24</span></div>
+    </aside>
+  </section>
 
-<h2>The network</h2>
-<h3>LANs</h3>
-<section id="lans"><table><thead><tr><th>LAN</th><th>Network</th><th>Router (.1)</th><th>Host (.10)</th></tr></thead><tbody><tr><td>lan-h1</td><td><code>10.3.1.0/24</code></td><td>r1</td><td>h1 <code>10.3.1.10</code></td></tr><tr><td>lan-h2</td><td><code>10.3.32.0/24</code></td><td>r2</td><td>h2 <code>10.3.32.10</code></td></tr><tr><td>lan-h3</td><td><code>10.3.33.0/24</code></td><td>r2</td><td>h3 <code>10.3.33.10</code></td></tr></tbody></table></section>
-<h3>Router links</h3>
-<section id="links"><table><thead><tr><th>Link</th><th>Network</th></tr></thead><tbody><tr><td>r1 — r2</td><td><code>10.3.12.0/30</code></td></tr><tr><td>r1 — r3</td><td><code>10.3.13.0/30</code></td></tr><tr><td>r3 — r2</td><td><code>10.3.23.0/30</code></td></tr></tbody></table></section>
-<h3>Diagram</h3>
-<pre class="mermaid" id="diagram">graph LR
+  <section class="stats" aria-label="Network summary">
+    <div class="stat"><strong>3</strong><span>Linux routers</span></div>
+    <div class="stat"><strong>3</strong><span>Host LANs</span></div>
+    <div class="stat"><strong>3</strong><span>Router links</span></div>
+    <div class="stat"><strong>5</strong><span>Static routes</span></div>
+  </section>
+
+  <section class="page-section" id="topology">
+    <div class="section-heading"><div><p class="section-kicker">01 · Network design</p><h2>Topology</h2><p>Two paths connect r1 and r2; h2 and h3 share r2 but use separate LANs.</p></div><span class="section-index">10.3.0.0/16</span></div>
+    <div class="network-grid">
+      <article class="panel diagram-panel"><h3>Logical layout</h3><div class="mermaid" id="diagram">graph LR
   h1[&quot;h1&lt;br&gt;10.3.1.10&quot;] --- r1((r1))
   h2[&quot;h2&lt;br&gt;10.3.32.10&quot;] --- r2((r2))
   h3[&quot;h3&lt;br&gt;10.3.33.10&quot;] --- r2((r2))
   r1((r1)) ---|10.3.12.0/30| r2((r2))
   r1((r1)) ---|10.3.13.0/30| r3((r3))
-  r3((r3)) ---|10.3.23.0/30| r2((r2))</pre>
+  r3((r3)) ---|10.3.23.0/30| r2((r2))</div><p class="diagram-note">Router-to-router links use /30 networks. Host LANs use /24 networks.</p></article>
+      <div class="topology-data">
+        <article class="panel"><h3>Host LANs</h3><div id="lans"><table><thead><tr><th>LAN</th><th>Network</th><th>Router (.1)</th><th>Host (.10)</th></tr></thead><tbody><tr><td>lan-h1</td><td><code>10.3.1.0/24</code></td><td>r1</td><td>h1 <code>10.3.1.10</code></td></tr><tr><td>lan-h2</td><td><code>10.3.32.0/24</code></td><td>r2</td><td>h2 <code>10.3.32.10</code></td></tr><tr><td>lan-h3</td><td><code>10.3.33.0/24</code></td><td>r2</td><td>h3 <code>10.3.33.10</code></td></tr></tbody></table></div></article>
+        <article class="panel"><h3>Router links</h3><div id="links"><table><thead><tr><th>Link</th><th>Network</th></tr></thead><tbody><tr><td>r1 — r2</td><td><code>10.3.12.0/30</code></td></tr><tr><td>r1 — r3</td><td><code>10.3.13.0/30</code></td></tr><tr><td>r3 — r2</td><td><code>10.3.23.0/30</code></td></tr></tbody></table></div></article>
+      </div>
+    </div>
+  </section>
 
-<h2>Routing tables</h2>
-<section id="routing-tables"><h3>r1</h3><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.12.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.13.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.1.0/24</code></td><td>directly connected</td></tr><tr><td><code>10.3.32.0/24</code></td><td>10.3.12.2</td></tr><tr><td><code>10.3.32.0/20</code></td><td>10.3.13.2</td></tr></tbody></table>
-<h3>r2</h3><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.12.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.23.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.1.0/24</code></td><td>10.3.12.1</td></tr><tr><td><code>10.3.32.0/24</code></td><td>directly connected</td></tr><tr><td><code>10.3.33.0/24</code></td><td>directly connected</td></tr></tbody></table>
-<h3>r3</h3><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.13.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.23.0/30</code></td><td>directly connected</td></tr><tr><td><code>10.3.1.0/24</code></td><td>10.3.13.1</td></tr><tr><td><code>10.3.32.0/20</code></td><td>10.3.23.2</td></tr></tbody></table></section>
+  <section class="page-section" id="routes">
+    <div class="section-heading"><div><p class="section-kicker">02 · Forwarding</p><h2>Routing tables</h2><p>Connected networks and configured static routes, sorted by longest prefix first.</p></div><span class="section-index">5 entries</span></div>
+    <div class="route-intro"><span class="pill">Directly connected</span><span class="pill pill-summary">Static next hop</span></div>
+    <div class="route-grid" id="routing-tables"><article class="route-card"><header><span class="router-mark">ROUTER</span><h3>r1</h3></header><div class="table-wrap"><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.12.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.13.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.1.0/24</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.32.0/24</code></td><td><span class="hop static">10.3.12.2</span></td></tr><tr><td><code>10.3.32.0/20</code></td><td><span class="hop static">10.3.13.2</span></td></tr></tbody></table></div></article>
+<article class="route-card"><header><span class="router-mark">ROUTER</span><h3>r2</h3></header><div class="table-wrap"><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.12.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.23.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.1.0/24</code></td><td><span class="hop static">10.3.12.1</span></td></tr><tr><td><code>10.3.32.0/24</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.33.0/24</code></td><td><span class="hop connected">directly connected</span></td></tr></tbody></table></div></article>
+<article class="route-card"><header><span class="router-mark">ROUTER</span><h3>r3</h3></header><div class="table-wrap"><table><thead><tr><th>Destination</th><th>Next hop</th></tr></thead><tbody><tr><td><code>10.3.13.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.23.0/30</code></td><td><span class="hop connected">directly connected</span></td></tr><tr><td><code>10.3.1.0/24</code></td><td><span class="hop static">10.3.13.1</span></td></tr><tr><td><code>10.3.32.0/20</code></td><td><span class="hop static">10.3.23.2</span></td></tr></tbody></table></div></article></div>
+    <aside class="summary-callout"><span aria-hidden="true">↳</span><div><strong>Longest-prefix match in action</strong><p>r1 uses <code>10.3.32.0/24 via 10.3.12.2</code> for h2. Other destinations in the <code>10.3.32.0/20</code> summary, including h3, go through r3.</p></div></aside>
+  </section>
 
-<h2>Evidence from the running network</h2>
-<section id="evidence"><h3>Every router&#x27;s routing table: ip route</h3>
-<p class="file">evidence3/routes.txt</p>
-<pre id="evidence-routes">10.3.1.0/24 dev r1-eth0 proto kernel scope link src 10.3.1.1
+  <section class="page-section" id="evidence">
+    <div class="section-heading"><div><p class="section-kicker">03 · Live Mininet output</p><h2>Evidence</h2><p>Expand an item to inspect the captured command output.</p></div><span class="section-index">5 records</span></div>
+    <div class="evidence-grid"><details class="evidence-card" id="evidence-card-routes"><summary><span class="evidence-title">Every router&#x27;s routing table: ip route</span><span class="file">evidence3/routes.txt</span></summary><pre id="evidence-routes">10.3.1.0/24 dev r1-eth0 proto kernel scope link src 10.3.1.1
 10.3.12.0/30 dev r1-eth1 proto kernel scope link src 10.3.12.1
 10.3.13.0/30 dev r1-eth2 proto kernel scope link src 10.3.13.1
 10.3.32.0/24 via 10.3.12.2 dev r1-eth1
@@ -56,10 +109,8 @@ Every route was checked for loops and missing routes before it reached a router.
 10.3.1.0/24 via 10.3.13.1 dev r3-eth0
 10.3.13.0/30 dev r3-eth0 proto kernel scope link src 10.3.13.2
 10.3.23.0/30 dev r3-eth1 proto kernel scope link src 10.3.23.1
-10.3.32.0/20 via 10.3.23.2 dev r3-eth1</pre>
-<h3>From one host to every other: traceroute</h3>
-<p class="file">evidence3/traces.txt</p>
-<pre id="evidence-traces">traceroute to 10.3.32.10 (10.3.32.10), 5 hops max, 60 byte packets
+10.3.32.0/20 via 10.3.23.2 dev r3-eth1</pre></details>
+<details class="evidence-card" id="evidence-card-traces"><summary><span class="evidence-title">From one host to every other: traceroute</span><span class="file">evidence3/traces.txt</span></summary><pre id="evidence-traces">traceroute to 10.3.32.10 (10.3.32.10), 5 hops max, 60 byte packets
  1  10.3.1.1  1.393 ms  0.015 ms  0.007 ms
  2  10.3.12.2  0.317 ms  0.015 ms  0.008 ms
  3  10.3.32.10  0.086 ms  0.009 ms  0.008 ms
@@ -71,16 +122,12 @@ traceroute to 10.3.33.10 (10.3.33.10), 5 hops max, 60 byte packets
 traceroute to 10.3.1.10 (10.3.1.10), 5 hops max, 60 byte packets
  1  10.3.32.1  0.500 ms  0.017 ms  0.004 ms
  2  10.3.12.1  0.066 ms  0.008 ms  0.007 ms
- 3  10.3.1.10  0.052 ms  0.025 ms  0.010 ms</pre>
-<h3>Your summary route at work: ip route get</h3>
-<p class="file">evidence3/summary.txt</p>
-<pre id="evidence-summary">10.3.32.10 via 10.3.12.2 dev r1-eth1 src 10.3.12.1 uid 0
+ 3  10.3.1.10  0.052 ms  0.025 ms  0.010 ms</pre></details>
+<details class="evidence-card" id="evidence-card-summary"><summary><span class="evidence-title">Your summary route at work: ip route get</span><span class="file">evidence3/summary.txt</span></summary><pre id="evidence-summary">10.3.32.10 via 10.3.12.2 dev r1-eth1 src 10.3.12.1 uid 0
     cache
 10.3.33.10 via 10.3.13.2 dev r1-eth2 src 10.3.13.1 uid 0
-    cache</pre>
-<h3>A link goes down: what static routes do</h3>
-<p class="file">evidence3/failure.txt</p>
-<pre id="evidence-failure">PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
+    cache</pre></details>
+<details class="evidence-card" id="evidence-card-failure"><summary><span class="evidence-title">A link goes down: what static routes do</span><span class="file">evidence3/failure.txt</span></summary><pre id="evidence-failure">PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
 
 --- 10.3.32.10 ping statistics ---
 2 packets transmitted, 0 received, 100% packet loss, time 1000ms
@@ -115,22 +162,26 @@ PING 10.3.32.10 (10.3.32.10) 56(84) bytes of data.
 
 --- 10.3.32.10 ping statistics ---
 2 packets transmitted, 2 received, 0% packet loss, time 1002ms
-rtt min/avg/max/mdev = 0.073/0.412/0.751/0.339 ms</pre>
-<h3>check_paths() stopping a loop and a missing route</h3>
-<p class="file">evidence3/check.txt</p>
-<pre id="evidence-check">Missing-route case:
+rtt min/avg/max/mdev = 0.073/0.412/0.751/0.339 ms</pre></details>
+<details class="evidence-card" id="evidence-card-check"><summary><span class="evidence-title">check_paths() stopping a loop and a missing route</span><span class="file">evidence3/check.txt</span></summary><pre id="evidence-check">Missing-route case:
 PROBLEM: h2 to h1: r2 has no route to 10.3.1.10
 PROBLEM: h3 to h1: r2 has no route to 10.3.1.10
 
 Loop case:
 PROBLEM: h2 to h1: loop r2 -&gt; r3 -&gt; r2
-PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2</pre></section>
+PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2</pre></details></div>
+  </section>
 
-<h2>What I learned</h2>
-<section id="answers"><section id="answer-design"><h3>Describe your design: why these routers, LANs and links, and how you chose the addresses.</h3><p>My design uses three routers in a triangle, with h1 on r1 and h2 and h3 on separate LANs behind r2. The direct r1â€“r2 link gives h1 a short path to h2, while the path through r3 provides a second physical route between the routers. I used the lab&#x27;s address plan with NN=03: LANs use 10.3.1.0/24, 10.3.32.0/24, and 10.3.33.0/24, and each router link has its own /30.</p></section>
-<section id="answer-summary"><h3>Which route summarises several LANs? Which networks does it cover, why is it correct, and what else would it attract if you added a network inside its range?</h3><p>The 10.3.32.0/20 route summarizes the 10.3.32.0/24 and 10.3.33.0/24 LANs because both are inside 10.3.32.0 through 10.3.47.255. It lets r1 send traffic for the remote LAN block through r3, while its more specific 10.3.32.0/24 route sends h2 traffic directly toward r2. The summary would also attract any future network inside that /20, including unused ranges such as 10.3.40.0/24, unless a more specific route or another design change handled it.</p></section>
-<section id="answer-failure"><h3>When you took a link down, what happened, and why couldn&#x27;t your routes recover even though another path existed? What would have recovered?</h3><p>When I took r1â€“r2 down, h1&#x27;s ping to h2 lost all packets. The route lookup on r1 then selected the broader 10.3.32.0/20 route through r3, so an alternate forward path existed. But r2 reported &quot;Network is unreachable&quot; for h1: its route back used the failed r1â€“r2 link and disappeared. Bringing the link up did not restore that static route, and the ping still failed. Re-adding r2&#x27;s route manually restored the ping. A routing protocol such as OSPF could detect the failure and recalculate the routes automatically.</p></section>
-<section id="answer-control_plane"><h3>In your network, what was the control plane? Who worked out the routes, and what does that mean for a network of 40 routers?</h3><p>In this lab, I worked out the routes and wrote them as static entries in network.yaml. The Linux kernel&#x27;s routing table then makes the forwarding decision for each packet using longest-prefix match; there is no routing protocol calculating routes for this topology. For 40 routers, manually maintaining every route would be error-prone, so a routing protocol or a validated configuration generator would be more practical and could respond to topology changes.</p></section></section>
+  <section class="page-section" id="reflection">
+    <div class="section-heading"><div><p class="section-kicker">04 · Lab notes</p><h2>What I learned</h2><p>Design choices, route summaries, failure behavior and control-plane work.</p></div><span class="section-index">Reflection</span></div>
+    <div class="answer-grid" id="answers"><article class="answer-card" id="answer-design"><span class="answer-key">design</span><h3>Describe your design: why these routers, LANs and links, and how you chose the addresses.</h3><p>My design uses three routers in a triangle, with h1 on r1 and h2 and h3 on separate LANs behind r2. The direct r1â€“r2 link gives h1 a short path to h2, while the path through r3 provides a second physical route between the routers. I used the lab&#x27;s address plan with NN=03: LANs use 10.3.1.0/24, 10.3.32.0/24, and 10.3.33.0/24, and each router link has its own /30.</p></article>
+<article class="answer-card" id="answer-summary"><span class="answer-key">summary</span><h3>Which route summarises several LANs? Which networks does it cover, why is it correct, and what else would it attract if you added a network inside its range?</h3><p>The 10.3.32.0/20 route summarizes the 10.3.32.0/24 and 10.3.33.0/24 LANs because both are inside 10.3.32.0 through 10.3.47.255. It lets r1 send traffic for the remote LAN block through r3, while its more specific 10.3.32.0/24 route sends h2 traffic directly toward r2. The summary would also attract any future network inside that /20, including unused ranges such as 10.3.40.0/24, unless a more specific route or another design change handled it.</p></article>
+<article class="answer-card" id="answer-failure"><span class="answer-key">failure</span><h3>When you took a link down, what happened, and why couldn&#x27;t your routes recover even though another path existed? What would have recovered?</h3><p>When I took r1â€“r2 down, h1&#x27;s ping to h2 lost all packets. The route lookup on r1 then selected the broader 10.3.32.0/20 route through r3, so an alternate forward path existed. But r2 reported &quot;Network is unreachable&quot; for h1: its route back used the failed r1â€“r2 link and disappeared. Bringing the link up did not restore that static route, and the ping still failed. Re-adding r2&#x27;s route manually restored the ping. A routing protocol such as OSPF could detect the failure and recalculate the routes automatically.</p></article>
+<article class="answer-card" id="answer-control_plane"><span class="answer-key">control plane</span><h3>In your network, what was the control plane? Who worked out the routes, and what does that mean for a network of 40 routers?</h3><p>In this lab, I worked out the routes and wrote them as static entries in network.yaml. The Linux kernel&#x27;s routing table then makes the forwarding decision for each packet using longest-prefix match; there is no routing protocol calculating routes for this topology. For 40 routers, manually maintaining every route would be error-prone, so a routing protocol or a validated configuration generator would be more practical and could respond to topology changes.</p></article></div>
+  </section>
+
+  <footer><span>WIC2005 · Week 3 · generated from <code>week-03/netlab/network.yaml</code></span><a href="https://github.com/cheonglihua/wic2005-lab-portfolio">Source repository ↗</a></footer>
+</main>
 
 <script type="application/json" id="network-data">{
   "student_id_last4": "4903",
@@ -207,7 +258,7 @@ PROBLEM: h3 to h1: loop r2 -&gt; r3 -&gt; r2</pre></section>
 }</script>
 <script type="module">
   import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({ startOnLoad: true });
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "strict" });
 </script>
 </body>
 </html>
