@@ -168,3 +168,12 @@ docker run --rm -v "${PWD}:/repo" -w /repo/week-03/netlab `
 The generator validates the data and all host paths before writing
 `docs/week3/index.html`. The published page is
 [Week 3 — Routed Network Lab](https://cheonglihua.github.io/wic2005-lab-portfolio/week3/).
+After the `Deploy portfolio site` GitHub Actions run succeeds, check the live
+response in PowerShell (the query parameter avoids an old cached copy):
+
+```powershell
+(Invoke-WebRequest -Uri "https://cheonglihua.github.io/wic2005-lab-portfolio/week3/?verify=1" -UseBasicParsing).StatusCode
+```
+
+The expected status is `200`; the page should show four routers and include the
+expanded connectivity, LPM, summary-route and failure evidence.
