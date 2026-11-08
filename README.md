@@ -29,3 +29,6 @@ configured forwarding rules.
 
 Week 2 is declared as **Level 3 (AI-Assisted)**, using ChatGPT / Codex. See the
 [Week 2 AI use section](./week-02/README.md#ai-use) for what each tool did.
+
+Week 3 is declared as **Level 3 (AI-Assisted)**, using ChatGPT / Codex. See the
+[Week 3 AI use section](./week-03/README.md#ai-use) for what each tool did.
