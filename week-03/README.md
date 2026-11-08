@@ -218,3 +218,19 @@ succeeds, check the published page in PowerShell:
 
 The expected status is `200`. The page should show four routers and expandable
 topology, routing-table, evidence, and reflection sections.
+
+## AI use
+
+**Declared level: Level 3 (AI-Assisted).** The Week 3 assignment is set at
+Level 3. AI carried out specific project tasks, and no AI model or function is
+built into the final network, scripts, or page.
+
+| Tool | What it did |
+| --- | --- |
+| ChatGPT / Codex | Explained lab concepts. |
+| ChatGPT / Codex | Helped write and fix code in `netlab/`. |
+| ChatGPT / Codex | Helped write the `netlab/page3.yaml` answers and this README. |
+
+AI did not run the lab for me. The files in `netlab/evidence3/` are output from
+my own Mininet runs. I reviewed the AI-assisted work and can explain and defend
+everything submitted here.
