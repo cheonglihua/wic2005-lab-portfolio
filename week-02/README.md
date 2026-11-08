@@ -163,7 +163,6 @@ built into the final network, scripts, or page.
 | ChatGPT / Codex | Explained lab concepts. |
 | ChatGPT / Codex | Helped write and fix code in `netlab/`. |
 | ChatGPT / Codex | Helped write the `netlab/page.yaml` answers and this README. |
-| Claude Code | Checked the finished work against the lab requirements and drafted this declaration. |
 
 AI did not run the lab for me. The files in `netlab/evidence/` are output from
 my own Mininet runs. I reviewed the AI-assisted work and can explain and defend
