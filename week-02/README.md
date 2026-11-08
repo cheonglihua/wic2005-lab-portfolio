@@ -151,3 +151,20 @@ When the topology or page data changes, rerun the generator command above,
 inspect `git diff`, and commit the updated data and generated page. Pushing to
 `main` triggers the existing Pages workflow, which publishes the root `docs/`
 directory. The published Week 2 link is at the top of this README.
+
+## AI use
+
+**Declared level: Level 3 (AI-Assisted).** The Week 2 assignment is set at
+Level 3. AI carried out specific project tasks, and no AI model or function is
+built into the final network, scripts, or page.
+
+| Tool | What it did |
+| --- | --- |
+| ChatGPT / Codex | Explained lab concepts. |
+| ChatGPT / Codex | Helped write and fix code in `netlab/`. |
+| ChatGPT / Codex | Helped write the `netlab/page.yaml` answers and this README. |
+| Claude Code | Checked the finished work against the lab requirements and drafted this declaration. |
+
+AI did not run the lab for me. The files in `netlab/evidence/` are output from
+my own Mininet runs. I reviewed the AI-assisted work and can explain and defend
+everything submitted here.

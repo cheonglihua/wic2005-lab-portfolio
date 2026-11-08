@@ -24,3 +24,9 @@ allow this repository's workflow token to enable Pages automatically.
 The Week 1 experiment runs a three-host Mininet topology on an ordinary Linux
 bridge. It demonstrates Ethernet learning without a controller or manually
 configured forwarding rules.
+
+## AI use
+
+Week 2 is declared as **Level 3 (AI-Assisted)**, using ChatGPT / Codex and
+Claude Code. See the
+[Week 2 AI use section](./week-02/README.md#ai-use) for what each tool did.
