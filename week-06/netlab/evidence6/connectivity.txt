@@ -1,0 +1,71 @@
+== shop (VNI 4901): every VM to every other
+PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
+64 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=6.69 ms
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 6.685/6.685/6.685/0.000 ms
+PING 10.3.50.12 (10.3.50.12) 56(84) bytes of data.
+64 bytes from 10.3.50.12: icmp_seq=1 ttl=64 time=1.39 ms
+
+--- 10.3.50.12 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 1.394/1.394/1.394/0.000 ms
+PING 10.3.50.10 (10.3.50.10) 56(84) bytes of data.
+64 bytes from 10.3.50.10: icmp_seq=1 ttl=64 time=1.18 ms
+
+--- 10.3.50.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 1.182/1.182/1.182/0.000 ms
+PING 10.3.50.12 (10.3.50.12) 56(84) bytes of data.
+64 bytes from 10.3.50.12: icmp_seq=1 ttl=64 time=0.254 ms
+
+--- 10.3.50.12 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.254/0.254/0.254/0.000 ms
+PING 10.3.50.10 (10.3.50.10) 56(84) bytes of data.
+64 bytes from 10.3.50.10: icmp_seq=1 ttl=64 time=0.066 ms
+
+--- 10.3.50.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.066/0.066/0.066/0.000 ms
+PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
+64 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.084 ms
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.084/0.084/0.084/0.000 ms
+== bank (VNI 4902)
+PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
+64 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.492 ms
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.492/0.492/0.492/0.000 ms
+PING 10.3.50.10 (10.3.50.10) 56(84) bytes of data.
+64 bytes from 10.3.50.10: icmp_seq=1 ttl=64 time=0.065 ms
+
+--- 10.3.50.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.065/0.065/0.065/0.000 ms
+== lab (VNI 4903)
+PING 10.3.70.11 (10.3.70.11) 56(84) bytes of data.
+64 bytes from 10.3.70.11: icmp_seq=1 ttl=64 time=0.734 ms
+
+--- 10.3.70.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.734/0.734/0.734/0.000 ms
+PING 10.3.70.10 (10.3.70.10) 56(84) bytes of data.
+64 bytes from 10.3.70.10: icmp_seq=1 ttl=64 time=0.060 ms
+
+--- 10.3.70.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.060/0.060/0.060/0.000 ms
+== and no other: pay1 to 10.3.50.12 (web3's address, not in bank) must fail
+PING 10.3.50.12 (10.3.50.12) 56(84) bytes of data.
+
+--- 10.3.50.12 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1008ms
+
+== and no other: web1 to 10.3.70.10 (dev1, another tenant's network) must fail
+ping: connect: Network is unreachable

@@ -1,0 +1,49 @@
+== rack1: vxlan4901 before any traffic
+e2:be:bf:21:eb:83 vlan 1 master br4901 permanent
+e2:be:bf:21:eb:83 master br4901 permanent
+00:00:00:00:00:00 dst 10.3.0.2 self permanent
+00:00:00:00:00:00 dst 10.3.0.3 self permanent
+PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
+64 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.924 ms
+64 bytes from 10.3.50.11: icmp_seq=2 ttl=64 time=0.084 ms
+
+--- 10.3.50.11 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1002ms
+rtt min/avg/max/mdev = 0.084/0.504/0.924/0.420 ms
+== captured on rack3's underlay
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on rack3-eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+17:59:53.707191 IP 10.3.0.1.34214 > 10.3.0.3.4789: VXLAN, flags [I] (0x08), vni 4901
+ARP, Request who-has 10.3.50.11 tell 10.3.50.10, length 28
+
+1 packet captured
+1 packet received by filter
+0 packets dropped by kernel
+== rack1: vxlan4901 after
+02:00:13:25:00:0b master br4901 
+e2:be:bf:21:eb:83 vlan 1 master br4901 permanent
+e2:be:bf:21:eb:83 master br4901 permanent
+02:00:13:25:00:0b dst 10.3.0.2 self 
+00:00:00:00:00:00 dst 10.3.0.2 self permanent
+00:00:00:00:00:00 dst 10.3.0.3 self permanent
+== rack2: vxlan4901 after
+02:00:13:25:00:0a master br4901 
+da:56:b2:9c:60:53 vlan 1 master br4901 permanent
+da:56:b2:9c:60:53 master br4901 permanent
+02:00:13:25:00:0a dst 10.3.0.1 self 
+00:00:00:00:00:00 dst 10.3.0.1 self permanent
+00:00:00:00:00:00 dst 10.3.0.3 self permanent
+== rack3: vxlan4901 after
+02:00:13:25:00:0a master br4901 
+42:53:85:08:c8:f6 vlan 1 master br4901 permanent
+42:53:85:08:c8:f6 master br4901 permanent
+02:00:13:25:00:0a dst 10.3.0.1 self 
+00:00:00:00:00:00 dst 10.3.0.1 self permanent
+00:00:00:00:00:00 dst 10.3.0.2 self permanent
+== extra: captured on rack4's underlay meanwhile (rack4 hosts no shop VM)
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on rack4-eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+
+0 packets captured
+0 packets received by filter
+0 packets dropped by kernel

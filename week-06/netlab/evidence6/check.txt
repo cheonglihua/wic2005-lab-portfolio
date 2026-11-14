@@ -1,0 +1,4 @@
+PROBLEM: tenant shop (VNI 4901): MTU 1500 + 50 bytes of VXLAN = 1550, 50 bytes more than the underlay MTU 1500; lower the tenant MTU to 1450 or raise the underlay MTU to 1550
+PROBLEM: tenant bank (VNI 4902): MTU 1500 + 50 bytes of VXLAN = 1550, 50 bytes more than the underlay MTU 1500; lower the tenant MTU to 1450 or raise the underlay MTU to 1550
+PROBLEM: tenant lab (VNI 4903): MTU 1500 + 50 bytes of VXLAN = 1550, 50 bytes more than the underlay MTU 1500; lower the tenant MTU to 1450 or raise the underlay MTU to 1550
+Fix the design and try again: nothing was built.

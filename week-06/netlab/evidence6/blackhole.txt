@@ -1,0 +1,77 @@
+== small ping: works
+PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
+64 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.333 ms
+64 bytes from 10.3.50.11: icmp_seq=2 ttl=64 time=0.083 ms
+
+--- 10.3.50.11 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1025ms
+rtt min/avg/max/mdev = 0.083/0.208/0.333/0.125 ms
+== large ping (1472 + 28 = 1500-byte packet): lost
+PING 10.3.50.11 (10.3.50.11) 1472(1500) bytes of data.
+
+--- 10.3.50.11 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1005ms
+
+== TCP transfer
+Connecting to host 10.3.50.11, port 5201
+[  5] local 10.3.50.10 port 34762 connected to 10.3.50.11 port 5201
+[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
+[  5]   0.00-1.00   sec  0.00 Bytes  0.00 bits/sec    2   1.41 KBytes       
+[  5]   1.00-2.00   sec  0.00 Bytes  0.00 bits/sec    1   1.41 KBytes       
+[  5]   2.00-3.00   sec  0.00 Bytes  0.00 bits/sec    0   1.41 KBytes       
+[  5]   3.00-4.00   sec  0.00 Bytes  0.00 bits/sec    1   1.41 KBytes       
+[  5]   4.00-5.00   sec  0.00 Bytes  0.00 bits/sec    0   1.41 KBytes       
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-5.00   sec  0.00 Bytes  0.00 bits/sec    4             sender
+[  5]   0.00-5.00   sec  0.00 Bytes  0.00 bits/sec                  receiver
+
+iperf Done.
+== finding the limit with don't-fragment pings
+PING 10.3.50.11 (10.3.50.11) 1400(1428) bytes of data.
+1408 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.072 ms
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.072/0.072/0.072/0.000 ms
+PING 10.3.50.11 (10.3.50.11) 1440(1468) bytes of data.
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 0 received, 100% packet loss, time 0ms
+
+PING 10.3.50.11 (10.3.50.11) 1420(1448) bytes of data.
+1428 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.055 ms
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.055/0.055/0.055/0.000 ms
+PING 10.3.50.11 (10.3.50.11) 1430(1458) bytes of data.
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 0 received, 100% packet loss, time 0ms
+
+PING 10.3.50.11 (10.3.50.11) 1425(1453) bytes of data.
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 0 received, 100% packet loss, time 0ms
+
+== largest that works: 1422 (+28 = 1450)
+PING 10.3.50.11 (10.3.50.11) 1422(1450) bytes of data.
+1430 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.063 ms
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.063/0.063/0.063/0.000 ms
+== smallest that fails: 1423 (+28 = 1451)
+PING 10.3.50.11 (10.3.50.11) 1423(1451) bytes of data.
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 0 received, 100% packet loss, time 0ms
+
+== why: rack1's vxlan4901 has mtu 1450, so br4901 discards bigger frames before they are encapsulated (vxlan TX dropped stays 0)
+6: vxlan4901: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue master br4901 state UNKNOWN mode DEFAULT group default qlen 1000
+    link/ether 02:85:c6:27:8e:97 brd ff:ff:ff:ff:ff:ff
+    RX:  bytes packets errors dropped  missed   mcast           
+          5684      22      0       0       0       0 
+    TX:  bytes packets errors dropped carrier collsns           
+          6011      25      0       0       0       0 

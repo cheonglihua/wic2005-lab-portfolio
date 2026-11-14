@@ -1,0 +1,19 @@
+sh echo "== small ping: works" > evidence6/blackhole.txt
+web1 ping -c 2 10.3.50.11 >> evidence6/blackhole.txt
+sh echo "== large ping (1472 + 28 = 1500-byte packet): lost" >> evidence6/blackhole.txt
+web1 ping -c 2 -W 1 -s 1472 10.3.50.11 >> evidence6/blackhole.txt
+web2 iperf3 -s -D
+sh sleep 1; echo "== TCP transfer" >> evidence6/blackhole.txt
+web1 timeout 20 iperf3 -c 10.3.50.11 -t 5 >> evidence6/blackhole.txt 2>&1
+sh echo "== finding the limit with don't-fragment pings" >> evidence6/blackhole.txt
+web1 ping -M do -c 1 -W 1 -s 1400 10.3.50.11 >> evidence6/blackhole.txt
+web1 ping -M do -c 1 -W 1 -s 1440 10.3.50.11 >> evidence6/blackhole.txt
+web1 ping -M do -c 1 -W 1 -s 1420 10.3.50.11 >> evidence6/blackhole.txt
+web1 ping -M do -c 1 -W 1 -s 1430 10.3.50.11 >> evidence6/blackhole.txt
+web1 ping -M do -c 1 -W 1 -s 1425 10.3.50.11 >> evidence6/blackhole.txt
+sh echo "== largest that works: 1422 (+28 = 1450)" >> evidence6/blackhole.txt
+web1 ping -M do -c 1 -W 1 -s 1422 10.3.50.11 >> evidence6/blackhole.txt
+sh echo "== smallest that fails: 1423 (+28 = 1451)" >> evidence6/blackhole.txt
+web1 ping -M do -c 1 -W 1 -s 1423 10.3.50.11 >> evidence6/blackhole.txt
+sh echo "== why: rack1's vxlan4901 has mtu 1450, so br4901 discards bigger frames before they are encapsulated (vxlan TX dropped stays 0)" >> evidence6/blackhole.txt
+rack1 ip -s link show vxlan4901 >> evidence6/blackhole.txt

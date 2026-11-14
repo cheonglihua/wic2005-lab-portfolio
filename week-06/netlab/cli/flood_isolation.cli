@@ -1,0 +1,21 @@
+sh echo "== rack1: vxlan4901 before any traffic" > evidence6/flood.txt
+rack1 bridge fdb show dev vxlan4901 >> evidence6/flood.txt
+rack3 timeout 8 tcpdump -ni rack3-eth0 udp port 4789 > /tmp/rack3.txt 2>&1 &
+rack4 timeout 8 tcpdump -ni rack4-eth0 udp port 4789 > /tmp/rack4.txt 2>&1 &
+sh sleep 2
+web1 ping -c 2 10.3.50.11 >> evidence6/flood.txt
+sh sleep 8; echo "== captured on rack3's underlay" >> evidence6/flood.txt; cat /tmp/rack3.txt >> evidence6/flood.txt
+sh echo "== rack1: vxlan4901 after" >> evidence6/flood.txt
+rack1 bridge fdb show dev vxlan4901 >> evidence6/flood.txt
+sh echo "== rack2: vxlan4901 after" >> evidence6/flood.txt
+rack2 bridge fdb show dev vxlan4901 >> evidence6/flood.txt
+sh echo "== rack3: vxlan4901 after" >> evidence6/flood.txt
+rack3 bridge fdb show dev vxlan4901 >> evidence6/flood.txt
+sh echo "== extra: captured on rack4's underlay meanwhile (rack4 hosts no shop VM)" >> evidence6/flood.txt; cat /tmp/rack4.txt >> evidence6/flood.txt
+pay2 timeout 8 tcpdump -ni pay2-eth0 > /tmp/pay2.txt 2>&1 &
+sh sleep 2
+web1 ping -c 3 10.3.50.11 > evidence6/isolation.txt
+web1 ip neigh show 10.3.50.11 >> evidence6/isolation.txt
+sh sleep 8; echo "== captured on pay2 (bank, also 10.3.50.11) meanwhile" >> evidence6/isolation.txt; cat /tmp/pay2.txt >> evidence6/isolation.txt
+pay1 ping -c 2 10.3.50.11 >> evidence6/isolation.txt
+pay1 ip neigh show 10.3.50.11 >> evidence6/isolation.txt

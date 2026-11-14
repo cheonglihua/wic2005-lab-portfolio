@@ -1,0 +1,2 @@
+web1 ping -c 1 -W 1 10.3.50.11 > /dev/null
+web1 for s in 1400 1418 1420 1422 1423 1424 1426 1427 1428 1440 1472; do if ping -M do -c 1 -W 1 -s $s 10.3.50.11 >/dev/null 2>&1; then echo "$s ok"; else echo "$s FAIL"; fi; done > /tmp/probe.txt; cat /tmp/probe.txt

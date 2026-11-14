@@ -1,0 +1,6 @@
+sh echo "== fix B: underlay MTU 9000" >> evidence6/fixes.txt
+web1 ping -M do -c 1 -s 1472 10.3.50.11 >> evidence6/fixes.txt
+web1 ping -M do -c 1 -s 1473 10.3.50.11 >> evidence6/fixes.txt 2>&1
+web2 iperf3 -s -D
+sh sleep 1
+web1 iperf3 -c 10.3.50.11 -t 5 >> evidence6/fixes.txt
