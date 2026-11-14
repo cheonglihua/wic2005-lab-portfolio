@@ -374,7 +374,7 @@ Every tenant's MTU was checked against the underlay before anything was built.</
     <section class="answer-grid" id="answers">{answers}</section>
   </section>
 
-  <footer><span>Generated from <code>{source}</code> by <code>make_page6.py</code> on {today}</span><a href="{repo}">Source repository ↗</a></footer>
+  <footer><a href="{repo}">Source repository ↗</a></footer>
 </main>
 
 <script type="application/json" id="overlay-data">{data}</script>
