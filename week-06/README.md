@@ -1,9 +1,10 @@
-# Week 6 — Namespaces, VXLAN Overlays and Containers
+# Week 6 — Virtualisation, Overlays and Software Forwarding
 
 This week looks under Mininet, then builds a multi-tenant VXLAN data centre from
 YAML. The address block comes from the student ID suffix `4903`: IPv4
 `10.3.0.0/16`, IPv6 `fd00:4903::/32`.
 
+- **Assignment:** Overlay your own data centre
 - **Published page:** [Week 6 — my data centre overlay](https://cheonglihua.github.io/wic2005-lab-portfolio/week6/)
 - **Assignment files:** [`netlab/`](./netlab/)
 - **Lab transcripts:** [`lab/results/`](./lab/results/)
@@ -133,9 +134,9 @@ with the machine it runs on. Only its network is separate.
 
 ### This VXLAN tunnel compared with the Week 5 P4 tunnel
 
-This comparison assumes the Week 5 tunnel was the P4 `basic_tunnel` design: a
-custom tunnel header between Ethernet and IP, forwarded by P4 switches on its
-`dst_id`.
+As the lecture's `vtep.p4` puts it, Week 5's tunnel "added one small header that
+every switch had to understand". The 4-byte figure below assumes the P4
+`basic_tunnel` header (`proto_id` + `dst_id`).
 
 | | VXLAN (this lab) | Week 5 P4 tunnel |
 | --- | --- | --- |

@@ -302,13 +302,13 @@ PAGE = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#1e1b4b">
 <meta name="description" content="Week 6 VXLAN overlay: a multi-tenant data centre built from data, with flood-and-learn, isolation and MTU evidence.">
-<title>Overlay {last4}: my data centre, from data</title>
+<title>Week 6 — Virtualisation, Overlays and Software Forwarding · Overlay {last4}</title>
 <style>{css}</style>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="topbar">
-  <span class="brand"><span class="brand-mark">W6</span>VXLAN overlay · {last4}</span>
+  <span class="brand"><span class="brand-mark">W6</span>Week 6 · Overlay {last4}</span>
   <nav class="nav" aria-label="Page sections">
     <a href="#requirements"><b>✓</b>Requirements</a><a href="#design"><b>D2</b>Design</a><a href="#vteps"><b>D3</b>VTEPs</a><a href="#mtu"><b>D4</b>MTU</a><a href="#evidence"><b>D5</b>Evidence</a><a href="#reflection"><b>D6</b>Answers</a>
   </nav>
@@ -316,7 +316,7 @@ PAGE = """<!doctype html>
 <main id="main">
   <section class="hero" id="overview">
     <div class="hero-copy">
-      <p class="eyebrow">WIC2005 · Week 6 · Overlay your own data centre</p>
+      <p class="eyebrow">Week 6 · Virtualisation, Overlays and Software Forwarding · Assignment: overlay your own data centre</p>
       <h1>My data centre overlay, from data</h1>
       <p id="summary">{n_hv} hypervisors and {n_tenants} tenants ({n_vms} VMs) on <code>{v4_block}</code>, joined by VXLAN.
 Every tenant's MTU was checked against the underlay before anything was built.</p>

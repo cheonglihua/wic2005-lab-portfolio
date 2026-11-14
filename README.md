@@ -20,7 +20,7 @@ allow this repository's workflow token to enable Pages automatically.
 - [Week 1 - Why Programmable Networks Exist](./week-01/README.md)
 - [Week 2 - Networks as Data](./week-02/README.md)
 - [Week 3 - Static Routing and Network Data](./week-03/README.md)
-- [Week 6 - VXLAN Overlays and Containers](./week-06/README.md)
+- [Week 6 - Virtualisation, Overlays and Software Forwarding](./week-06/README.md)
 
 The Week 1 experiment runs a three-host Mininet topology on an ordinary Linux
 bridge. It demonstrates Ethernet learning without a controller or manually
