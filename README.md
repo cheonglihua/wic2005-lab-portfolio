@@ -19,7 +19,8 @@ allow this repository's workflow token to enable Pages automatically.
 
 - [Week 1 - Why Programmable Networks Exist](./week-01/README.md)
 - [Week 2 - Networks as Data](./week-02/README.md)
-- [Week 3 - Static Routing and Network Data](./week-03/README.md) 
+- [Week 3 - Static Routing and Network Data](./week-03/README.md)
+- [Week 6 - VXLAN Overlays and Containers](./week-06/README.md)
 
 The Week 1 experiment runs a three-host Mininet topology on an ordinary Linux
 bridge. It demonstrates Ethernet learning without a controller or manually
@@ -32,3 +33,6 @@ Week 2 is declared as **Level 3 (AI-Assisted)**, using ChatGPT / Codex. See the
 
 Week 3 is declared as **Level 3 (AI-Assisted)**, using ChatGPT / Codex. See the
 [Week 3 AI use section](./week-03/README.md#ai-use) for what each tool did.
+
+Week 6 is declared as **Level 3 (AI-Assisted)**, using Claude Code. See the
+[Week 6 AI use section](./week-06/README.md#ai-use) for what it did.
