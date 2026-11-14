@@ -3,7 +3,7 @@
 # Leave a blank line between paragraphs. Don't put your name or your full student ID in this file.
 #
 # Formatting understood by make_page6.py, block by block (blocks separated by a blank line):
-#   lines starting "- "        -> a bullet list
+#   lines starting "- "        -> a bullet list (a first line without "- " becomes its heading)
 #   lines starting "|"         -> a table (first row is the header)
 #   "[[bars Title]]" + "label | value | shown text" lines -> a bar chart
 #   `code` and **bold** work inside any text.
@@ -14,119 +14,121 @@ answers:
   design:
     question: "Describe your design: hypervisors, tenants, VNIs and addresses. Which tenants overlap, and why did you place each VM where you did?"
     answer: |-
-      A four-rack data centre on my block `10.3.0.0/16`. The racks rack1 to rack4 are the hypervisors, at `10.3.0.1` to `10.3.0.4` on the underlay `10.3.0.0/24`. The underlay MTU is 9000, my chosen fix. The VNIs come from my ID: 4901, 4902 and 4903.
+      My data centre has four racks (rack1 to rack4) as hypervisors, at `10.3.0.1` to `10.3.0.4` on the underlay `10.3.0.0/24`. I took the VNIs from my ID: 4901, 4902 and 4903. The final underlay MTU is 9000 (fix B).
 
-      | Tenant | VNI | Network | VMs (hypervisor) | Why placed there |
+      | Tenant | VNI | Network | VMs (hypervisor) | Why I placed them there |
       |---|---|---|---|---|
-      | shop | 4901 | `10.3.50.0/24` | web1 (rack1), web2 (rack2), web3 (rack3) | Web tier spread over 3 racks: it survives losing any one rack, and each shop VTEP floods to 2 others |
-      | bank | 4902 | `10.3.50.0/24` (same as shop) | pay1 (rack1), pay2 (rack3) | Anti-affinity: two racks. Placed beside web1 and web3, so the same IP addresses sit on the same racks: the hardest isolation case |
-      | lab | 4903 | `10.3.70.0/24` | dev1 (rack2), dev2 (rack4) | Makes rack4 a hypervisor outside shop's VNI, so I can show that shop's floods don't reach it |
+      | shop | 4901 | `10.3.50.0/24` | web1 (rack1), web2 (rack2), web3 (rack3) | The three web VMs are distributed across different racks to reduce dependence on a single rack. Application-level load balancing and failover would still be needed to maintain service availability if a rack fails. It is also the tenant I use to watch flooding, since each shop VTEP floods to 2 others. |
+      | bank | 4902 | `10.3.50.0/24` (same as shop) | pay1 (rack1), pay2 (rack3) | On two racks so one failure doesn't take down both payment VMs. I put them on the same racks as web1 and web3 on purpose, so VMs with the same IP sit on the same hypervisor. That is the hardest case for isolation. |
+      | lab | 4903 | `10.3.70.0/24` | dev1 (rack2), dev2 (rack4) | Gives me rack4, a hypervisor with no shop VM, so I can check that shop's floods never reach it. |
 
-      - **Overlapping tenants:** shop and bank both use `10.3.50.0/24`. They are two customers who chose the same private range, and only the VNI keeps them apart. pay1 and web1 are both `.10`; pay2 and web2 are both `.11`.
-      - **Hypervisors hosting two tenants:** rack1 (shop and bank), rack2 (shop and lab), rack3 (shop and bank).
-      - **Tenant spanning 3 hypervisors:** shop (rack1, rack2, rack3).
+      - **Overlap:** shop and bank both use `10.3.50.0/24`, like two customers who picked the same private range. Only the VNI keeps them apart. web1 and pay1 are both `.10`, and web2 and pay2 are both `.11`.
+      - **Two tenants on one hypervisor:** rack1 (shop, bank), rack2 (shop, lab) and rack3 (shop, bank).
+      - **Tenant on 3 hypervisors:** shop.
 
   isolation:
     question: "Two of your VMs have the same IP address. Using your evidence, explain how a ping reaches the right one — and what would have to go wrong for one tenant to see another's traffic."
     answer: |-
-      web2 (shop, rack2) and pay2 (bank, rack3) are both `10.3.50.11`. From `isolation.txt`:
+      web2 (shop, on rack2) and pay2 (bank, on rack3) both have `10.3.50.11`. My `isolation.txt` shows who answered each ping:
 
-      | Sender | Pinged | Replies | ARP entry for 10.3.50.11 | MAC decodes to | Answered by |
-      |---|---|---|---|---|---|
-      | web1 (shop) | `10.3.50.11` | 3 of 3 | `02:00:13:25:00:0b` | `0x1325` = VNI 4901, address .11 | web2 on rack2 |
-      | pay1 (bank) | `10.3.50.11` | 2 of 2 | `02:00:13:26:00:0b` | `0x1326` = VNI 4902, address .11 | pay2 on rack3 |
-      | tcpdump on pay2 during web1's ping | — | — | — | **0 packets captured** | — |
+      | Sender | Replies | MAC in its ARP table for 10.3.50.11 | What the MAC means | Answered by |
+      |---|---|---|---|---|
+      | web1 (shop) | 3 of 3 | `02:00:13:25:00:0b` | `13:25` = 0x1325 = VNI 4901, last byte = .11 | web2 on rack2 |
+      | pay1 (bank) | 2 of 2 | `02:00:13:26:00:0b` | `13:26` = 0x1326 = VNI 4902, last byte = .11 | pay2 on rack3 |
+      | tcpdump on pay2 while web1 pinged | n/a | n/a | 0 packets captured | n/a |
 
-      How the right VM is reached:
-      - The sender's port decides the tenant. web1's port is in `br4901`, pay1's port is in `br4902`.
-      - Each bridge has only its own VXLAN device, so the frame leaves rack1 tagged with VNI 4901 or 4902.
-      - rack3 did receive shop's flooded ARP (`flood.txt`), but it decapsulated it into `vxlan4901` → `br4901`. That bridge holds only web3's port. pay2's port, `rack3-eth2`, is in `br4902`, so pay2 never saw it.
-      - The overlay never looks at the IP address: the same IP gives two different MACs, one per VNI.
+      Why the ping reaches the right VM:
+      - The overlay never looks at the IP address. What matters is which bridge the sender's port is in.
+      - On rack1, web1's port is in `br4901` and pay1's port is in `br4902`. Each bridge only contains its own VXLAN device, so web1's frames leave with VNI 4901 and pay1's leave with VNI 4902.
+      - The receiving VTEP puts each frame into the bridge for its VNI. On rack3, VNI 4901 goes into `br4901`, which only has web3's port, so it can never come out of pay2's port in `br4902`.
+      - One thing I noticed in my evidence: web1 already had web2's MAC cached from the flood test, so its pings here went unicast straight to rack2. pay2 capturing 0 packets shows nothing leaked, but the stronger proof is that pay1 got a different MAC (VNI 4902) for the same IP.
 
-      What would have to go wrong for one tenant to see another's traffic:
-      - A VM port in the wrong bridge, for example `rack3-eth2 master br4901` from an off-by-one in the port numbers.
-      - Two tenants given the same VNI (`check_spec()` refuses that), or a VXLAN device created with the wrong `id`.
-      - An attack on the underlay. VXLAN has no authentication or encryption, so anyone who can send UDP to port 4789 on a rack could inject VNI 4902 frames into bank. The underlay must be trusted, or protected with IPsec or MACsec.
+      What would have to go wrong for a leak:
+      - A VM port added to the wrong bridge, for example `rack3-eth2 master br4901` if my port numbering was off by one.
+      - Two tenants with the same VNI (`check_spec()` stops this), or a VXLAN device created with the wrong `id`.
+      - Someone on the underlay sending fake VXLAN packets. VXLAN has no authentication or encryption, so anyone who can send UDP to port 4789 could inject frames with VNI 4902 into bank. The underlay has to be trusted, or protected with IPsec or MACsec.
 
   flood_learn:
     question: "Using your evidence, explain what was flooded, to which hypervisors, and what each VTEP learned. With 50 hypervisors in one VNI, how many copies would one broadcast need — and how would EVPN change that?"
     answer: |-
-      web1 pinged web2 (`10.3.50.11`). The only frame flooded was web1's **ARP broadcast** "who-has 10.3.50.11". rack1's `vxlan4901` copied it once to each entry in its flood list (head-end replication). The ARP reply and the ICMP echoes were unicast, because by then the MACs were known.
+      When web1 pinged web2 (`10.3.50.11`), web1 first sent an ARP broadcast asking who has `10.3.50.11`. That was the only frame that got flooded. rack1 sent one copy to each hypervisor in its VNI 4901 flood list, which is head-end replication. The ARP reply and the pings after it were unicast, because by then the VTEPs knew both MACs.
 
       | Hypervisor | Flood list for VNI 4901 (before) | Got the flooded ARP? | Learned afterwards |
       |---|---|---|---|
-      | rack1 (sender) | `10.3.0.2`, `10.3.0.3` (only `00:00:00:00:00:00` entries) | sent it | web2 `02:00:13:25:00:0b` → `10.3.0.2` |
-      | rack2 | `10.3.0.1`, `10.3.0.3` | yes, then replied | web1 `02:00:13:25:00:0a` → `10.3.0.1` |
-      | rack3 | `10.3.0.1`, `10.3.0.2` | **yes**: captured `10.3.0.1 > 10.3.0.3.4789 vni 4901 ARP who-has 10.3.50.11` | web1 `02:00:13:25:00:0a` → `10.3.0.1`, though it never replied |
-      | rack4 | not in VNI 4901 | **no**: 0 packets captured | — |
+      | rack1 (sender) | `10.3.0.2`, `10.3.0.3` | sent it | web2 `02:00:13:25:00:0b` at `10.3.0.2` |
+      | rack2 | `10.3.0.1`, `10.3.0.3` | yes, and it replied | web1 `02:00:13:25:00:0a` at `10.3.0.1` |
+      | rack3 | `10.3.0.1`, `10.3.0.2` | **yes**: captured `10.3.0.1 > 10.3.0.3.4789 ... vni 4901 ARP who-has 10.3.50.11` | web1 `02:00:13:25:00:0a` at `10.3.0.1`, even though it never replied |
+      | rack4 | not in VNI 4901 | **no**: 0 packets captured | nothing |
 
-      - A VTEP learns from the outer source IP of every packet it receives, even a flood. That is why rack3 learned web1.
-      - Learned entries are not `permanent`, so they age out. The flood entries my code created stay.
+      - Before the ping, rack1's `vxlan4901` table only had my two `00:00:00:00:00:00` flood entries, plus the device's own MAC. Every other entry was learned from traffic.
+      - A VTEP learns "this inner source MAC is behind this outer source IP" from every packet it receives, floods included. That is why rack3 learned web1.
+      - The learned entries are not marked `permanent`, so they age out. My flood entries stay.
 
-      [[bars Copies of one broadcast that the source hypervisor must send]]
+      [[bars Copies of one broadcast the sending hypervisor has to send]]
       My shop VNI (3 hypervisors) | 2 | 2 copies
       50 hypervisors, flood and learn | 49 | 49 copies
-      50 hypervisors, EVPN + ARP suppression (for ARP) | 0 | 0: answered locally
+      50 hypervisors, EVPN with ARP suppression (ARP only) | 0 | 0, answered locally
 
-      With 50 hypervisors in one VNI, every broadcast or unknown-unicast frame needs **49 copies**, and every flood list has 49 entries to maintain by hand. EVPN (a BGP control plane) changes that:
+      With 50 hypervisors in one VNI, one broadcast needs **49 copies** from the sending hypervisor, and every flood list has 49 entries to keep up to date. EVPN uses BGP to reduce this:
 
-      - **Type 3 routes** build the flood lists automatically, replacing my `bridge fdb append` lines.
-      - **Type 2 routes** advertise each VM's MAC and IP when it starts, so every VTEP knows where each MAC is before any traffic. No data-plane learning is needed.
-      - **ARP suppression:** the local VTEP answers ARP from that table, so most broadcasts never leave the hypervisor. A real broadcast still costs 49 copies unless the underlay does multicast, but such broadcasts become rare.
+      - **Type 3 routes** build the flood lists automatically, so nobody has to write `bridge fdb append` lines by hand.
+      - **Type 2 routes** tell every VTEP each VM's MAC and IP as soon as the VM starts, so there is no need to learn from flooded traffic.
+      - **ARP suppression** lets the local VTEP answer ARP from that information, so most ARP never leaves the hypervisor. A real broadcast still needs 49 copies (unless the underlay uses multicast), but it happens much less often.
 
   mtu:
     question: "Compare your two MTU fixes using your measurements. Which would you choose for a data centre, what does each cost, and who has to change what?"
     answer: |-
-      `check_mtu()` refused `blackhole.yaml` for every tenant: 1500 + 50 = 1550, 50 bytes more than the 1500-byte underlay. My measurements (`blackhole.txt`, `fixes.txt`):
+      `check_mtu()` refused `blackhole.yaml` for all three tenants: 1500 + 50 = 1550, which is 50 bytes over the 1500-byte underlay. I built it anyway with `--force` to see what happens, then measured both fixes (`blackhole.txt`, `fixes.txt`):
 
-      | Design | Underlay MTU | Tenant MTU | Largest DF ping that works | First size that fails | How it fails | iperf3 (5 s) |
+      | Design | Underlay MTU | Tenant MTU | Largest DF ping that works | First size that fails | What the sender sees | iperf3 (5 s) |
       |---|---|---|---|---|---|---|
-      | Black hole (`--force`) | 1500 | 1500 | `-s 1422` (1450-byte packet) | `-s 1423` | **silently lost**: no error, 100% loss | 0 bytes, cwnd stuck at 1.41 KB |
-      | Fix A | 1500 | 1450 | `-s 1422` (1450) | `-s 1423` | `message too long, mtu=1450` at the sender | 3.08 Gbit/s |
-      | Fix B | 9000 | 1500 | `-s 1472` (1500) | `-s 1473` | `message too long, mtu=1500` at the sender | 2.85 Gbit/s |
+      | Black hole (`--force`) | 1500 | 1500 | `-s 1422` (1450-byte packet) | `-s 1423` | **nothing**: the packet is just lost | 0 bytes, cwnd stuck at 1.41 KB |
+      | Fix A | 1500 | 1450 | `-s 1422` (1450) | `-s 1423` | `message too long, mtu=1450` | 3.08 Gbit/s |
+      | Fix B | 9000 | 1500 | `-s 1472` (1500) | `-s 1473` | `message too long, mtu=1500` | 2.85 Gbit/s |
 
       [[bars iperf3 receiver throughput, Gbit/s]]
       Black hole | 0 | 0.00
       Fix A: tenant MTU 1450 | 3.08 | 3.08
       Fix B: underlay MTU 9000 | 2.85 | 2.85
 
-      - In the black hole, the VM believes 1500 is fine, but `br4901` drops anything above 1450 at `vxlan4901` without telling anyone. Both fixes turn that silent loss into an error the sender can see.
-      - Fix A and fix B throughputs are within run-to-run noise in software-only Mininet (926 vs 224 retransmits). On real hardware, fix B carries 50 more bytes of payload per packet.
+      What the numbers show:
+      - In the black hole the VM thinks 1500 is fine, but `vxlan4901` only has an MTU of 1450 (1500 minus 50). The bridge drops anything bigger before it is encapsulated and sends no ICMP error back, so the sender never finds out. 1423 + 28 = 1451 bytes is the first size that dies.
+      - Nothing gets fragmented. My pings used `-M do` (don't fragment), and the packets were within the VM's own 1500 MTU anyway, so they are simply dropped inside the hypervisor.
+      - TCP suffers the most. iperf3 moved 0 bytes because every full-size segment is dropped, no error comes back, and TCP keeps resending the same size.
+      - Both fixes turn the silent drop into an error the sender can see. The difference between fix A and fix B (3.08 vs 2.85 Gbit/s) is normal run-to-run variation in Mininet, so I don't count it as a real result. On real hardware fix B would carry 50 more payload bytes in every packet.
 
       | | Fix A: tenants at 1450 | Fix B: underlay at 9000 |
       |---|---|---|
-      | Who changes what | Every tenant VM's MTU (through DHCP option 26 or cloud-init) | The operator: every switch port, hypervisor NIC and router in the underlay |
-      | Cost | 50 bytes less payload in every packet; tenants must know about it | Hardware and configuration across the whole fabric |
-      | Risk | A VM that keeps 1500 falls into the black hole | One missed underlay device brings back the lab Part 6 black hole |
-      | Tenants see | A non-standard MTU | A normal 1500 |
+      | Who changes what | Every tenant VM's MTU (for example through DHCP option 26 or cloud-init) | The operator: every switch port, hypervisor NIC and router in the underlay |
+      | Cost | 50 bytes less payload in every packet, and tenants have to know about it | Configuration (and maybe hardware) across the whole underlay |
+      | Risk | A VM left at 1500 falls into the black hole | One missed underlay device brings the black hole back, like in lab Part 6 |
+      | What tenants see | An unusual MTU | The normal 1500 |
 
-      **I choose fix B** (my `overlay.yaml` uses it):
-
-      - Tenants keep the standard 1500, so no VM image, appliance or customer has to change.
-      - It leaves headroom for an IPv6 underlay (70 bytes) or extra headers.
-      - The operator controls the underlay and can monitor it for a missed device.
-      - Fix A is the right choice only when you don't own the underlay, for example an overlay across the internet.
+      **I chose fix B** (it is what my `overlay.yaml` uses):
+      - Tenants keep the normal 1500, so customers don't need to change any VM or appliance.
+      - There is spare room for more overhead later, for example an IPv6 underlay (70 bytes).
+      - The operator owns the underlay, so it can change it once and keep monitoring it. The catch is that every device has to be changed, or the black hole comes back.
+      - I would only pick fix A if I didn't control the underlay, for example an overlay running over the internet.
 
   p4:
     question: "If your hypervisors' VTEPs were P4 switches running the lecture's vtep.p4, what would have to fill the vtep_encap table, and how? What would replace flood-and-learn?"
     answer: |-
-      **Who fills it:** in `vtep.p4` both tables start empty and default to `drop`. A P4 program cannot write its own tables, so the control plane must fill them, as in the Week 5 lab (P4Runtime, or `simple_switch_CLI` `table_add`).
+      **Who fills the tables:** in `vtep.p4`, `vtep_encap` and `vtep_decap` start empty and their default action is `drop`. The P4 program is only the data plane: it matches packets and runs actions, but it cannot add entries to its own tables. So the control plane has to install them, like in the Week 5 lab (with P4Runtime, or `simple_switch_CLI` and `table_add`).
 
-      **How:** `vtep_encap` is keyed on **(ingress port, destination MAC)**. The port identifies the tenant, because each VM has its own port. The `encap` action is given the VNI, the switch's own MAC and VTEP address, the remote VTEP, the next-hop MAC on the underlay, and the output port. `vtep_decap` is keyed on (VNI, inner destination MAC). For my rack1 (port 1 = web1, shop; port 2 = pay1, bank):
+      **What goes in:** `vtep_encap` matches on (ingress port, destination MAC). The ingress port tells the switch which tenant the frame belongs to, because each VM has its own port. The `encap` action then gets the VNI, this switch's MAC and VTEP IP, the remote VTEP IP, the next-hop MAC and the output port. `vtep_decap` matches on (VNI, inner destination MAC) and picks the local port. For my rack1 (port 1 is web1 from shop, port 2 is pay1 from bank):
 
       | Table | Key | Action | Reaches |
       |---|---|---|---|
-      | `vtep_encap` | port 1, `02:00:13:25:00:0b` | `encap(4901, …, 10.3.0.1 → 10.3.0.2, …)` | web2 |
-      | `vtep_encap` | port 1, `02:00:13:25:00:0c` | `encap(4901, …, 10.3.0.1 → 10.3.0.3, …)` | web3 |
-      | `vtep_encap` | port 2, `02:00:13:26:00:0b` | `encap(4902, …, 10.3.0.1 → 10.3.0.3, …)` | pay2 |
+      | `vtep_encap` | port 1, `02:00:13:25:00:0b` | `encap(4901, ..., 10.3.0.1 to 10.3.0.2, ...)` | web2 |
+      | `vtep_encap` | port 1, `02:00:13:25:00:0c` | `encap(4901, ..., 10.3.0.1 to 10.3.0.3, ...)` | web3 |
+      | `vtep_encap` | port 2, `02:00:13:26:00:0b` | `encap(4902, ..., 10.3.0.1 to 10.3.0.3, ...)` | pay2 |
       | `vtep_decap` | 4901, `02:00:13:25:00:0a` | `decap(port 1)` | web1 |
       | `vtep_decap` | 4902, `02:00:13:26:00:0a` | `decap(port 2)` | pay1 |
 
-      - web1 and pay1 share `10.3.50.10` but never collide: the keys use port, MAC and VNI, never the IP address.
-      - My `overlay.yaml` already holds everything needed. `plan()` gives every VM's MAC, VNI and hypervisor, and `vm_ports()` gives each VM's port, so a controller could generate these entries the same way `all_commands()` generates my `ip` and `bridge` commands.
+      - web1 and pay1 both use `10.3.50.10` but never clash, because no key uses the IP address. The port and the MAC (which carries the VNI) are enough.
+      - A controller could work these entries out from my `overlay.yaml`: `plan()` gives each VM's MAC, VNI and hypervisor, and `vm_ports()` gives its port. It is the same idea as `all_commands()` building my Linux commands.
 
-      **What replaces flood-and-learn:** a control plane that knows every VM in advance, either the orchestrator's inventory or EVPN type 2 routes turned into table entries.
-
-      - `vtep.p4` cannot learn and has no flooding, so a frame for an unknown MAC is dropped, not flooded.
-      - It has no ARP either, so the controller must answer ARP or the VMs must have static neighbour entries.
-      - Cost: every VM must be installed before it can talk. Gain: no floods at all, and no 49-copy broadcasts.
+      **What replaces flood-and-learn:** the controller has to know where every VM is before it sends anything, for example from the orchestrator's VM inventory, or from EVPN type 2 routes turned into table entries.
+      - `vtep.p4` has no MAC learning and no flooding. A frame for an unknown MAC just hits the default `drop`.
+      - It also drops ARP, because it only handles IPv4 frames. So the controller has to answer ARP, or each VM needs static ARP entries.
+      - The trade-off: a new VM cannot talk until its entries are installed, but there is no flooding at all, so no 49-copy broadcasts.

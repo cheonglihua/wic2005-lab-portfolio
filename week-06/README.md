@@ -5,7 +5,7 @@ YAML. The address block comes from the student ID suffix `4903`: IPv4
 `10.3.0.0/16`, IPv6 `fd00:4903::/32`.
 
 - **Assignment:** Overlay your own data centre
-- **Published page:** [Week 6 — my data centre overlay](https://cheonglihua.github.io/wic2005-lab-portfolio/week6/)
+- **Published page:** [Week 6: my data centre overlay](https://cheonglihua.github.io/wic2005-lab-portfolio/week6/)
 - **Assignment files:** [`netlab/`](./netlab/)
 - **Lab transcripts:** [`lab/results/`](./lab/results/)
 
@@ -25,7 +25,7 @@ YAML. The address block comes from the student ID suffix `4903`: IPv4
 | `netlab/mtu_a.yaml`, `netlab/mtu_b.yaml` | Fix A (tenants 1450) and fix B (underlay 9000) |
 | `netlab/build_overlay.py` | Builder; my `tenant_commands()` and `check_mtu()` |
 | `netlab/make_page6.py`, `netlab/page6.yaml` | Page generator and my answers |
-| `netlab/cli/*.cli` | The `mininet>` commands used to collect each evidence file |
+| `netlab/cli/*.cli` | The `mininet>` commands used to collect each evidence file (`probe.cli` was a quick size sweep to find the black-hole limit before recording it) |
 | `netlab/evidence6/` | Evidence: check, connectivity, flood, isolation, black hole, fixes |
 | `lab/*.cmds`, `lab/part2.sh` | Lab Parts 1–6 commands with my addresses |
 | `lab/results/` | Lab transcripts, Parts 1–7 |
@@ -83,9 +83,9 @@ From [Parts 4–5](./lab/results/part3-6.txt):
 | Measurement | Underlay (`h1-eth0`) | VXLAN over IPv4 (`vxlan100`) | VXLAN over IPv6 (`vxlan106`) |
 | --- | --- | --- | --- |
 | Interface MTU | 1500 | 1450 | 1430 |
-| Largest DF ping that works | — | `-s 1422` (1450) | `-s 1402` (1430) |
-| First that fails | — | `-s 1423`: `message too long, mtu=1450` | `-s 1403`: `message too long, mtu=1430` |
-| iperf3 receiver | **29.1 Gbit/s** | **16.3 Gbit/s** (56% of underlay) | — |
+| Largest DF ping that works | n/a | `-s 1422` (1450) | `-s 1402` (1430) |
+| First that fails | n/a | `-s 1423`: `message too long, mtu=1450` | `-s 1403`: `message too long, mtu=1430` |
+| iperf3 receiver | **29.1 Gbit/s** | **16.3 Gbit/s** (56% of underlay) | not measured |
 
 The 50 bytes, header by header, as each inner packet is wrapped:
 
@@ -160,6 +160,7 @@ built into the overlay, the scripts or the page.
 | Claude Code | Wrote the `netlab/cli/` and `lab/` command scripts, then ran them in the course container (`firdaussahran/netlab-mininet:1.0`) on my laptop through Docker to collect `netlab/evidence6/` and `lab/results/`. |
 | Claude Code | Drafted the `netlab/page6.yaml` answers and this README from those outputs. |
 | Claude Code | Redesigned the page template in `netlab/make_page6.py`: its own Week 6 theme, sections by deliverable (D2–D6), a requirements checklist and a drawn overlay diagram. The checks, commands, element ids and data block are unchanged. |
+| Claude Code | Reviewed the `page6.yaml` answers against the evidence, corrected two over-claims (the isolation capture and the flood table) and reworded the answers in plainer English. |
 
 The evidence files are real output from Mininet runs on my machine. Two run
 notes:
