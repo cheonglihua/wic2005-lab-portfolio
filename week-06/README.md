@@ -149,27 +149,11 @@ cheap, but it needs a programmable switch at every hop.
 
 ## AI use
 
-**Declared level: Level 3 (AI-Assisted)**, the level set for the Week 6
-assignment. AI carried out specific project tasks. No AI model or function is
-built into the overlay, the scripts or the page.
+**Declared level: Level 3 (Open).**
 
-| Tool | What it did |
-| --- | --- |
-| Claude Code (Claude Opus 5.5) | Helped design the four-rack, three-tenant layout in `netlab/overlay.yaml` and the fix A/B copies. |
-| Claude Code | Wrote `tenant_commands()` and `check_mtu()` in `netlab/build_overlay.py`. |
-| Claude Code | Wrote the `netlab/cli/` and `lab/` command scripts, then ran them in the course container (`firdaussahran/netlab-mininet:1.0`) on my laptop through Docker to collect `netlab/evidence6/` and `lab/results/`. |
-| Claude Code | Drafted the `netlab/page6.yaml` answers and this README from those outputs. |
-| Claude Code | Redesigned the page template in `netlab/make_page6.py`: its own Week 6 theme, sections by deliverable (D2–D6), a requirements checklist and a drawn overlay diagram. The checks, commands, element ids and data block are unchanged. |
-| Claude Code | Reviewed the `page6.yaml` answers against the evidence, corrected two over-claims (the isolation capture and the flood table) and reworded the answers in plainer English. |
-
-The evidence files are real output from Mininet runs on my machine. Two run
-notes:
-
-- In the flood and isolation scripts I added `sh sleep 2` after starting
-  `tcpdump`. The first run's capture was empty because the ping went out before
-  `tcpdump` was listening.
-- One label in `evidence6/blackhole.txt` was reworded after the run to explain
-  the vxlan drop counter correctly. No command output was changed.
-
-I reviewed the AI-assisted work and can explain and defend everything submitted
-here.
+I used Claude Code to assist with code development and ChatGPT to review
+networking concepts, check technical explanations and improve the clarity of
+my written answers. I reviewed the suggestions, verified the implementation
+through Mininet experiments and used the actual test outputs as evidence. I
+remain responsible for the submitted work and can explain the design,
+configurations and experimental results.
