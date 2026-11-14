@@ -33,7 +33,7 @@ underlay:
 hypervisors: [rack1, rack2, rack3, rack4]
 
 tenants:
-  - name: shop                 # web tier spread over three racks: survives losing any one
+  - name: shop                 # web VMs on three racks: less dependence on one rack (no load balancing or failover here)
     vni: 4901
     network: 10.3.50.0/24
     mtu: 1450                  # fix A: 1500 - 50 bytes of VXLAN
