@@ -1,0 +1,8 @@
+sh echo 'mininet> dump'
+dump
+sh echo 'mininet> sh lsns -t net -o NS,PID,COMMAND'
+sh lsns -t net -o NS,PID,COMMAND
+sh echo 'mininet> h1 ip -br link'
+h1 ip -br link
+sh echo 'mininet> sh ip -br link'
+sh ip -br link

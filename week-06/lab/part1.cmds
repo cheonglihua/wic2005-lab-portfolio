@@ -1,0 +1,4 @@
+dump
+sh lsns -t net -o NS,PID,COMMAND
+h1 ip -br link
+sh ip -br link

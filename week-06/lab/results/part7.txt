@@ -1,0 +1,16 @@
+$ docker exec c1 ip addr show eth0
+2: eth0@if82: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue state UP 
+    link/ether 4a:00:6f:13:6d:a5 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0
+       valid_lft forever preferred_lft forever
+$ docker exec c1 cat /etc/os-release
+NAME="Alpine Linux"
+ID=alpine
+VERSION_ID=3.20.10
+PRETTY_NAME="Alpine Linux v3.20"
+HOME_URL="https://alpinelinux.org/"
+BUG_REPORT_URL="https://gitlab.alpinelinux.org/alpine/aports/-/issues"
+$ docker exec c1 ps
+PID   USER     TIME  COMMAND
+    1 root      0:00 sleep 600
+   19 root      0:00 ps
