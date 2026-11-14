@@ -19,27 +19,39 @@
 # This starting design meets the requirements, but it isn't yours yet: change the tenants,
 # VNIs, networks, VMs and placement, and design the MTUs (that's check_mtu()'s job to check).
 
-student_id_last4: "4207"
+student_id_last4: "4903"
+
+# Design: a small colocation hall with four racks. Two customers (shop and bank) were both
+# given 10.3.50.0/24 by their own admins, so their addresses overlap and only the VNI keeps
+# them apart. A third tenant (lab) has its own network and lives on rack2 and rack4 only.
+# VNIs come from the ID: 4901, 4902, 4903.
 
 underlay:
-  network: 10.7.0.0/24
-  mtu: 1500                    # the largest IP packet the underlay carries
+  network: 10.3.0.0/24
+  mtu: 9000                    # fix B (my choice): jumbo frames on the underlay, tenants keep 1500
 
-hypervisors: [hv1, hv2, hv3]
+hypervisors: [rack1, rack2, rack3, rack4]
 
 tenants:
-  - name: red
-    vni: 100
-    network: 10.7.50.0/24
+  - name: shop                 # web tier spread over three racks: survives losing any one
+    vni: 4901
+    network: 10.3.50.0/24
     mtu: 1500                  # the largest IP packet this tenant's VMs send
     vms:                       # [VM name, the hypervisor it runs on]
-      - [red1, hv1]
-      - [red2, hv2]
-      - [red3, hv3]
-  - name: blue
-    vni: 200
-    network: 10.7.50.0/24      # the same addresses as red, on purpose
+      - [web1, rack1]
+      - [web2, rack2]
+      - [web3, rack3]
+  - name: bank                 # two payment VMs, kept on different racks (anti-affinity)
+    vni: 4902
+    network: 10.3.50.0/24      # the same addresses as shop, on purpose
     mtu: 1500
     vms:
-      - [blue1, hv1]
-      - [blue2, hv3]
+      - [pay1, rack1]
+      - [pay2, rack3]
+  - name: lab                  # a test tenant on its own network, the only tenant on rack4
+    vni: 4903
+    network: 10.3.70.0/24
+    mtu: 1500
+    vms:
+      - [dev1, rack2]
+      - [dev2, rack4]
