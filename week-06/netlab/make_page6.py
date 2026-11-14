@@ -21,6 +21,7 @@ import html
 import ipaddress
 import json
 import os
+import re
 import sys
 
 import yaml
@@ -228,6 +229,39 @@ def evidence_section(ev_id, path, title, look_for):
     )
 
 
+def inline(text):
+    """Escape, then allow `code` and **bold** inside answer text."""
+    out = esc(text)
+    out = re.sub(r"`([^`]+)`", lambda m: f"<code>{m.group(1)}</code>", out)
+    return re.sub(r"\*\*([^*]+)\*\*", lambda m: f"<strong>{m.group(1)}</strong>", out)
+
+
+def answer_block(block):
+    """One blank-line-separated block of an answer: a paragraph, a list, a table or a bar chart."""
+    lines = [l.strip() for l in block.strip().splitlines() if l.strip()]
+    if lines[0].startswith("[[bars"):
+        title = lines[0][6:].strip(" ]")
+        rows = [[c.strip() for c in l.split("|")] for l in lines[1:]]
+        top = max(float(r[1]) for r in rows) or 1
+        bars = "".join(
+            f'<div class="bar-row"><span class="bar-label">{inline(r[0])}</span>'
+            f'<span class="bar-track"><span class="bar" style="width:{max(float(r[1]) / top * 100, 0.8):.1f}%"></span></span>'
+            f'<span class="bar-value">{inline(r[2] if len(r) > 2 else r[1])}</span></div>'
+            for r in rows
+        )
+        return f'<figure class="bars"><figcaption>{inline(title)}</figcaption>{bars}</figure>'
+    if all(l.startswith("|") for l in lines):
+        rows = [[c.strip() for c in l.strip("|").split("|")] for l in lines if not re.fullmatch(r"\|[\s:|-]+\|", l)]
+        head = "".join(f"<th>{inline(c)}</th>" for c in rows[0])
+        body = "".join("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in rows[1:])
+        return f'<div class="table-wrap"><table class="answer-table"><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></div>'
+    if all(l.startswith("- ") for l in lines):
+        return "<ul>" + "".join(f"<li>{inline(l[2:])}</li>" for l in lines) + "</ul>"
+    if len(lines) > 1 and all(l.startswith("- ") for l in lines[1:]):
+        return f'<p class="lead">{inline(lines[0])}</p><ul>' + "".join(f"<li>{inline(l[2:])}</li>" for l in lines[1:]) + "</ul>"
+    return f"<p>{inline(' '.join(lines))}</p>"
+
+
 def answers_section(page):
     parts = []
     for key, qa in page.get("answers", {}).items():
@@ -235,10 +269,10 @@ def answers_section(page):
         if not answer:
             print(f"WARNING: page6.yaml has no answer for '{key}'")
             answer = "(Not answered yet.)"
-        paragraphs = "".join(f"<p>{esc(p.strip())}</p>" for p in answer.split("\n\n") if p.strip())
+        blocks = "".join(answer_block(b) for b in answer.split("\n\n") if b.strip())
         parts.append(
             f'<section class="answer-card" id="answer-{esc(key)}"><span class="answer-key">{esc(key.replace("_", " "))}</span>'
-            f'<h3>{esc(qa.get("question", key))}</h3>{paragraphs}</section>'
+            f'<h3>{esc(qa.get("question", key))}</h3>{blocks}</section>'
         )
     return "\n".join(parts)
 
@@ -289,6 +323,11 @@ CSS = """
   pre { max-height:440px; overflow:auto; margin:0; padding:1rem 1.1rem; background:var(--night); color:#e0e2ff; font:.78rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; } pre.missing { background:#fef2f2; color:var(--bad); }
   .evidence-list { display:grid; gap:.7rem; } .evidence-card { overflow:hidden; } .evidence-card summary { position:relative; display:grid; gap:.15rem; padding:.95rem 2.8rem .95rem 1.1rem; cursor:pointer; list-style:none; } .evidence-card summary::-webkit-details-marker { display:none; } .evidence-card summary:after { content:"+"; position:absolute; right:1rem; top:.85rem; display:grid; place-items:center; width:1.6rem; height:1.6rem; border-radius:50%; background:#eef0ff; color:var(--indigo); font-weight:800; } .evidence-card[open] summary:after { content:"−"; background:var(--amber); color:var(--night); } .ev-title { font-weight:750; } .ev-look { color:var(--muted); font-size:.86rem; } .file { color:var(--indigo); font:.74rem ui-monospace,monospace; }
   .answer-grid { display:grid; gap:.8rem; } .answer-card { padding:1.1rem 1.25rem; border-left:4px solid var(--indigo); } .answer-key { color:#b45309; font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; } .answer-card h3 { margin:.3rem 0 .6rem; font-size:1.05rem; line-height:1.4; } .answer-card p { margin:.55rem 0 0; color:#3f3d56; }
+  .answer-card p.lead { margin-top:.9rem; font-weight:700; color:var(--ink); } .answer-card ul { margin:.55rem 0 0; padding-left:1.2rem; color:#3f3d56; } .answer-card li { margin:.25rem 0; } .answer-card li::marker { color:var(--amber); }
+  .answer-card .table-wrap { margin:.7rem 0 .2rem; border:1px solid var(--line); border-radius:10px; } .answer-table { font-size:.85rem; } .answer-table th { background:#f4f2fb; } .answer-table td { color:#3f3d56; } .answer-table td:first-child { font-weight:700; color:var(--ink); }
+  .bars { margin:.8rem 0 .2rem; padding:.85rem 1rem; border:1px solid var(--line); border-radius:10px; background:#fbfaff; } .bars figcaption { margin-bottom:.5rem; color:var(--muted); font-size:.78rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .bar-row { display:grid; grid-template-columns:minmax(7rem,13rem) 1fr minmax(5.5rem,auto); gap:.7rem; align-items:center; margin:.35rem 0; font-size:.86rem; } .bar-label { font-weight:700; } .bar-track { height:.85rem; border-radius:999px; background:#ece9f7; overflow:hidden; } .bar { display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--indigo),#7c3aed); } .bar-value { color:var(--muted); font:600 .8rem ui-monospace,Consolas,monospace; text-align:right; }
+  @media(max-width:620px) { .bar-row { grid-template-columns:1fr auto; } .bar-track { grid-column:1/-1; grid-row:2; } }
   footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.75rem; margin-top:3.5rem; padding:1.1rem 0; border-top:1px solid var(--line); color:var(--muted); font-size:.84rem; } footer a { font-weight:700; text-decoration:none; }
   @media(max-width:850px) { .grid,.cmd-grid,.checklist { grid-template-columns:1fr; } .hero { grid-template-columns:1fr; } .hero-aside { max-width:460px; } }
   @media(max-width:620px) { .topbar { flex-direction:column; align-items:flex-start; gap:.3rem; } .brand { white-space:normal; font-size:.92rem; line-height:1.3; } .nav { justify-content:flex-start; width:100%; overflow-x:auto; flex-wrap:nowrap; } .nav a { white-space:nowrap; } .hero { padding:1.5rem 1.25rem; border-radius:16px; } .stats { grid-template-columns:1fr 1fr; } .step { width:2.5rem; height:2.5rem; font-size:.85rem; } }
