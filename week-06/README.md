@@ -158,6 +158,7 @@ built into the overlay, the scripts or the page.
 | Claude Code | Wrote `tenant_commands()` and `check_mtu()` in `netlab/build_overlay.py`. |
 | Claude Code | Wrote the `netlab/cli/` and `lab/` command scripts, then ran them in the course container (`firdaussahran/netlab-mininet:1.0`) on my laptop through Docker to collect `netlab/evidence6/` and `lab/results/`. |
 | Claude Code | Drafted the `netlab/page6.yaml` answers and this README from those outputs. |
+| Claude Code | Restyled the page template in `netlab/make_page6.py` to match the Week 3 page (drawn overlay diagram, tenant cards, MTU plan). The checks, commands, element ids and data block are unchanged. |
 
 The evidence files are real output from Mininet runs on my machine. Two run
 notes:

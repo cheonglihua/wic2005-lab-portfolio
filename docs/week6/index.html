@@ -3,49 +3,137 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102a35">
+<meta name="description" content="Week 6 VXLAN overlay lab: a multi-tenant data centre built from data, with flood-and-learn, isolation and MTU evidence.">
 <title>Overlay 4903: my data centre, from data</title>
 <style>
-  body { font-family: system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1f2937; }
-  h1 { font-size: 1.6rem; margin-bottom: .2rem; } h2 { margin-top: 2.2rem; border-bottom: 1px solid #e5e7eb; }
-  table { border-collapse: collapse; width: 100%; font-size: .92rem; margin-bottom: 1rem; } th, td { border-bottom: 1px solid #e5e7eb; padding: .35rem .5rem; text-align: left; }
-  pre { background: #111827; color: #f3f4f6; padding: .8rem; border-radius: .4rem; overflow-x: auto; font-size: .82rem; }
-  pre.mermaid { background: none; color: inherit; } pre.missing { background: #fef2f2; color: #991b1b; }
-  .meta, .file { color: #6b7280; font-size: .85rem; } code { font-size: .88em; }
+  :root { color-scheme:light; --ink:#142b33; --muted:#5d727b; --teal:#087e83; --teal-dark:#075c64; --lime:#c6f36a; --paper:#fff; --line:#d5e2dc; --navy:#102a35; --shadow:0 18px 48px #163c3b12; }
+  * { box-sizing:border-box; } html { scroll-behavior:smooth; scroll-padding-top:5.5rem; }
+  body { margin:0; background:radial-gradient(ellipse at 12% 18%,#d4e9e1 0,transparent 38%),linear-gradient(180deg,#e4efea 0,#f3f6f2 36rem,#eef3f0 100%); color:var(--ink); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  a { color:var(--teal-dark); } a:focus-visible, summary:focus-visible { outline:3px solid #dc8d27; outline-offset:3px; border-radius:4px; }
+  .skip-link { position:absolute; left:-9999px; top:1rem; z-index:20; background:#fff; padding:.7rem 1rem; } .skip-link:focus { left:1rem; }
+  .topbar { position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; gap:1.5rem; padding:.75rem max(1.25rem,calc((100% - 1160px)/2)); background:#102a35f5; color:#eff8f3; backdrop-filter:blur(14px); }
+  .brand { color:#eff8f3; text-decoration:none; font-weight:750; letter-spacing:.02em; white-space:nowrap; } .brand-mark { display:inline-grid; place-items:center; width:2rem; height:2rem; margin-right:.55rem; border-radius:9px; background:var(--lime); color:var(--navy); font-size:.78rem; }
+  .nav { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.25rem; } .nav a { color:#c4d9d4; padding:.45rem .65rem; font-size:.88rem; text-decoration:none; border-radius:8px; } .nav a:hover { color:#fff; background:#ffffff18; } .nav .sep { width:1px; margin:.35rem .35rem; background:#ffffff30; }
+  main { max-width:1160px; margin:auto; padding:2rem 1.25rem 4rem; }
+  .hero { position:relative; overflow:hidden; display:grid; grid-template-columns:minmax(0,1.5fr) minmax(250px,.7fr); gap:2rem; padding:clamp(2rem,5vw,4.25rem); border-radius:26px; color:#f2faf5; background:radial-gradient(circle at 91% 10%,#247e78 0,transparent 34%),linear-gradient(125deg,#102a35 5%,#15444b 70%,#0e625f); box-shadow:var(--shadow); }
+  .hero:after { content:""; position:absolute; width:330px; height:330px; right:-140px; bottom:-220px; border:1px solid #ffffff24; border-radius:50%; box-shadow:0 0 0 35px #ffffff09,0 0 0 70px #ffffff06; pointer-events:none; }
+  .eyebrow,.section-kicker { margin:0 0 .6rem; color:var(--teal); font-size:.75rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; } .hero .eyebrow { color:var(--lime); }
+  h1 { max-width:700px; margin:.1rem 0 1rem; font-size:clamp(2.4rem,6vw,4.4rem); line-height:1.02; letter-spacing:-.05em; } .hero-copy>p:not(.eyebrow) { max-width:650px; color:#d3e5df; font-size:1.06rem; } .hero code { color:var(--lime); }
+  .hero-actions { display:flex; flex-wrap:wrap; gap:.7rem; margin-top:1.5rem; } .button { display:inline-flex; align-items:center; gap:.55rem; padding:.7rem 1rem; border-radius:10px; font-weight:750; text-decoration:none; } .button-primary { background:var(--lime); color:var(--navy); } .button-ghost { border:1px solid #ffffff50; color:#f2faf5; }
+  .hero-aside { align-self:end; position:relative; z-index:1; padding:1.15rem; border:1px solid #ffffff28; border-radius:16px; background:#ffffff0c; backdrop-filter:blur(8px); } .aside-label { color:#a9c6bd; font-size:.76rem; text-transform:uppercase; letter-spacing:.1em; } .block-value { display:block; margin:.2rem 0 .8rem; color:#fff; font:700 clamp(1.35rem,3vw,1.8rem)/1.2 ui-monospace,monospace; } .hero-meta { display:flex; justify-content:space-between; gap:1rem; padding-top:.75rem; border-top:1px solid #ffffff25; color:#c6d9d3; font-size:.82rem; }
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:.85rem; margin:1.1rem 0 3.5rem; } .stat { padding:1rem 1.15rem; border:1px solid #d3e1da; border-radius:14px; background:#d9ece4; box-shadow:0 8px 25px #163c3b08; } .stat:nth-child(2) { background:#dcecf0; } .stat:nth-child(3) { background:#e8e5f2; } .stat:nth-child(4) { background:#f4ead4; } .stat strong { display:block; color:var(--teal-dark); font-size:1.65rem; line-height:1.15; } .stat span { color:#4f6870; font-size:.84rem; }
+  .page-section { margin:3.2rem 0; padding:clamp(1.25rem,3vw,2rem); border:1px solid #d3e1da; border-radius:22px; background:linear-gradient(145deg,#ffffff,#eaf5ef); box-shadow:var(--shadow); scroll-margin-top:5rem; }
+  #vteps { background:linear-gradient(145deg,#e5ebf8,#f4f5fb); border-color:#d6deef; } #evidence { background:linear-gradient(145deg,#dcefeb,#f0f8f5); border-color:#cfe2dc; } #reflection { background:linear-gradient(145deg,#f3ead9,#fcf8ed); border-color:#eadfc8; }
+  .section-heading { display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:1.2rem; padding-bottom:1rem; border-bottom:1px solid #ccded5; } .section-heading h2 { margin:0; font-size:clamp(1.8rem,4vw,2.45rem); letter-spacing:-.04em; } .section-heading p:not(.section-kicker) { margin:.35rem 0 0; color:var(--muted); }
+  .section-kicker { display:inline-block; padding:.22rem .5rem; border-radius:999px; background:#dcefe5; } #vteps .section-kicker { background:#e0e5f3; color:#4b5b91; } #evidence .section-kicker { background:#d2eae3; } #reflection .section-kicker { background:#efe1c4; color:#806322; }
+  .section-index { flex:none; padding:.35rem .6rem; border:1px solid #d1e0d8; border-radius:8px; background:#f8fcf9; color:#53756b; font:700 .78rem ui-monospace,monospace; }
+  .hero>*,.stats>*,.grid>*,.tenants>*,.cmd-grid>*,.evidence-list>*,.answer-grid>* { min-width:0; } main { overflow-wrap:break-word; }
+  .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; align-items:start; } .wide { grid-column:1/-1; }
+  .panel,.tenant-card,.cmd-card,.answer-card,.evidence-card { border:1px solid var(--line); border-radius:17px; background:var(--paper); box-shadow:0 10px 30px #163c3b08; }
+  .panel { padding:1.15rem; } .panel h3 { margin:.2rem 0 .7rem; font-size:1rem; } .panel-note { margin:0 0 .5rem; color:var(--muted); font-size:.9rem; }
+  .diagram-panel { overflow-x:auto; background:linear-gradient(145deg,#e6f3ee,#f7faf5); }
+  .overlay-svg { display:block; width:100%; min-width:680px; height:auto; }
+  .overlay-svg .u-link { stroke:#2c7773; stroke-width:3; } .overlay-svg .v-link { stroke:#8aa9a0; stroke-width:2; }
+  .overlay-svg .sw rect { fill:#102a35; } .overlay-svg .sw text { fill:#eff8f3; text-anchor:middle; font:800 17px system-ui,sans-serif; } .overlay-svg .sw .meta { fill:#a9c6bd; font:11px ui-monospace,Consolas,monospace; }
+  .overlay-svg .hv rect { fill:#e0f0e9; stroke:#28766e; stroke-width:2.5; } .overlay-svg .hv text { fill:#174e4a; text-anchor:middle; font:800 17px system-ui,sans-serif; } .overlay-svg .hv .meta { fill:#567a72; font:11px ui-monospace,Consolas,monospace; }
+  .overlay-svg .vm rect { fill:#fff; stroke-width:2; } .overlay-svg .vm .name { fill:#163c3b; font:800 14px system-ui,sans-serif; } .overlay-svg .vm .meta { fill:#536d69; font:11px ui-monospace,Consolas,monospace; }
+  .legend { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  .chip { display:inline-flex; align-items:center; gap:.35rem; margin:.1rem .3rem .1rem 0; padding:.2rem .55rem .2rem .45rem; border-radius:999px; border:1px solid color-mix(in srgb,var(--tc) 35%,#fff); background:color-mix(in srgb,var(--tc) 10%,#fff); color:#1d3a40; font-size:.82rem; font-weight:700; white-space:nowrap; }
+  .chip:before { content:""; width:.55rem; height:.55rem; border-radius:50%; background:var(--tc); } .chip small { color:var(--muted); font-weight:500; }
+  .tenants { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); gap:1rem; margin-top:1rem; }
+  .tenant-card { overflow:hidden; border-top:5px solid var(--tc); } .tenant-card header { display:flex; align-items:center; gap:.6rem; padding:1rem 1rem .4rem; } .tenant-card h3 { margin:0; font-size:1.02rem; } .dot { flex:none; width:.8rem; height:.8rem; border-radius:50%; background:var(--tc); }
+  .badges { display:flex; flex-wrap:wrap; gap:.4rem; padding:0 1rem .5rem; } .badge { padding:.18rem .5rem; border-radius:999px; background:#eef4f1; color:#456860; font-size:.74rem; font-weight:700; } .badge.overlap { background:#fdf0dc; color:#8a5a12; }
+  .tenant-card .table-wrap { padding:0 .75rem .6rem; } .tenant-card table { font-size:.84rem; } .tenant-card th,.tenant-card td { padding:.55rem .4rem; } .tenant-card td code { white-space:nowrap; overflow-wrap:normal; }
+  .table-wrap { overflow-x:auto; } table { width:100%; border-collapse:collapse; font-size:.9rem; } th,td { padding:.62rem .55rem; border-bottom:1px solid #eaf0ed; text-align:left; vertical-align:top; } th { color:var(--muted); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; } tbody tr:last-child td { border-bottom:0; }
+  code { color:#135c60; font:600 .9em ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; } .mac { color:#5d727b; font-weight:500; } .mac b { color:#135c60; }
+  .hop { display:inline-block; white-space:nowrap; padding:.22rem .45rem; border-radius:6px; font-size:.78rem; font-weight:700; } .ok { background:#e3f2e8; color:#2c6a45; } .bad { background:#fde8e4; color:#9b3420; }
+  .callout { display:flex; gap:.9rem; align-items:flex-start; margin-top:1rem; padding:1rem 1.1rem; border:1px solid #e9dfc5; border-radius:13px; background:#fbf7ec; color:#5b4d2b; } .callout strong { display:block; color:#624d1d; } .callout p { margin:.15rem 0 0; font-size:.9rem; }
+  .cmd-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; } .cmd-card { overflow:hidden; } .cmd-card header { display:flex; flex-wrap:wrap; align-items:center; gap:.55rem; padding:.9rem 1rem .7rem; } .cmd-card h3 { margin:0; font-size:1.15rem; } .cmd-meta { margin-left:auto; color:var(--muted); font-size:.78rem; }
+  .router-mark { padding:.22rem .4rem; border-radius:6px; background:#e0e5f3; color:#4b5b91; font-size:.62rem; font-weight:800; letter-spacing:.1em; }
+  pre { max-height:420px; overflow:auto; margin:0; padding:1rem 1.1rem; border-top:1px solid #e6eeea; background:#102a35; color:#dcece5; font:.78rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; } pre.missing { background:#fff1ec; color:#8b4027; }
+  .evidence-list { display:grid; gap:.8rem; } .evidence-card { overflow:hidden; } .evidence-card summary { position:relative; display:flex; flex-direction:column; gap:.15rem; padding:1rem 2.6rem 1rem 1.1rem; cursor:pointer; list-style:none; } .evidence-card summary::-webkit-details-marker { display:none; } .evidence-card summary:after { content:"+"; position:absolute; right:1.1rem; top:1rem; color:var(--teal); font-size:1.15rem; font-weight:700; } .evidence-card[open] summary:after { content:"−"; } .evidence-title { color:var(--ink); font-weight:750; } .file { color:var(--muted); font:.75rem ui-monospace,monospace; }
+  .answer-grid { display:grid; gap:.8rem; } .answer-card { padding:1.15rem 1.3rem; } .answer-key { color:var(--teal); font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; } .answer-card h3 { margin:.35rem 0 .65rem; font-size:1.08rem; line-height:1.4; } .answer-card p { margin:.55rem 0 0; color:#425960; }
+  footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.75rem; margin-top:4rem; padding:1.2rem 0; border-top:1px solid var(--line); color:var(--muted); font-size:.84rem; } footer a { text-decoration:none; font-weight:700; }
+  @media(max-width:850px) { .grid,.cmd-grid { grid-template-columns:1fr; } .hero { grid-template-columns:1fr; } .hero-aside { max-width:460px; } }
+  @media(max-width:620px) { .topbar { align-items:flex-start; flex-direction:column; gap:.35rem; padding:.7rem 1rem; } .nav { justify-content:flex-start; width:100%; overflow-x:auto; flex-wrap:nowrap; } .nav a { white-space:nowrap; } main { padding:1rem 1rem 3rem; } .hero { gap:1rem; padding:1.6rem 1.3rem; border-radius:19px; } .stats { grid-template-columns:1fr 1fr; margin-bottom:2.7rem; } .stat { padding:.8rem; } .section-heading { align-items:flex-start; flex-direction:column; } .page-section { margin:2.2rem 0; padding:1.1rem; border-radius:16px; } }
+  @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
 </style>
 </head>
 <body>
-<p class="meta"><a href="../">← Week 2: my network, built from data</a> · <a href="../week3/">Week 3: routed, from data</a></p>
-<h1>My data centre overlay, from data</h1>
-<p class="meta">Student ID ending 4903 · generated from <code>overlay.yaml</code> by <code>make_page6.py</code> on 2026-11-14</p>
-<p id="summary">4 hypervisors and 3 tenants (7 VMs) on <code>10.3.0.0/16</code>, joined by VXLAN.
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../"><span class="brand-mark">W6</span>WIC2005 · Lab portfolio</a>
+  <nav class="nav" aria-label="Page sections">
+    <a href="#design">Design</a><a href="#vteps">VTEPs</a><a href="#evidence">Evidence</a><a href="#reflection">Reflection</a>
+    <span class="sep" aria-hidden="true"></span>
+    <a href="../">Week 1</a><a href="../week-02/">Week 2</a><a href="../week3/">Week 3</a>
+  </nav>
+</header>
+<main id="main">
+  <section class="hero" id="overview">
+    <div class="hero-copy">
+      <p class="eyebrow">Week 06 · VXLAN overlay · Mininet lab</p>
+      <h1>My data centre overlay, from data</h1>
+      <p id="summary">4 hypervisors and 3 tenants (7 VMs) on <code>10.3.0.0/16</code>, joined by VXLAN.
 Every tenant's MTU was checked against the underlay before anything was built.</p>
-<p>Repository: <a id="repository" href="https://github.com/cheonglihua/wic2005-lab-portfolio">https://github.com/cheonglihua/wic2005-lab-portfolio</a></p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="#design">Explore the overlay <span aria-hidden="true">↓</span></a>
+        <a class="button button-ghost" id="repository" href="https://github.com/cheonglihua/wic2005-lab-portfolio">View repository <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <aside class="hero-aside" aria-label="Address block and page information">
+      <span class="aside-label">IPv4 address block</span><strong class="block-value">10.3.0.0/16</strong>
+      <div class="hero-meta"><span>ID suffix · 4903</span><span>Updated · 2026-11-14</span></div>
+    </aside>
+  </section>
 
-<h2>The design</h2>
-<h3>Hypervisors and the underlay</h3>
-<section id="hypervisors"><p>Underlay <code>10.3.0.0/24</code>, MTU 9000.</p><table><tr><th>Hypervisor</th><th>Underlay address</th><th>VMs</th></tr><tr><td>rack1</td><td><code>10.3.0.1</code></td><td>web1 (shop), pay1 (bank)</td></tr><tr><td>rack2</td><td><code>10.3.0.2</code></td><td>web2 (shop), dev1 (lab)</td></tr><tr><td>rack3</td><td><code>10.3.0.3</code></td><td>web3 (shop), pay2 (bank)</td></tr><tr><td>rack4</td><td><code>10.3.0.4</code></td><td>dev2 (lab)</td></tr></table></section>
-<section id="tenants"><h3>shop: VNI 4901, <code>10.3.50.0/24</code>, MTU 1500</h3><table><tr><th>VM</th><th>On</th><th>Address</th><th>MAC</th></tr><tr><td>web1</td><td>rack1</td><td><code>10.3.50.10</code></td><td><code>02:00:13:25:00:0a</code></td></tr><tr><td>web2</td><td>rack2</td><td><code>10.3.50.11</code></td><td><code>02:00:13:25:00:0b</code></td></tr><tr><td>web3</td><td>rack3</td><td><code>10.3.50.12</code></td><td><code>02:00:13:25:00:0c</code></td></tr></table>
-<h3>bank: VNI 4902, <code>10.3.50.0/24</code>, MTU 1500</h3><table><tr><th>VM</th><th>On</th><th>Address</th><th>MAC</th></tr><tr><td>pay1</td><td>rack1</td><td><code>10.3.50.10</code></td><td><code>02:00:13:26:00:0a</code></td></tr><tr><td>pay2</td><td>rack3</td><td><code>10.3.50.11</code></td><td><code>02:00:13:26:00:0b</code></td></tr></table>
-<h3>lab: VNI 4903, <code>10.3.70.0/24</code>, MTU 1500</h3><table><tr><th>VM</th><th>On</th><th>Address</th><th>MAC</th></tr><tr><td>dev1</td><td>rack2</td><td><code>10.3.70.10</code></td><td><code>02:00:13:27:00:0a</code></td></tr><tr><td>dev2</td><td>rack4</td><td><code>10.3.70.11</code></td><td><code>02:00:13:27:00:0b</code></td></tr></table></section>
-<h3>Diagram</h3>
-<pre class="mermaid" id="diagram">graph TB
-  s1[[underlay switch s1]]
-  rack1[&quot;rack1&lt;br&gt;10.3.0.1&quot;] --- s1
-  rack2[&quot;rack2&lt;br&gt;10.3.0.2&quot;] --- s1
-  rack3[&quot;rack3&lt;br&gt;10.3.0.3&quot;] --- s1
-  rack4[&quot;rack4&lt;br&gt;10.3.0.4&quot;] --- s1
-  web1(&quot;web1&lt;br&gt;10.3.50.10&lt;br&gt;shop · VNI 4901&quot;) --- rack1
-  web2(&quot;web2&lt;br&gt;10.3.50.11&lt;br&gt;shop · VNI 4901&quot;) --- rack2
-  web3(&quot;web3&lt;br&gt;10.3.50.12&lt;br&gt;shop · VNI 4901&quot;) --- rack3
-  pay1(&quot;pay1&lt;br&gt;10.3.50.10&lt;br&gt;bank · VNI 4902&quot;) --- rack1
-  pay2(&quot;pay2&lt;br&gt;10.3.50.11&lt;br&gt;bank · VNI 4902&quot;) --- rack3
-  dev1(&quot;dev1&lt;br&gt;10.3.70.10&lt;br&gt;lab · VNI 4903&quot;) --- rack2
-  dev2(&quot;dev2&lt;br&gt;10.3.70.11&lt;br&gt;lab · VNI 4903&quot;) --- rack4</pre>
+  <section class="stats" aria-label="Overlay summary">
+    <div class="stat"><strong>4</strong><span>Hypervisors (VTEPs)</span></div>
+    <div class="stat"><strong>3</strong><span>Tenants, one VNI each</span></div>
+    <div class="stat"><strong>7</strong><span>VMs</span></div>
+    <div class="stat"><strong>9000</strong><span>Underlay MTU</span></div>
+  </section>
 
-<h2>VTEP commands, as built</h2>
-<p>What <code>tenant_commands()</code> ran on each hypervisor.</p>
-<section id="commands"><h3>rack1</h3>
-<pre id="commands-rack1">ip link add br4901 type bridge
+  <section class="page-section" id="design">
+    <div class="section-heading"><div><p class="section-kicker">01 · The design</p><h2>Hypervisors and tenants</h2><p>Every address, MAC and VTEP below is worked out from the YAML file.</p></div><span class="section-index">10.3.0.0/24</span></div>
+    <div class="grid">
+      <article class="panel diagram-panel wide"><h3>Diagram</h3><div id="diagram"><svg class="overlay-svg" viewBox="0 0 960 422" role="img" aria-labelledby="ov-title ov-desc">
+<title id="ov-title">Overlay diagram</title>
+<desc id="ov-desc">The underlay switch s1 joins 4 hypervisors; each hypervisor hosts VMs coloured by tenant.</desc>
+<line class="u-link" x1="480" y1="76" x2="120" y2="130" />
+<line class="u-link" x1="480" y1="76" x2="360" y2="130" />
+<line class="u-link" x1="480" y1="76" x2="600" y2="130" />
+<line class="u-link" x1="480" y1="76" x2="840" y2="130" />
+<g class="sw"><rect x="370" y="18" width="220" height="58" rx="12" /><text x="480" y="44">s1</text><text class="meta" x="480" y="62">underlay 10.3.0.0/24 · MTU 9000</text></g>
+<line class="v-link" x1="45" y1="194" x2="45" y2="359" />
+<g class="hv"><rect x="25" y="130" width="190" height="64" rx="12" /><text x="120" y="157">rack1</text><text class="meta" x="120" y="177">VTEP 10.3.0.1</text></g>
+<line class="v-link" x1="45" y1="289" x2="65" y2="289" /><g class="vm"><rect x="65" y="262" width="170" height="54" rx="10" style="stroke:#0d8a8c" /><rect x="65" y="262" width="8" height="54" rx="4" style="fill:#0d8a8c" /><text class="name" x="83" y="284">web1</text><text class="meta" x="83" y="303">10.3.50.10 · VNI 4901</text></g>
+<line class="v-link" x1="45" y1="359" x2="65" y2="359" /><g class="vm"><rect x="65" y="332" width="170" height="54" rx="10" style="stroke:#5b5fc7" /><rect x="65" y="332" width="8" height="54" rx="4" style="fill:#5b5fc7" /><text class="name" x="83" y="354">pay1</text><text class="meta" x="83" y="373">10.3.50.10 · VNI 4902</text></g>
+<line class="v-link" x1="285" y1="194" x2="285" y2="359" />
+<g class="hv"><rect x="265" y="130" width="190" height="64" rx="12" /><text x="360" y="157">rack2</text><text class="meta" x="360" y="177">VTEP 10.3.0.2</text></g>
+<line class="v-link" x1="285" y1="289" x2="305" y2="289" /><g class="vm"><rect x="305" y="262" width="170" height="54" rx="10" style="stroke:#0d8a8c" /><rect x="305" y="262" width="8" height="54" rx="4" style="fill:#0d8a8c" /><text class="name" x="323" y="284">web2</text><text class="meta" x="323" y="303">10.3.50.11 · VNI 4901</text></g>
+<line class="v-link" x1="285" y1="359" x2="305" y2="359" /><g class="vm"><rect x="305" y="332" width="170" height="54" rx="10" style="stroke:#c07a0c" /><rect x="305" y="332" width="8" height="54" rx="4" style="fill:#c07a0c" /><text class="name" x="323" y="354">dev1</text><text class="meta" x="323" y="373">10.3.70.10 · VNI 4903</text></g>
+<line class="v-link" x1="525" y1="194" x2="525" y2="359" />
+<g class="hv"><rect x="505" y="130" width="190" height="64" rx="12" /><text x="600" y="157">rack3</text><text class="meta" x="600" y="177">VTEP 10.3.0.3</text></g>
+<line class="v-link" x1="525" y1="289" x2="545" y2="289" /><g class="vm"><rect x="545" y="262" width="170" height="54" rx="10" style="stroke:#0d8a8c" /><rect x="545" y="262" width="8" height="54" rx="4" style="fill:#0d8a8c" /><text class="name" x="563" y="284">web3</text><text class="meta" x="563" y="303">10.3.50.12 · VNI 4901</text></g>
+<line class="v-link" x1="525" y1="359" x2="545" y2="359" /><g class="vm"><rect x="545" y="332" width="170" height="54" rx="10" style="stroke:#5b5fc7" /><rect x="545" y="332" width="8" height="54" rx="4" style="fill:#5b5fc7" /><text class="name" x="563" y="354">pay2</text><text class="meta" x="563" y="373">10.3.50.11 · VNI 4902</text></g>
+<line class="v-link" x1="765" y1="194" x2="765" y2="289" />
+<g class="hv"><rect x="745" y="130" width="190" height="64" rx="12" /><text x="840" y="157">rack4</text><text class="meta" x="840" y="177">VTEP 10.3.0.4</text></g>
+<line class="v-link" x1="765" y1="289" x2="785" y2="289" /><g class="vm"><rect x="785" y="262" width="170" height="54" rx="10" style="stroke:#c07a0c" /><rect x="785" y="262" width="8" height="54" rx="4" style="fill:#c07a0c" /><text class="name" x="803" y="284">dev2</text><text class="meta" x="803" y="303">10.3.70.11 · VNI 4903</text></g>
+</svg><div class="legend"><span class="chip" style="--tc:#0d8a8c">shop <small>VNI 4901 · 10.3.50.0/24</small></span><span class="chip" style="--tc:#5b5fc7">bank <small>VNI 4902 · 10.3.50.0/24</small></span><span class="chip" style="--tc:#c07a0c">lab <small>VNI 4903 · 10.3.70.0/24</small></span></div></div></article>
+      <article class="panel"><h3>Hypervisors and the underlay</h3><section id="hypervisors"><p class="panel-note">Underlay <code>10.3.0.0/24</code>, MTU 9000.</p><div class="table-wrap"><table><thead><tr><th>Hypervisor</th><th>Underlay address</th><th>VMs</th></tr></thead><tbody><tr><td><strong>rack1</strong></td><td><code>10.3.0.1</code></td><td><span class="chip" style="--tc:#0d8a8c">web1 <small>shop</small></span><span class="chip" style="--tc:#5b5fc7">pay1 <small>bank</small></span></td></tr><tr><td><strong>rack2</strong></td><td><code>10.3.0.2</code></td><td><span class="chip" style="--tc:#0d8a8c">web2 <small>shop</small></span><span class="chip" style="--tc:#c07a0c">dev1 <small>lab</small></span></td></tr><tr><td><strong>rack3</strong></td><td><code>10.3.0.3</code></td><td><span class="chip" style="--tc:#0d8a8c">web3 <small>shop</small></span><span class="chip" style="--tc:#5b5fc7">pay2 <small>bank</small></span></td></tr><tr><td><strong>rack4</strong></td><td><code>10.3.0.4</code></td><td><span class="chip" style="--tc:#c07a0c">dev2 <small>lab</small></span></td></tr></tbody></table></div></section></article>
+      <article class="panel"><h3>MTU plan: tenant packet + 50 bytes of VXLAN</h3><div id="mtu-plan"><div class="table-wrap"><table><thead><tr><th>Tenant</th><th>Tenant MTU</th><th>VXLAN</th><th>On the underlay</th><th>Underlay MTU</th><th>check_mtu()</th></tr></thead><tbody><tr><td><strong>shop</strong></td><td>1500</td><td>+ 50</td><td>1550</td><td>9000</td><td><span class="hop ok">fits · 7450 spare</span></td></tr><tr><td><strong>bank</strong></td><td>1500</td><td>+ 50</td><td>1550</td><td>9000</td><td><span class="hop ok">fits · 7450 spare</span></td></tr><tr><td><strong>lab</strong></td><td>1500</td><td>+ 50</td><td>1550</td><td>9000</td><td><span class="hop ok">fits · 7450 spare</span></td></tr></tbody></table></div></div></article>
+    </div>
+    <section class="tenants" id="tenants"><article class="tenant-card" style="--tc:#0d8a8c"><header><span class="dot"></span><h3>shop: VNI 4901, <code>10.3.50.0/24</code>, MTU 1500</h3></header><div class="badges"><span class="badge">3 VMs</span><span class="badge">3 hypervisors</span><span class="badge overlap">Same addresses as bank</span></div><div class="table-wrap"><table><thead><tr><th>VM</th><th>On</th><th>Address</th><th>MAC</th></tr></thead><tbody><tr><td><strong>web1</strong></td><td>rack1</td><td><code>10.3.50.10</code></td><td><code class="mac">02:<b>00:13:25</b>:00:0a</code></td></tr><tr><td><strong>web2</strong></td><td>rack2</td><td><code>10.3.50.11</code></td><td><code class="mac">02:<b>00:13:25</b>:00:0b</code></td></tr><tr><td><strong>web3</strong></td><td>rack3</td><td><code>10.3.50.12</code></td><td><code class="mac">02:<b>00:13:25</b>:00:0c</code></td></tr></tbody></table></div></article>
+<article class="tenant-card" style="--tc:#5b5fc7"><header><span class="dot"></span><h3>bank: VNI 4902, <code>10.3.50.0/24</code>, MTU 1500</h3></header><div class="badges"><span class="badge">2 VMs</span><span class="badge">2 hypervisors</span><span class="badge overlap">Same addresses as shop</span></div><div class="table-wrap"><table><thead><tr><th>VM</th><th>On</th><th>Address</th><th>MAC</th></tr></thead><tbody><tr><td><strong>pay1</strong></td><td>rack1</td><td><code>10.3.50.10</code></td><td><code class="mac">02:<b>00:13:26</b>:00:0a</code></td></tr><tr><td><strong>pay2</strong></td><td>rack3</td><td><code>10.3.50.11</code></td><td><code class="mac">02:<b>00:13:26</b>:00:0b</code></td></tr></tbody></table></div></article>
+<article class="tenant-card" style="--tc:#c07a0c"><header><span class="dot"></span><h3>lab: VNI 4903, <code>10.3.70.0/24</code>, MTU 1500</h3></header><div class="badges"><span class="badge">2 VMs</span><span class="badge">2 hypervisors</span></div><div class="table-wrap"><table><thead><tr><th>VM</th><th>On</th><th>Address</th><th>MAC</th></tr></thead><tbody><tr><td><strong>dev1</strong></td><td>rack2</td><td><code>10.3.70.10</code></td><td><code class="mac">02:<b>00:13:27</b>:00:0a</code></td></tr><tr><td><strong>dev2</strong></td><td>rack4</td><td><code>10.3.70.11</code></td><td><code class="mac">02:<b>00:13:27</b>:00:0b</code></td></tr></tbody></table></div></article></section>
+    <aside class="callout"><span aria-hidden="true">↳</span><div><strong>Reading a MAC address</strong><p>Each VM's MAC is <code>02:VV:VV:VV:00:XX</code>. The highlighted middle three bytes are the tenant's VNI, and the last byte is the VM's address. Two VMs can share an IP address but never a MAC.</p></div></aside>
+  </section>
+
+  <section class="page-section" id="vteps">
+    <div class="section-heading"><div><p class="section-kicker">02 · Tunnel endpoints</p><h2>VTEP commands, as built</h2><p>What <code>tenant_commands()</code> ran on each hypervisor: bridge, VXLAN device, VM ports, flood list.</p></div><span class="section-index">59 commands</span></div>
+    <section class="cmd-grid" id="commands"><article class="cmd-card"><header><span class="router-mark">VTEP</span><h3>rack1</h3><code>10.3.0.1</code><span class="cmd-meta">shop, bank · 17 commands</span></header><pre id="commands-rack1">ip link add br4901 type bridge
 ip link set br4901 up
 ip link add vxlan4901 type vxlan id 4901 local 10.3.0.1 dstport 4789 dev rack1-eth0
 ip link set vxlan4901 master br4901
@@ -61,9 +149,8 @@ ip link set vxlan4902 master br4902
 ip link set vxlan4902 up
 ip link set rack1-eth2 master br4902
 ip link set rack1-eth2 up
-bridge fdb append 00:00:00:00:00:00 dev vxlan4902 dst 10.3.0.3</pre>
-<h3>rack2</h3>
-<pre id="commands-rack2">ip link add br4901 type bridge
+bridge fdb append 00:00:00:00:00:00 dev vxlan4902 dst 10.3.0.3</pre></article>
+<article class="cmd-card"><header><span class="router-mark">VTEP</span><h3>rack2</h3><code>10.3.0.2</code><span class="cmd-meta">shop, lab · 17 commands</span></header><pre id="commands-rack2">ip link add br4901 type bridge
 ip link set br4901 up
 ip link add vxlan4901 type vxlan id 4901 local 10.3.0.2 dstport 4789 dev rack2-eth0
 ip link set vxlan4901 master br4901
@@ -79,9 +166,8 @@ ip link set vxlan4903 master br4903
 ip link set vxlan4903 up
 ip link set rack2-eth2 master br4903
 ip link set rack2-eth2 up
-bridge fdb append 00:00:00:00:00:00 dev vxlan4903 dst 10.3.0.4</pre>
-<h3>rack3</h3>
-<pre id="commands-rack3">ip link add br4901 type bridge
+bridge fdb append 00:00:00:00:00:00 dev vxlan4903 dst 10.3.0.4</pre></article>
+<article class="cmd-card"><header><span class="router-mark">VTEP</span><h3>rack3</h3><code>10.3.0.3</code><span class="cmd-meta">shop, bank · 17 commands</span></header><pre id="commands-rack3">ip link add br4901 type bridge
 ip link set br4901 up
 ip link add vxlan4901 type vxlan id 4901 local 10.3.0.3 dstport 4789 dev rack3-eth0
 ip link set vxlan4901 master br4901
@@ -97,27 +183,95 @@ ip link set vxlan4902 master br4902
 ip link set vxlan4902 up
 ip link set rack3-eth2 master br4902
 ip link set rack3-eth2 up
-bridge fdb append 00:00:00:00:00:00 dev vxlan4902 dst 10.3.0.1</pre>
-<h3>rack4</h3>
-<pre id="commands-rack4">ip link add br4903 type bridge
+bridge fdb append 00:00:00:00:00:00 dev vxlan4902 dst 10.3.0.1</pre></article>
+<article class="cmd-card"><header><span class="router-mark">VTEP</span><h3>rack4</h3><code>10.3.0.4</code><span class="cmd-meta">lab · 8 commands</span></header><pre id="commands-rack4">ip link add br4903 type bridge
 ip link set br4903 up
 ip link add vxlan4903 type vxlan id 4903 local 10.3.0.4 dstport 4789 dev rack4-eth0
 ip link set vxlan4903 master br4903
 ip link set vxlan4903 up
 ip link set rack4-eth1 master br4903
 ip link set rack4-eth1 up
-bridge fdb append 00:00:00:00:00:00 dev vxlan4903 dst 10.3.0.2</pre></section>
+bridge fdb append 00:00:00:00:00:00 dev vxlan4903 dst 10.3.0.2</pre></article></section>
+  </section>
 
-<h2>Evidence from the running overlay</h2>
-<section id="evidence"><h3>check_mtu() refusing the black-hole design</h3>
-<p class="file">evidence6/check.txt</p>
-<pre id="evidence-check">PROBLEM: tenant shop (VNI 4901): MTU 1500 + 50 bytes of VXLAN = 1550, 50 bytes more than the underlay MTU 1500; lower the tenant MTU to 1450 or raise the underlay MTU to 1550
+  <section class="page-section" id="evidence">
+    <div class="section-heading"><div><p class="section-kicker">03 · Live Mininet output</p><h2>Evidence from the running overlay</h2><p>Expand an item to see the captured command output.</p></div><span class="section-index">6 records</span></div>
+    <div class="evidence-list"><details class="evidence-card" id="evidence-card-check"><summary><span class="evidence-title">check_mtu() refusing the black-hole design</span><span class="file">evidence6/check.txt</span></summary><pre id="evidence-check">PROBLEM: tenant shop (VNI 4901): MTU 1500 + 50 bytes of VXLAN = 1550, 50 bytes more than the underlay MTU 1500; lower the tenant MTU to 1450 or raise the underlay MTU to 1550
 PROBLEM: tenant bank (VNI 4902): MTU 1500 + 50 bytes of VXLAN = 1550, 50 bytes more than the underlay MTU 1500; lower the tenant MTU to 1450 or raise the underlay MTU to 1550
 PROBLEM: tenant lab (VNI 4903): MTU 1500 + 50 bytes of VXLAN = 1550, 50 bytes more than the underlay MTU 1500; lower the tenant MTU to 1450 or raise the underlay MTU to 1550
-Fix the design and try again: nothing was built.</pre>
-<h3>Flood and learn: the VTEP table before, the flooded broadcast, the table after</h3>
-<p class="file">evidence6/flood.txt</p>
-<pre id="evidence-flood">== rack1: vxlan4901 before any traffic
+Fix the design and try again: nothing was built.</pre></details>
+<details class="evidence-card" id="evidence-card-connectivity"><summary><span class="evidence-title">Every VM reaches its own tenant, and no other</span><span class="file">evidence6/connectivity.txt</span></summary><pre id="evidence-connectivity">== shop (VNI 4901): every VM to every other
+PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
+64 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=6.69 ms
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 6.685/6.685/6.685/0.000 ms
+PING 10.3.50.12 (10.3.50.12) 56(84) bytes of data.
+64 bytes from 10.3.50.12: icmp_seq=1 ttl=64 time=1.39 ms
+
+--- 10.3.50.12 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 1.394/1.394/1.394/0.000 ms
+PING 10.3.50.10 (10.3.50.10) 56(84) bytes of data.
+64 bytes from 10.3.50.10: icmp_seq=1 ttl=64 time=1.18 ms
+
+--- 10.3.50.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 1.182/1.182/1.182/0.000 ms
+PING 10.3.50.12 (10.3.50.12) 56(84) bytes of data.
+64 bytes from 10.3.50.12: icmp_seq=1 ttl=64 time=0.254 ms
+
+--- 10.3.50.12 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.254/0.254/0.254/0.000 ms
+PING 10.3.50.10 (10.3.50.10) 56(84) bytes of data.
+64 bytes from 10.3.50.10: icmp_seq=1 ttl=64 time=0.066 ms
+
+--- 10.3.50.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.066/0.066/0.066/0.000 ms
+PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
+64 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.084 ms
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.084/0.084/0.084/0.000 ms
+== bank (VNI 4902)
+PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
+64 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.492 ms
+
+--- 10.3.50.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.492/0.492/0.492/0.000 ms
+PING 10.3.50.10 (10.3.50.10) 56(84) bytes of data.
+64 bytes from 10.3.50.10: icmp_seq=1 ttl=64 time=0.065 ms
+
+--- 10.3.50.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.065/0.065/0.065/0.000 ms
+== lab (VNI 4903)
+PING 10.3.70.11 (10.3.70.11) 56(84) bytes of data.
+64 bytes from 10.3.70.11: icmp_seq=1 ttl=64 time=0.734 ms
+
+--- 10.3.70.11 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.734/0.734/0.734/0.000 ms
+PING 10.3.70.10 (10.3.70.10) 56(84) bytes of data.
+64 bytes from 10.3.70.10: icmp_seq=1 ttl=64 time=0.060 ms
+
+--- 10.3.70.10 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.060/0.060/0.060/0.000 ms
+== and no other: pay1 to 10.3.50.12 (web3&#x27;s address, not in bank) must fail
+PING 10.3.50.12 (10.3.50.12) 56(84) bytes of data.
+
+--- 10.3.50.12 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1008ms
+
+== and no other: web1 to 10.3.70.10 (dev1, another tenant&#x27;s network) must fail
+ping: connect: Network is unreachable</pre></details>
+<details class="evidence-card" id="evidence-card-flood"><summary><span class="evidence-title">Flood and learn: the VTEP table before, the flooded broadcast, the table after</span><span class="file">evidence6/flood.txt</span></summary><pre id="evidence-flood">== rack1: vxlan4901 before any traffic
 e2:be:bf:21:eb:83 vlan 1 master br4901 permanent
 e2:be:bf:21:eb:83 master br4901 permanent
 00:00:00:00:00:00 dst 10.3.0.2 self permanent
@@ -165,10 +319,8 @@ listening on rack4-eth0, link-type EN10MB (Ethernet), snapshot length 262144 byt
 
 0 packets captured
 0 packets received by filter
-0 packets dropped by kernel</pre>
-<h3>Two tenants, one address: who answers</h3>
-<p class="file">evidence6/isolation.txt</p>
-<pre id="evidence-isolation">PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
+0 packets dropped by kernel</pre></details>
+<details class="evidence-card" id="evidence-card-isolation"><summary><span class="evidence-title">Two tenants, one address: who answers</span><span class="file">evidence6/isolation.txt</span></summary><pre id="evidence-isolation">PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
 64 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.104 ms
 64 bytes from 10.3.50.11: icmp_seq=2 ttl=64 time=0.082 ms
 64 bytes from 10.3.50.11: icmp_seq=3 ttl=64 time=0.102 ms
@@ -191,10 +343,8 @@ PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
 --- 10.3.50.11 ping statistics ---
 2 packets transmitted, 2 received, 0% packet loss, time 1001ms
 rtt min/avg/max/mdev = 0.074/0.221/0.369/0.147 ms
-10.3.50.11 dev pay1-eth0 lladdr 02:00:13:26:00:0b REACHABLE</pre>
-<h3>The black hole: tenant MTU 1500 on a 1500-byte underlay</h3>
-<p class="file">evidence6/blackhole.txt</p>
-<pre id="evidence-blackhole">== small ping: works
+10.3.50.11 dev pay1-eth0 lladdr 02:00:13:26:00:0b REACHABLE</pre></details>
+<details class="evidence-card" id="evidence-card-blackhole"><summary><span class="evidence-title">The black hole: tenant MTU 1500 on a 1500-byte underlay</span><span class="file">evidence6/blackhole.txt</span></summary><pre id="evidence-blackhole">== small ping: works
 PING 10.3.50.11 (10.3.50.11) 56(84) bytes of data.
 64 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.333 ms
 64 bytes from 10.3.50.11: icmp_seq=2 ttl=64 time=0.083 ms
@@ -270,10 +420,8 @@ PING 10.3.50.11 (10.3.50.11) 1423(1451) bytes of data.
     RX:  bytes packets errors dropped  missed   mcast           
           5684      22      0       0       0       0 
     TX:  bytes packets errors dropped carrier collsns           
-          6011      25      0       0       0       0</pre>
-<h3>Two fixes, measured</h3>
-<p class="file">evidence6/fixes.txt</p>
-<pre id="evidence-fixes">== fix A: tenant MTU 1450
+          6011      25      0       0       0       0</pre></details>
+<details class="evidence-card" id="evidence-card-fixes"><summary><span class="evidence-title">Two fixes, measured</span><span class="file">evidence6/fixes.txt</span></summary><pre id="evidence-fixes">== fix A: tenant MTU 1450
 PING 10.3.50.11 (10.3.50.11) 1422(1450) bytes of data.
 1430 bytes from 10.3.50.11: icmp_seq=1 ttl=64 time=0.290 ms
 
@@ -326,14 +474,20 @@ Connecting to host 10.3.50.11, port 5201
 [  5]   0.00-5.00   sec  1.66 GBytes  2.85 Gbits/sec  224             sender
 [  5]   0.00-5.00   sec  1.66 GBytes  2.85 Gbits/sec                  receiver
 
-iperf Done.</pre></section>
+iperf Done.</pre></details></div>
+  </section>
 
-<h2>What I learned</h2>
-<section id="answers"><section id="answer-design"><h3>Describe your design: hypervisors, tenants, VNIs and addresses. Which tenants overlap, and why did you place each VM where you did?</h3><p>My data centre is four racks, rack1 to rack4, on the underlay 10.3.0.0/24 at 10.3.0.1 to 10.3.0.4. The underlay runs jumbo frames (MTU 9000), my chosen MTU fix. It hosts three tenants, with VNIs taken from my ID: shop (VNI 4901, 10.3.50.0/24), bank (VNI 4902, also 10.3.50.0/24) and lab (VNI 4903, 10.3.70.0/24). shop and bank overlap on purpose. They are two customers who both picked the same private range, which is normal in a shared cloud, so only the VNI can tell their VMs apart.</p><p>shop&#x27;s web tier is spread over three racks: web1 (.10) on rack1, web2 (.11) on rack2 and web3 (.12) on rack3. The shop survives losing any one rack, and every shop VTEP has two other VTEPs in its flood list. bank&#x27;s two payment VMs are on different racks for anti-affinity: pay1 (.10) on rack1 and pay2 (.11) on rack3. I put them on the same racks as web1 and web3 to make isolation as hard as possible. rack1 and rack3 each host two tenants, and pay1/web1 and pay2/web2 have the same IP addresses. lab runs dev1 on rack2 and dev2 on rack4. That makes rack2 host two tenants with different networks, and makes rack4 a hypervisor outside shop&#x27;s VNI, so I could check that shop&#x27;s floods do not reach it.</p></section>
-<section id="answer-isolation"><h3>Two of your VMs have the same IP address. Using your evidence, explain how a ping reaches the right one — and what would have to go wrong for one tenant to see another&#x27;s traffic.</h3><p>web2 (shop, rack2) and pay2 (bank, rack3) are both 10.3.50.11. When web1 pinged 10.3.50.11, all 3 replies came back, and web1&#x27;s ARP entry is lladdr 02:00:13:25:00:0b. The middle bytes 00:13:25 are 0x1325 = 4901, so it is shop, and 0b is .11, so it is web2. A tcpdump on pay2 at the same time captured 0 packets. This is true even though rack3 did receive shop&#x27;s flooded ARP request (it is in flood.txt). rack3 decapsulated that request into vxlan4901, which is in br4901 with only web3&#x27;s port, and pay2&#x27;s port rack3-eth2 is in br4902. When pay1 pinged the same address, it got lladdr 02:00:13:26:00:0b (0x1326 = 4902, bank), so pay2 answered. Same IP, two different MACs: the answer depends on which bridge, and so which VNI, the sender&#x27;s port is in. The overlay never looks at the IP address.</p><p>For one tenant to see another&#x27;s traffic, the VNI mapping would have to break. Examples: a VM&#x27;s port put in the wrong bridge (such as rack3-eth2 master br4901 because of an off-by-one in the port numbers), two tenants given the same VNI (check_spec() refuses that), or a VXLAN device created with the wrong id. The other risk is the underlay. VXLAN has no authentication or encryption, so anyone who can send UDP to port 4789 on a rack could inject frames with VNI 4902 and reach bank. The isolation is only as good as the trust in the underlay (IPsec or MACsec would close that).</p></section>
-<section id="answer-flood_learn"><h3>Using your evidence, explain what was flooded, to which hypervisors, and what each VTEP learned. With 50 hypervisors in one VNI, how many copies would one broadcast need — and how would EVPN change that?</h3><p>Before any traffic, rack1&#x27;s vxlan4901 table held only my two flood entries: 00:00:00:00:00:00 dst 10.3.0.2 and dst 10.3.0.3, both permanent (from tenant_commands()). web1 pinged web2 at 10.3.50.11. Its first frame, an ARP broadcast, went into br4901 and out of vxlan4901, which made one copy per flood entry. rack3&#x27;s underlay capture shows that copy, 10.3.0.1 &gt; 10.3.0.3.4789, vni 4901, ARP who-has 10.3.50.11 tell 10.3.50.10, even though the conversation was between rack1 and rack2. It shows only that one packet: the ARP reply and the ICMP echoes were unicast, because by then the MACs were learned. rack4 captured 0 packets because it is not in shop&#x27;s flood list.</p><p>Afterwards each VTEP had learned MAC-to-VTEP entries from the outer source IP of what it received. rack1 learned 02:00:13:25:00:0b (web2) dst 10.3.0.2. rack2 learned 02:00:13:25:00:0a (web1) dst 10.3.0.1. rack3 also learned web1 at 10.3.0.1 from the flood alone, although it never answered. The learned entries are not permanent, so they age out.</p><p>With 50 hypervisors in one VNI, head-end replication needs 49 copies of every broadcast or unknown-unicast frame, all sent by the source hypervisor. Each hypervisor&#x27;s flood list also has 49 entries to maintain by hand. EVPN puts a BGP control plane in front of this. Type 3 routes build the flood lists automatically. Type 2 routes advertise each VM&#x27;s MAC and IP when it is attached, so remote VTEPs know where every MAC is before any traffic, with no data-plane learning. With ARP suppression, the local VTEP answers ARP from that table, so most broadcasts never leave the hypervisor. EVPN still needs 49 copies for the broadcasts that remain, unless the underlay does multicast, but those broadcasts become rare.</p></section>
-<section id="answer-mtu"><h3>Compare your two MTU fixes using your measurements. Which would you choose for a data centre, what does each cost, and who has to change what?</h3><p>check_mtu() refused blackhole.yaml for every tenant: 1500 + 50 = 1550, 50 bytes more than the 1500-byte underlay. Built anyway with --force, small pings worked, but 1472-byte pings lost 100% and iperf3 moved 0 bytes in 5 seconds, with cwnd stuck at 1.41 KB. The largest don&#x27;t-fragment ping that worked was 1422 bytes (a 1450-byte packet). 1423 was lost silently: the VM believes its MTU is 1500, and br4901 drops the frame at vxlan4901 (MTU 1450) without telling anyone.</p><p>Fix A (tenants 1450, underlay 1500): 1422 works, and 1423 now fails at the sender with &quot;message too long, mtu=1450&quot;, so TCP picks a smaller MSS. iperf3 got 3.08 Gbit/s. Fix B (tenants 1500, underlay 9000): a full 1472-byte ping (1500-byte packet) works, and 1473 fails locally with mtu=1500. iperf3 got 2.85 Gbit/s. In my software-only Mininet, that difference is run-to-run noise (fix A&#x27;s run had 926 retransmits, fix B&#x27;s 224). On real hardware, B carries 50 more bytes of payload per packet.</p><p>I would choose fix B for a data centre, and my overlay.yaml uses it. Tenants keep the standard 1500, so no VM image, appliance or customer has to change, and there is headroom for an IPv6 underlay (70 bytes) or extra headers. The cost falls on the operator. Every switch port, hypervisor NIC and router in the underlay must be set to jumbo frames, and one missed device brings back exactly the lab Part 6 black hole, so it needs monitoring. Fix A needs no network change, but every tenant VM must be configured to 1450 (by DHCP option 26 or cloud-init), loses 50 bytes of every packet, and a VM that forgets falls into the black hole. Fix A is right only when you do not own the underlay, for example an overlay across the internet.</p></section>
-<section id="answer-p4"><h3>If your hypervisors&#x27; VTEPs were P4 switches running the lecture&#x27;s vtep.p4, what would have to fill the vtep_encap table, and how? What would replace flood-and-learn?</h3><p>A P4 program cannot write its own tables: only the control plane can, through P4Runtime. So a controller would have to fill vtep_encap with one entry per remote VM, keyed on the tenant&#x27;s VNI and the inner destination MAC. Each entry&#x27;s action adds the outer headers with that VM&#x27;s hypervisor as the destination VTEP. For my design, rack1&#x27;s entries would include VNI 4901 + 02:00:13:25:00:0b -&gt; encap to 10.3.0.2, and VNI 4902 + 02:00:13:26:00:0b -&gt; encap to 10.3.0.3. A port-to-VNI table would map rack1&#x27;s port 1 to 4901 and port 2 to 4902.</p><p>My overlay.yaml already holds everything needed. plan() computes every VM&#x27;s MAC, VNI and hypervisor, so the controller could generate these entries in the same way that all_commands() generates my ip and bridge commands.</p><p>Flood-and-learn would be replaced by a control plane that knows where every VM is in advance: the orchestrator&#x27;s inventory, or EVPN routes turned into table entries. Data-plane learning in P4 would need a digest to the controller and a table write for every new MAC, which is slow. Unknown destinations would be dropped instead of flooded. The broadcasts that remain, such as ARP, would be copied by the packet replication engine to a multicast group built from my flood lists, or answered locally by the controller.</p></section></section>
+  <section class="page-section" id="reflection">
+    <div class="section-heading"><div><p class="section-kicker">04 · Lab notes</p><h2>What I learned</h2><p>Design, isolation, flooding, MTU and the P4 alternative.</p></div><span class="section-index">Reflection</span></div>
+    <section class="answer-grid" id="answers"><section class="answer-card" id="answer-design"><span class="answer-key">design</span><h3>Describe your design: hypervisors, tenants, VNIs and addresses. Which tenants overlap, and why did you place each VM where you did?</h3><p>My data centre is four racks, rack1 to rack4, on the underlay 10.3.0.0/24 at 10.3.0.1 to 10.3.0.4. The underlay runs jumbo frames (MTU 9000), my chosen MTU fix. It hosts three tenants, with VNIs taken from my ID: shop (VNI 4901, 10.3.50.0/24), bank (VNI 4902, also 10.3.50.0/24) and lab (VNI 4903, 10.3.70.0/24). shop and bank overlap on purpose. They are two customers who both picked the same private range, which is normal in a shared cloud, so only the VNI can tell their VMs apart.</p><p>shop&#x27;s web tier is spread over three racks: web1 (.10) on rack1, web2 (.11) on rack2 and web3 (.12) on rack3. The shop survives losing any one rack, and every shop VTEP has two other VTEPs in its flood list. bank&#x27;s two payment VMs are on different racks for anti-affinity: pay1 (.10) on rack1 and pay2 (.11) on rack3. I put them on the same racks as web1 and web3 to make isolation as hard as possible. rack1 and rack3 each host two tenants, and pay1/web1 and pay2/web2 have the same IP addresses. lab runs dev1 on rack2 and dev2 on rack4. That makes rack2 host two tenants with different networks, and makes rack4 a hypervisor outside shop&#x27;s VNI, so I could check that shop&#x27;s floods do not reach it.</p></section>
+<section class="answer-card" id="answer-isolation"><span class="answer-key">isolation</span><h3>Two of your VMs have the same IP address. Using your evidence, explain how a ping reaches the right one — and what would have to go wrong for one tenant to see another&#x27;s traffic.</h3><p>web2 (shop, rack2) and pay2 (bank, rack3) are both 10.3.50.11. When web1 pinged 10.3.50.11, all 3 replies came back, and web1&#x27;s ARP entry is lladdr 02:00:13:25:00:0b. The middle bytes 00:13:25 are 0x1325 = 4901, so it is shop, and 0b is .11, so it is web2. A tcpdump on pay2 at the same time captured 0 packets. This is true even though rack3 did receive shop&#x27;s flooded ARP request (it is in flood.txt). rack3 decapsulated that request into vxlan4901, which is in br4901 with only web3&#x27;s port, and pay2&#x27;s port rack3-eth2 is in br4902. When pay1 pinged the same address, it got lladdr 02:00:13:26:00:0b (0x1326 = 4902, bank), so pay2 answered. Same IP, two different MACs: the answer depends on which bridge, and so which VNI, the sender&#x27;s port is in. The overlay never looks at the IP address.</p><p>For one tenant to see another&#x27;s traffic, the VNI mapping would have to break. Examples: a VM&#x27;s port put in the wrong bridge (such as rack3-eth2 master br4901 because of an off-by-one in the port numbers), two tenants given the same VNI (check_spec() refuses that), or a VXLAN device created with the wrong id. The other risk is the underlay. VXLAN has no authentication or encryption, so anyone who can send UDP to port 4789 on a rack could inject frames with VNI 4902 and reach bank. The isolation is only as good as the trust in the underlay (IPsec or MACsec would close that).</p></section>
+<section class="answer-card" id="answer-flood_learn"><span class="answer-key">flood learn</span><h3>Using your evidence, explain what was flooded, to which hypervisors, and what each VTEP learned. With 50 hypervisors in one VNI, how many copies would one broadcast need — and how would EVPN change that?</h3><p>Before any traffic, rack1&#x27;s vxlan4901 table held only my two flood entries: 00:00:00:00:00:00 dst 10.3.0.2 and dst 10.3.0.3, both permanent (from tenant_commands()). web1 pinged web2 at 10.3.50.11. Its first frame, an ARP broadcast, went into br4901 and out of vxlan4901, which made one copy per flood entry. rack3&#x27;s underlay capture shows that copy, 10.3.0.1 &gt; 10.3.0.3.4789, vni 4901, ARP who-has 10.3.50.11 tell 10.3.50.10, even though the conversation was between rack1 and rack2. It shows only that one packet: the ARP reply and the ICMP echoes were unicast, because by then the MACs were learned. rack4 captured 0 packets because it is not in shop&#x27;s flood list.</p><p>Afterwards each VTEP had learned MAC-to-VTEP entries from the outer source IP of what it received. rack1 learned 02:00:13:25:00:0b (web2) dst 10.3.0.2. rack2 learned 02:00:13:25:00:0a (web1) dst 10.3.0.1. rack3 also learned web1 at 10.3.0.1 from the flood alone, although it never answered. The learned entries are not permanent, so they age out.</p><p>With 50 hypervisors in one VNI, head-end replication needs 49 copies of every broadcast or unknown-unicast frame, all sent by the source hypervisor. Each hypervisor&#x27;s flood list also has 49 entries to maintain by hand. EVPN puts a BGP control plane in front of this. Type 3 routes build the flood lists automatically. Type 2 routes advertise each VM&#x27;s MAC and IP when it is attached, so remote VTEPs know where every MAC is before any traffic, with no data-plane learning. With ARP suppression, the local VTEP answers ARP from that table, so most broadcasts never leave the hypervisor. EVPN still needs 49 copies for the broadcasts that remain, unless the underlay does multicast, but those broadcasts become rare.</p></section>
+<section class="answer-card" id="answer-mtu"><span class="answer-key">mtu</span><h3>Compare your two MTU fixes using your measurements. Which would you choose for a data centre, what does each cost, and who has to change what?</h3><p>check_mtu() refused blackhole.yaml for every tenant: 1500 + 50 = 1550, 50 bytes more than the 1500-byte underlay. Built anyway with --force, small pings worked, but 1472-byte pings lost 100% and iperf3 moved 0 bytes in 5 seconds, with cwnd stuck at 1.41 KB. The largest don&#x27;t-fragment ping that worked was 1422 bytes (a 1450-byte packet). 1423 was lost silently: the VM believes its MTU is 1500, and br4901 drops the frame at vxlan4901 (MTU 1450) without telling anyone.</p><p>Fix A (tenants 1450, underlay 1500): 1422 works, and 1423 now fails at the sender with &quot;message too long, mtu=1450&quot;, so TCP picks a smaller MSS. iperf3 got 3.08 Gbit/s. Fix B (tenants 1500, underlay 9000): a full 1472-byte ping (1500-byte packet) works, and 1473 fails locally with mtu=1500. iperf3 got 2.85 Gbit/s. In my software-only Mininet, that difference is run-to-run noise (fix A&#x27;s run had 926 retransmits, fix B&#x27;s 224). On real hardware, B carries 50 more bytes of payload per packet.</p><p>I would choose fix B for a data centre, and my overlay.yaml uses it. Tenants keep the standard 1500, so no VM image, appliance or customer has to change, and there is headroom for an IPv6 underlay (70 bytes) or extra headers. The cost falls on the operator. Every switch port, hypervisor NIC and router in the underlay must be set to jumbo frames, and one missed device brings back exactly the lab Part 6 black hole, so it needs monitoring. Fix A needs no network change, but every tenant VM must be configured to 1450 (by DHCP option 26 or cloud-init), loses 50 bytes of every packet, and a VM that forgets falls into the black hole. Fix A is right only when you do not own the underlay, for example an overlay across the internet.</p></section>
+<section class="answer-card" id="answer-p4"><span class="answer-key">p4</span><h3>If your hypervisors&#x27; VTEPs were P4 switches running the lecture&#x27;s vtep.p4, what would have to fill the vtep_encap table, and how? What would replace flood-and-learn?</h3><p>A P4 program cannot write its own tables: only the control plane can, through P4Runtime. So a controller would have to fill vtep_encap with one entry per remote VM, keyed on the tenant&#x27;s VNI and the inner destination MAC. Each entry&#x27;s action adds the outer headers with that VM&#x27;s hypervisor as the destination VTEP. For my design, rack1&#x27;s entries would include VNI 4901 + 02:00:13:25:00:0b -&gt; encap to 10.3.0.2, and VNI 4902 + 02:00:13:26:00:0b -&gt; encap to 10.3.0.3. A port-to-VNI table would map rack1&#x27;s port 1 to 4901 and port 2 to 4902.</p><p>My overlay.yaml already holds everything needed. plan() computes every VM&#x27;s MAC, VNI and hypervisor, so the controller could generate these entries in the same way that all_commands() generates my ip and bridge commands.</p><p>Flood-and-learn would be replaced by a control plane that knows where every VM is in advance: the orchestrator&#x27;s inventory, or EVPN routes turned into table entries. Data-plane learning in P4 would need a digest to the controller and a table write for every new MAC, which is slow. Unknown destinations would be dropped instead of flooded. The broadcasts that remain, such as ARP, would be copied by the packet replication engine to a multicast group built from my flood lists, or answered locally by the controller.</p></section></section>
+  </section>
+
+  <footer><span>WIC2005 · Week 6 · generated from <code>overlay.yaml</code> by <code>make_page6.py</code> on 2026-11-14</span><a href="https://github.com/cheonglihua/wic2005-lab-portfolio">Source repository ↗</a></footer>
+</main>
 
 <script type="application/json" id="overlay-data">{
   "design": {
@@ -473,9 +627,5 @@ iperf Done.</pre></section>
     ]
   }
 }</script>
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({ startOnLoad: true });
-</script>
 </body>
 </html>
