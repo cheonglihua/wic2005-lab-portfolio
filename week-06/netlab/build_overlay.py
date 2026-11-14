@@ -177,7 +177,16 @@ def check_mtu(spec):
     before anything is built.
     """
     problems = []
-    # TODO: your code here
+    umtu = int(spec["underlay"]["mtu"])
+    for t in spec["tenants"]:
+        mtu = int(t["mtu"])
+        needed = mtu + VXLAN_OVERHEAD
+        if needed > umtu:
+            problems.append(
+                f"tenant {t['name']} (VNI {t['vni']}): MTU {mtu} + {VXLAN_OVERHEAD} bytes of VXLAN = "
+                f"{needed}, {needed - umtu} bytes more than the underlay MTU {umtu}; "
+                f"lower the tenant MTU to {umtu - VXLAN_OVERHEAD} or raise the underlay MTU to {needed}"
+            )
     return problems
 
 
@@ -200,8 +209,26 @@ def tenant_commands(spec, hv, tenant):
     The lab's Part 2 and Part 3 commands are your starting point. plan(spec) gives you every
     hypervisor's underlay IP; vm_ports(spec, hv) tells you which port each VM is plugged into.
     """
-    cmds = []
-    # TODO: your code here
+    p = plan(spec)
+    vni = int(tenant["vni"])
+    br, vx = f"br{vni}", f"vxlan{vni}"
+    local = p["hypervisors"][hv]
+    mine = {vm for vm, where in tenant["vms"] if where == hv}
+    # The other VTEPs of this VNI, in the order the hypervisors are listed.
+    others = [h for h in spec["hypervisors"] if h != hv and any(where == h for _, where in tenant["vms"])]
+
+    cmds = [
+        f"ip link add {br} type bridge",
+        f"ip link set {br} up",
+        f"ip link add {vx} type vxlan id {vni} local {local} dstport 4789 dev {hv}-eth0",
+        f"ip link set {vx} master {br}",
+        f"ip link set {vx} up",
+    ]
+    for vm, port in vm_ports(spec, hv).items():
+        if vm in mine:
+            cmds += [f"ip link set {port} master {br}", f"ip link set {port} up"]
+    for h in others:
+        cmds.append(f"bridge fdb append 00:00:00:00:00:00 dev {vx} dst {p['hypervisors'][h]}")
     return cmds
 
 
