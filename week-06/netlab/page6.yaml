@@ -18,8 +18,8 @@ answers:
 
       | Tenant | VNI | Network | VMs (hypervisor) | Why I placed them there |
       |---|---|---|---|---|
-      | shop | 4901 | `10.3.50.0/24` | web1 (rack1), web2 (rack2), web3 (rack3) | The three web VMs are distributed across different racks to reduce dependence on a single rack. This improves infrastructure redundancy, although application-level load balancing and failover would still be needed to maintain service availability if a rack fails. It is also the tenant I use to watch flooding, since each shop VTEP floods to 2 others. |
-      | bank | 4902 | `10.3.50.0/24` (same as shop) | pay1 (rack1), pay2 (rack3) | On two racks so one failure doesn't take down both payment VMs. I put them on the same racks as web1 and web3 on purpose, so VMs with the same IP sit on the same hypervisor. That is the hardest case for isolation. |
+      | shop | 4901 | `10.3.50.0/24` | web1 (rack1), web2 (rack2), web3 (rack3) | I spread the three web VMs over three racks so the shop doesn't depend on just one rack. My design has no load balancer or failover though, so this is only about where the VMs sit. I also use shop to watch flooding, because each shop VTEP floods to 2 others. |
+      | bank | 4902 | `10.3.50.0/24` (same as shop) | pay1 (rack1), pay2 (rack3) | On two racks so one failure doesn't take down both payment VMs. I put them on the same racks as web1 and web3 on purpose, so VMs with the same IP sit on the same hypervisor. I think that is the hardest case to test isolation on. |
       | lab | 4903 | `10.3.70.0/24` | dev1 (rack2), dev2 (rack4) | Gives me rack4, a hypervisor with no shop VM, so I can check that shop's floods never reach it. |
 
       - **Overlap:** shop and bank both use `10.3.50.0/24`, like two customers who picked the same private range. Only the VNI keeps them apart. web1 and pay1 are both `.10`, and web2 and pay2 are both `.11`.
